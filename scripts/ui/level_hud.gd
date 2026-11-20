@@ -68,12 +68,37 @@ func _update_zone() -> void:
 		_zone_label.text = ""
 		return
 	var zone := TerritoryZone.zone_at(get_tree(), player.global_position)
+	var region := _region_name()
 	if zone == null:
-		_zone_label.text = "Mata aberta"
+		_zone_label.text = region
 		_zone_label.modulate = Color(0.9, 0.9, 0.9)
 	else:
 		_zone_label.text = "%s · %s" % [zone.level_text(), zone.zone_name]
 		_zone_label.modulate = Color(0.6, 1, 0.65) if zone.level == TerritoryZone.Level.SAFE else Color(1, 0.6, 0.45)
+
+
+var _last_region := ""
+
+
+## Nome da região da ilha onde o jogador está; avisa ao entrar numa nova.
+func _region_name() -> String:
+	var terrain := IslandTerrain.find(get_tree())
+	if terrain == null:
+		return "Mata aberta"
+	var biome := terrain.biome_at(player.global_position.x, player.global_position.z)
+	var region: String = IslandTerrain.BIOME_NAMES[biome]
+	if region != _last_region:
+		var first := _last_region == ""
+		_last_region = region
+		if not first and biome != IslandTerrain.Biome.WATER and biome != IslandTerrain.Biome.BEACH:
+			var danger: int = IslandTerrain.BIOME_DANGER[biome]
+			_notice_label.text = "%s\n%s" % [region, "Perigo: " + "★".repeat(danger) + "☆".repeat(4 - danger)]
+			_notice_left = notice_duration
+	return region
+
+
+func get_region_text() -> String:
+	return _last_region
 
 
 func get_notice() -> String:

@@ -35,6 +35,12 @@ const ACTION_SPRINT := &"sprint"
 ## Multiplicador sobre a gravidade padrão do projeto.
 @export var gravity_multiplier: float = 1.0
 
+@export_group("Nado")
+## Fração da velocidade ao nadar.
+@export var swim_speed_factor: float = 0.55
+## Profundidade (abaixo da superfície) a partir da qual o corpo flutua.
+@export var swim_depth: float = 1.15
+
 @export_group("Visual")
 ## Rapidez com que o modelo gira para a direção do movimento.
 @export var turn_speed: float = 12.0
@@ -46,6 +52,9 @@ const ACTION_SPRINT := &"sprint"
 @export var visual: Node3D
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
+## Nível do mar (vem do IslandTerrain). -INF = sem água.
+var water_level: float = -INF
+var _terrain_checked := false
 
 
 func _ready() -> void:
@@ -54,8 +63,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_apply_gravity(delta)
-	_handle_jump()
+	_find_water()
+	if is_swimming():
+		_apply_buoyancy(delta)
+	else:
+		_apply_gravity(delta)
+		_handle_jump()
 	var direction := get_move_direction()
 	_apply_horizontal_movement(direction, delta)
 	move_and_slide()
@@ -73,12 +86,36 @@ func get_move_direction() -> Vector3:
 	return Vector3(input.x, 0.0, input.y).rotated(Vector3.UP, yaw)
 
 
+## Corpo fundo o bastante na água para nadar.
+func is_swimming() -> bool:
+	return water_level > -INF and global_position.y < water_level - swim_depth + 0.05
+
+
+func _find_water() -> void:
+	if _terrain_checked:
+		return
+	_terrain_checked = true
+	var terrain := IslandTerrain.find(get_tree())
+	if terrain != null:
+		water_level = terrain.sea_level
+
+
+## Flutua até a superfície; [pulo] sobe um pouco mais (para sair na margem).
+func _apply_buoyancy(delta: float) -> void:
+	var target_y := water_level - swim_depth
+	var rise := clampf((target_y - global_position.y) * 4.0, -2.5, 2.5)
+	if Input.is_action_pressed(ACTION_JUMP):
+		rise = 3.0
+	velocity.y = move_toward(velocity.y, rise, 12.0 * delta)
+
+
 func is_sprinting() -> bool:
 	return Input.is_action_pressed(ACTION_SPRINT)
 
 
 func get_target_speed() -> float:
-	return sprint_speed if is_sprinting() else walk_speed
+	var speed := sprint_speed if is_sprinting() else walk_speed
+	return speed * swim_speed_factor if is_swimming() else speed
 
 
 func _apply_gravity(delta: float) -> void:
@@ -94,7 +131,7 @@ func _handle_jump() -> void:
 func _apply_horizontal_movement(direction: Vector3, delta: float) -> void:
 	var target := direction * get_target_speed()
 	var rate := acceleration if not direction.is_zero_approx() else deceleration
-	if not is_on_floor():
+	if not is_on_floor() and not is_swimming():
 		rate *= air_control
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, rate * delta)
 	velocity.x = horizontal.x

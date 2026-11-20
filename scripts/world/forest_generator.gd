@@ -24,7 +24,11 @@ extends Node3D
 ## Tufos de grama (cada um com 3 a 5 folhas).
 @export var grass_count: int = 8000
 @export var flower_count: int = 1600
-@export var mountain_count: int = 28
+@export var mountain_count: int = 0
+## Vegetação das regiões da ilha (usa o IslandTerrain da cena, se houver).
+@export var island_tree_count: int = 7000
+@export var island_rock_count: int = 1400
+@export var island_grass_count: int = 16000
 ## Lado de cada pedaço de MultiMesh.
 @export var chunk_size: float = 40.0
 ## Distância de visibilidade da grama e flores.
@@ -37,6 +41,9 @@ extends Node3D
 const FOLIAGE_SHADER := preload("res://resources/shaders/foliage.gdshader")
 
 var generated := false
+## Altura do chão e tinta usadas pelos "ajudantes" de plantio (ilha).
+var _ground_y := 0.0
+var _leaf_tint := Color.WHITE
 var tree_bodies: Array[StaticBody3D] = []
 
 var _rng := RandomNumberGenerator.new()
@@ -83,6 +90,7 @@ func generate() -> void:
 	for i in flower_count:
 		_scatter_flower()
 	_build_mountains()
+	_scatter_island()
 	_flush_batches()
 
 
@@ -173,7 +181,7 @@ func _try_tree() -> void:
 func _add_pine(p: Vector2) -> void:
 	var s := _rng.randf_range(0.8, 1.45)
 	var yaw := _rng.randf() * TAU
-	var base := Vector3(p.x, 0, p.y)
+	var base := Vector3(p.x, _ground_y, p.y)
 	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * s)
 	_push("pine_trunk", p, Transform3D(basis, base + Vector3(0, 0.9 * s, 0)), Color(0.42, 0.29, 0.19))
 	var green := Color.from_hsv(_rng.randf_range(0.27, 0.33), _rng.randf_range(0.5, 0.66), _rng.randf_range(0.46, 0.6))
@@ -181,13 +189,13 @@ func _add_pine(p: Vector2) -> void:
 	for layer in layers:
 		var ls: float = layer[1]
 		var lb := Basis(Vector3.UP, yaw + ls).scaled(Vector3(s * ls, s * ls, s * ls))
-		_push("pine_layer", p, Transform3D(lb, base + Vector3(0, layer[0] * s, 0)), green.lightened((1.0 - ls) * 0.25))
+		_push("pine_layer", p, Transform3D(lb, base + Vector3(0, layer[0] * s, 0)), green.lightened((1.0 - ls) * 0.25) * _leaf_tint)
 
 
 func _add_broadleaf(p: Vector2, autumn: bool) -> void:
 	var s := _rng.randf_range(0.85, 1.35)
 	var yaw := _rng.randf() * TAU
-	var base := Vector3(p.x, 0, p.y)
+	var base := Vector3(p.x, _ground_y, p.y)
 	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * s)
 	_push("oak_trunk", p, Transform3D(basis, base + Vector3(0, 1.1 * s, 0)), Color(0.40, 0.30, 0.21))
 	var crown: Color
@@ -213,7 +221,7 @@ func _add_trunk_body(p: Vector2) -> void:
 	shape.position = Vector3(0, 1.5, 0)
 	body.add_child(shape)
 	_bodies_root.add_child(body)
-	body.position = Vector3(p.x, 0, p.y)
+	body.position = Vector3(p.x, _ground_y, p.y)
 	tree_bodies.append(body)
 
 
@@ -431,6 +439,234 @@ func _build_meshes() -> void:
 	_register("flower_center", center, center_mat, detail_view_distance)
 
 
+func _build_island_meshes() -> void:
+	if _meshes.has("palm_trunk"):
+		return
+	var trunk := CylinderMesh.new()
+	trunk.top_radius = 0.12
+	trunk.bottom_radius = 0.2
+	trunk.height = 4.5
+	trunk.radial_segments = 6
+	trunk.rings = 3
+	_register("palm_trunk", trunk, _solid_material(), tree_view_distance)
+	var frond := PrismMesh.new()  # folha comprida e caída
+	frond.size = Vector3(0.6, 0.08, 2.4)
+	var frond_mat := _foliage_material(0.12, -0.2, 0.3)
+	frond_mat.set_shader_parameter("base_darkness", 0.2)
+	_register("palm_frond", frond, frond_mat, tree_view_distance)
+	var dead := CylinderMesh.new()
+	dead.top_radius = 0.05
+	dead.bottom_radius = 0.22
+	dead.height = 3.2
+	dead.radial_segments = 5
+	dead.rings = 0
+	_register("dead_trunk", dead, _solid_material(), tree_view_distance)
+	var branch := CylinderMesh.new()
+	branch.top_radius = 0.02
+	branch.bottom_radius = 0.07
+	branch.height = 1.3
+	branch.radial_segments = 4
+	branch.rings = 0
+	_register("dead_branch", branch, _solid_material(), tree_view_distance)
+	var lava := SphereMesh.new()
+	lava.radius = 1.0
+	lava.height = 1.4
+	lava.radial_segments = 6
+	lava.rings = 3
+	var lava_mat := StandardMaterial3D.new()
+	lava_mat.vertex_color_use_as_albedo = true
+	lava_mat.vertex_color_is_srgb = true
+	lava_mat.roughness = 0.9
+	lava_mat.emission_enabled = true
+	lava_mat.emission = Color(1.0, 0.3, 0.05)
+	lava_mat.emission_energy_multiplier = 0.9
+	_register("lava_rock", lava, lava_mat, tree_view_distance)
+	var cactus := CylinderMesh.new()
+	cactus.top_radius = 0.22
+	cactus.bottom_radius = 0.26
+	cactus.height = 2.0
+	cactus.radial_segments = 7
+	cactus.rings = 1
+	_register("cactus", cactus, _solid_material(), tree_view_distance)
+
+
+# ---------- regiões da ilha ----------
+
+func _scatter_island() -> void:
+	var terrain := IslandTerrain.find(get_tree())
+	if terrain == null:
+		return
+	_build_island_meshes()
+	var B := IslandTerrain.Biome
+	var limit := terrain.coast_radius + 60.0
+	var inner := minf(half_size, terrain.flat_radius) - 5.0
+	# Árvores (com colisão; as que dão madeira continuam sendo ForestTree).
+	for i in island_tree_count:
+		var p := _island_point(limit, inner)
+		var h := terrain.height_at(p.x, p.y)
+		var biome := terrain.biome_at(p.x, p.y)
+		if biome == B.WATER or not _is_free(p, 1.6):
+			continue
+		if _steep(terrain, p) > 0.55:
+			continue
+		_ground_y = h
+		_leaf_tint = Color.WHITE
+		match biome:
+			B.FOREST:
+				if _rng.randf() > 0.75:
+					continue
+				if _rng.randf() < 0.5: _add_pine(p)
+				else: _add_broadleaf(p, _rng.randf() < 0.15)
+			B.SNOW:
+				if h > 70.0 or _rng.randf() > 0.6:
+					continue
+				_leaf_tint = Color(1.25, 1.3, 1.35).lerp(Color.WHITE, 0.4)
+				_add_pine(p)
+			B.PLAINS:
+				if _rng.randf() > 0.18:
+					continue
+				_add_broadleaf(p, _rng.randf() < 0.55)
+			B.ROCKY:
+				if _rng.randf() > 0.12:
+					continue
+				_add_cactus(p)
+				continue  # cacto não dá madeira
+			B.VOLCANIC:
+				if _rng.randf() > 0.35:
+					continue
+				_add_dead_tree(p)
+				continue
+			B.BEACH:
+				if _rng.randf() > 0.35:
+					continue
+				_add_palm(p)
+			_:
+				continue
+		_placed.append(Vector3(p.x, p.y, 1.6))
+		_add_trunk_body(p)
+	_ground_y = 0.0
+	_leaf_tint = Color.WHITE
+	# Rochas por região.
+	for i in island_rock_count:
+		var p := _island_point(limit, inner)
+		var biome := terrain.biome_at(p.x, p.y)
+		if biome == B.WATER:
+			continue
+		var h := terrain.height_at(p.x, p.y)
+		var big := _rng.randf() < 0.35
+		var radius := _rng.randf_range(1.2, 3.2) if big else _rng.randf_range(0.3, 0.8)
+		var color := Color(0.55, 0.53, 0.5)
+		var kind := "rock"
+		match biome:
+			B.SNOW: color = Color(0.82, 0.86, 0.92) if h > 45.0 else Color(0.58, 0.6, 0.64)
+			B.ROCKY: color = Color(0.72, 0.5, 0.34); radius *= 1.3
+			B.VOLCANIC:
+				color = Color(0.16, 0.14, 0.14)
+				if _rng.randf() < 0.18:
+					kind = "lava_rock"
+					color = Color(0.25, 0.12, 0.08)
+			B.BEACH: color = Color(0.7, 0.66, 0.58)
+			B.PLAINS:
+				if _rng.randf() > 0.4:
+					continue
+		if big and not _is_free(p, radius):
+			continue
+		var scale := Vector3(radius * _rng.randf_range(0.9, 1.3), radius * _rng.randf_range(0.5, 0.85), radius * _rng.randf_range(0.9, 1.3))
+		var basis := Basis.from_euler(Vector3(_rng.randf_range(-0.3, 0.3), _rng.randf() * TAU, _rng.randf_range(-0.3, 0.3))).scaled(scale)
+		_push(kind, p, Transform3D(basis, Vector3(p.x, h - scale.y * 0.2, p.y)), color)
+		if big:
+			_placed.append(Vector3(p.x, p.y, radius))
+			var body := StaticBody3D.new()
+			body.collision_layer = 1
+			body.collision_mask = 0
+			var shape := CollisionShape3D.new()
+			var sphere := SphereShape3D.new()
+			sphere.radius = radius * 0.85
+			shape.shape = sphere
+			body.add_child(shape)
+			_bodies_root.add_child(body)
+			body.position = Vector3(p.x, h, p.y)
+	# Grama: verde na floresta e no gelo baixo, dourada e alta nas planícies.
+	for i in island_grass_count:
+		var p := _island_point(limit, inner)
+		var biome := terrain.biome_at(p.x, p.y)
+		var h := terrain.height_at(p.x, p.y)
+		var c: Color
+		var s := _rng.randf_range(0.8, 1.4)
+		match biome:
+			B.FOREST: c = Color.from_hsv(_rng.randf_range(0.2, 0.27), _rng.randf_range(0.6, 0.8), _rng.randf_range(0.48, 0.62))
+			B.PLAINS:
+				c = Color.from_hsv(_rng.randf_range(0.1, 0.15), _rng.randf_range(0.55, 0.75), _rng.randf_range(0.7, 0.85))
+				s *= 1.8
+			B.SNOW:
+				if h > 40.0 or _rng.randf() > 0.4:
+					continue
+				c = Color.from_hsv(0.25, 0.25, 0.6)
+			B.ROCKY:
+				if _rng.randf() > 0.15:
+					continue
+				c = Color.from_hsv(0.11, 0.5, 0.6)
+			_:
+				continue
+		for blade in _rng.randi_range(3, 5):
+			var off := Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 0.16)
+			var basis := Basis.from_euler(Vector3(_rng.randf_range(-0.35, 0.35), _rng.randf() * TAU, _rng.randf_range(-0.35, 0.35))).scaled(Vector3(s, s * _rng.randf_range(0.7, 1.2), s))
+			_push("grass", p, Transform3D(basis, Vector3(p.x + off.x, h, p.y + off.y)), c.lightened(_rng.randf_range(0.0, 0.1)))
+
+
+func _island_point(limit: float, inner: float) -> Vector2:
+	for attempt in 8:
+		var a := _rng.randf() * TAU
+		var r := sqrt(_rng.randf_range(inner * inner, limit * limit))
+		var p := Vector2(cos(a), sin(a)) * r
+		if absf(p.x) > half_size or absf(p.y) > half_size or p.length() > inner:
+			return p
+	return Vector2(limit, 0)
+
+
+func _steep(terrain: IslandTerrain, p: Vector2) -> float:
+	var hx := terrain.height_at(p.x + 1.5, p.y) - terrain.height_at(p.x - 1.5, p.y)
+	var hz := terrain.height_at(p.x, p.y + 1.5) - terrain.height_at(p.x, p.y - 1.5)
+	return Vector2(hx, hz).length() / 3.0
+
+
+func _add_palm(p: Vector2) -> void:
+	var s := _rng.randf_range(0.9, 1.3)
+	var lean := Vector3(_rng.randf_range(-0.25, 0.25), 0, _rng.randf_range(-0.25, 0.25))
+	var base := Vector3(p.x, _ground_y, p.y)
+	var trunk_basis := Basis.from_euler(lean).scaled(Vector3.ONE * s)
+	_push("palm_trunk", p, Transform3D(trunk_basis, base + trunk_basis.y * 2.25), Color(0.55, 0.42, 0.28))
+	var top := base + trunk_basis.y * 4.5
+	for i in 7:
+		var yaw := TAU * i / 7.0 + _rng.randf_range(-0.2, 0.2)
+		var fb := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, 0.45)
+		fb = fb.scaled(Vector3.ONE * s)
+		_push("palm_frond", p, Transform3D(fb, top + fb.z * -1.0), Color.from_hsv(_rng.randf_range(0.24, 0.3), 0.7, 0.55))
+
+
+func _add_dead_tree(p: Vector2) -> void:
+	var s := _rng.randf_range(0.8, 1.5)
+	var base := Vector3(p.x, _ground_y, p.y)
+	var b := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3.ONE * s)
+	var dark := Color(0.13, 0.11, 0.1)
+	_push("dead_trunk", p, Transform3D(b, base + Vector3(0, 1.6 * s, 0)), dark)
+	for i in 3:
+		var bb := Basis(Vector3.UP, TAU * i / 3.0 + _rng.randf()) * Basis(Vector3.RIGHT, 0.9)
+		bb = bb.scaled(Vector3.ONE * s)
+		_push("dead_branch", p, Transform3D(bb, base + Vector3(0, (1.6 + i * 0.5) * s, 0) + bb.y * 0.6), dark)
+
+
+func _add_cactus(p: Vector2) -> void:
+	var s := _rng.randf_range(0.8, 1.6)
+	var base := Vector3(p.x, _ground_y, p.y)
+	var green := Color(0.36, 0.52, 0.22)
+	_push("cactus", p, Transform3D(Basis().scaled(Vector3(s, s, s)), base + Vector3(0, s, 0)), green)
+	for side in [-1.0, 1.0]:
+		if _rng.randf() < 0.7:
+			var arm := Basis().scaled(Vector3(s * 0.6, s * 0.45, s * 0.6))
+			_push("cactus", p, Transform3D(arm, base + Vector3(side * 0.45 * s, s * 1.25, 0)), green.lightened(0.05))
+
+
 func _register(kind: String, mesh: Mesh, material: Material, view_distance: float) -> void:
 	if mesh is PrimitiveMesh:
 		(mesh as PrimitiveMesh).material = material
@@ -455,6 +691,7 @@ func _lifted(mesh: PrimitiveMesh, dy: float) -> ArrayMesh:
 func _solid_material() -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true  # cores das instâncias estão em sRGB
 	mat.roughness = 1.0
 	return mat
 

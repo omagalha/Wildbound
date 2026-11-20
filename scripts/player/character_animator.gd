@@ -35,7 +35,7 @@ const CLIPS := {
 	"air": "Jump", "attack": "Sword_Regular_A", "attack_heavy": "Sword_Attack",
 	"hit": "Hit_Chest", "death": "Death01", "eat": "Consume", "harvest": "Farm_Harvest",
 	"chop": "TreeChopping", "pickup": "PickUp_Table", "interact": "Interact",
-	"cast": "Spell_Simple_Shoot",
+	"cast": "Spell_Simple_Shoot", "swim": "Swim_Fwd", "swim_idle": "Swim_Idle",
 }
 const ONE_SHOT_PRIORITY := {"death": 10, "attack": 5, "attack_heavy": 5, "chop": 5, "cast": 5, "hit": 3, "eat": 2, "harvest": 2, "pickup": 2, "interact": 2}
 
@@ -238,6 +238,9 @@ func current_clip() -> String:
 # ---------- estados ----------
 
 func _update_locomotion() -> void:
+	if player.has_method("is_swimming") and player.is_swimming():
+		_play("swim" if _flat_speed() > 0.4 else "swim_idle")
+		return
 	if not player.is_on_floor():
 		_play("air")
 		return

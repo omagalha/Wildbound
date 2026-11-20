@@ -139,7 +139,10 @@ func _spawn_center() -> Vector3:
 		var p := origin + Vector3(cos(angle), 0, sin(angle)) * dist
 		p.x = clampf(p.x, -map_half_size, map_half_size)
 		p.z = clampf(p.z, -map_half_size, map_half_size)
-		p.y = 0.1
+		var terrain := IslandTerrain.find(get_tree())
+		p.y = (terrain.height_at(p.x, p.z) if terrain != null else 0.0) + 0.3
+		if terrain != null and terrain.is_water(p.x, p.z):
+			continue
 		best = p
 		if TerritoryZone.is_safe(get_tree(), p) or FireLight.is_point_lit(get_tree(), p, 3.0):
 			continue

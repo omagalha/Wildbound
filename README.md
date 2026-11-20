@@ -91,6 +91,14 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - Chegar perto avisa e dá **+50 XP** de descoberta. Cada um tem um **baú com saque** sorteado (madeira, pedra, sílex, comida, ataduras, tocha, minério e, raramente, lingotes de ferro).
 - O conteúdo do baú e a descoberta vão para o save, então o saque não renasce. O baú do acampamento não pode ser desmontado.
 
+## A ilha: regiões, relevo e mar (2026-11-20)
+
+- Mundo de **1,5 × 1,5 km**: uma ilha de ~1,2 km cercada de mar (`scripts/world/island_terrain.gd`), com relevo gerado por semente, colisão por mapa de altura e malha em pedaços com distância de visibilidade.
+- **Regiões:** centro **Floresta Primordial**, plano em y = 0, onde fica tudo o que já existia; norte **Montanhas Geladas** (picos nevados de até ~140 m); leste **Terras Rochosas** (platôs vermelhos em degraus e cactos); sul **Região Vulcânica** (vulcão com lava, fumaça, árvores queimadas e pedras de lava); oeste **Planícies Douradas** (capim dourado e um lago); praias com palmeiras em toda a costa.
+- O HUD mostra a região atual e, ao entrar numa nova, avisa com o nível de perigo (★).
+- **Nado:** no mar e no lago o jogador flutua e nada (mais devagar); [Espaço] sobe para sair na margem.
+- Consultas para outros sistemas: `IslandTerrain.find(tree).height_at(x, z)`, `biome_at(x, z)` e `is_water(x, z)`.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

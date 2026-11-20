@@ -92,9 +92,10 @@ func _test_forest() -> void:
 	_check(forest.trees_near(safe.global_position, safe.radius - 1.0) == 0, "Zona segura continua aberta")
 	var outside := 0
 	for body in forest.tree_bodies:
-		if absf(body.global_position.x) > forest.half_size + 0.1 or absf(body.global_position.z) > forest.half_size + 0.1:
+		var island_t := world.get_node("TestWorld/Island") as IslandTerrain
+		if absf(body.global_position.x) > island_t.half_size or absf(body.global_position.z) > island_t.half_size or island_t.is_water(body.global_position.x, body.global_position.z):
 			outside += 1
-	_check(outside == 0, "Todas as árvores dentro das bordas do mapa")
+	_check(outside == 0, "Árvores dentro da ilha e nunca na água", str(outside))
 
 	var visuals := world.get_node("TestWorld/Forest/Visuals")
 	var kinds := {}
@@ -102,7 +103,26 @@ func _test_forest() -> void:
 		if child is MultiMeshInstance3D:
 			kinds[String(child.name).get_slice("_", 0)] = true
 	_check(kinds.has("pine") and kinds.has("oak") and kinds.has("grass") and kinds.has("flower") and kinds.has("rock"), "Pinheiros, frondosas, grama, flores e rochas", str(kinds.keys()))
-	_check(visuals.get_node_or_null("Mountains") != null and visuals.get_node("Mountains").get_child_count() > 10, "Montanhas no horizonte")
+	var island := world.get_node_or_null("TestWorld/Island") as IslandTerrain
+	_check(island != null and island.generated_ok and island.height_at(0, -450) > 40.0, "Montanhas de verdade no relevo da ilha")
+	_check(is_zero_approx(island.height_at(0, 0)) and is_zero_approx(island.height_at(120, -90)), "Centro plano (base e construção como antes)")
+	var B := IslandTerrain.Biome
+	_check(island.biome_at(0, 0) == B.FOREST and island.biome_at(0, -450) == B.SNOW and island.biome_at(450, 0) == B.ROCKY and island.biome_at(30, 470) == B.VOLCANIC and island.biome_at(-450, -60) == B.PLAINS, "Cinco regiões: floresta, gelo (N), rochosa (L), vulcão (S), planícies (O)")
+	_check(island.is_water(0, 700) and island.is_water(700, 0), "Mar em volta da ilha")
+	var far_trees := 0
+	for body in forest.tree_bodies:
+		if Vector2(body.global_position.x, body.global_position.z).length() > 300.0:
+			far_trees += 1
+	_check(far_trees > 300, "Regiões distantes com vegetação própria", str(far_trees))
+	var player := world.get_node("Player") as PlayerController
+	player.set_physics_process(true)
+	player.global_position = Vector3(0, -3.0, 680)
+	await _wait(40)
+	_check(player.is_swimming() and absf(player.global_position.y - (island.sea_level - player.swim_depth)) < 0.6, "No mar o jogador nada e flutua", "%.2f" % player.global_position.y)
+	var hud := world.get_node("LevelHUD") as LevelHUD
+	await _wait(20)
+	_check(hud.get_region_text() == "Água", "HUD mostra a região", hud.get_region_text())
+	player.set_physics_process(false)
 
 	var first := []
 	for body in forest.tree_bodies:
