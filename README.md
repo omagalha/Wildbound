@@ -106,6 +106,13 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Criaturas por região** (`scripts/enemies/region_creatures.gd`), em tocas que viram zonas de atenção: Lobo das Neves (★★★), Touro das Rochas (★★, muito resistente), Cão de Brasa (★★★★, rápido) e Cervo Chifrudo (★★), cada um com saque próprio. Longe do jogador, as criaturas dormem.
 - **Minimapa** (`scripts/ui/minimap.gd`): redondo, com o desenho da ilha (cores das regiões, sombra do relevo, mar e praias), moldura dourada e norte, mostrando acampamentos (tenda dourada quando descobertos), a ruína, as tocas, a sua base e a região atual. Ícones fora do alcance ficam presos na borda, apontando a direção.
 
+## Frio e calor (2026-11-20)
+
+- **Temperatura** (`scripts/survival/temperature_component.gd`): a floresta é amena (~20 °C); as montanhas esfriam com a altura (o topo fica abaixo de zero); o vulcão esquenta (perto da cratera passa de 45 °C); a noite esfria 8 °C. Fogo por perto aquece e a água esfria. O corpo acompanha o ambiente aos poucos.
+- **Estados:** *Com frio* e *Com calor* fazem a fome cair mais rápido; *Congelando* e *Queimando* tiram 3 de vida a cada 2 s (pode matar: "Você morreu congelado" ou "de calor").
+- **Roupas, vestidas pela barra** (o mesmo número tira): **Casaco de pele** (+25 °C contra frio; 4 peles e 4 fibras) e **Manto refrescante** (−25 °C contra calor; 3 cristais de gelo, 2 argilas e 6 fibras). A roupa tinge o visual e vai para o save. Javalis, lobos, touros e cervos agora deixam **pele**.
+- HUD: termômetro com °C e estado, e a borda da tela gelada (azul) ou quente (laranja).
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

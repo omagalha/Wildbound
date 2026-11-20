@@ -18,7 +18,7 @@ const SPECIES := [
 		"glow": {"Eyes_Black": Color(0.4, 0.8, 1.0)}, "tint": Color.WHITE, "emission": Color.BLACK,
 		"clips": {},
 		"stats": {"max_health": 70.0, "chase_speed": 6.5, "charge_speed": 11.0, "charge_damage": 16.0, "bite_damage": 12.0, "perception_radius": 24.0, "leash_radius": 45.0, "telegraph_time": 0.6},
-		"loot": {&"raw_meat": 2, &"ice_crystal": 1}, "pack": [2, 3], "nests": 4,
+		"loot": {&"raw_meat": 2, &"ice_crystal": 1, &"hide": 2}, "pack": [2, 3], "nests": 4,
 	},
 	{
 		"id": &"rock_bull", "name": "Touro das Rochas", "biome": 2, "nest": "Pasto do Touro das Rochas",
@@ -27,7 +27,7 @@ const SPECIES := [
 		"glow": {}, "tint": Color.WHITE, "emission": Color.BLACK,
 		"clips": {"attack": "Attack_Headbutt", "alert": "Idle_Headlow"},
 		"stats": {"max_health": 150.0, "wander_speed": 1.3, "chase_speed": 5.0, "charge_speed": 13.0, "charge_damage": 28.0, "charge_hit_radius": 1.7, "bite_range": 2.6, "bite_damage": 14.0, "perception_radius": 20.0, "leash_radius": 40.0, "telegraph_time": 1.0, "recover_time": 1.6},
-		"loot": {&"raw_meat": 4, &"clay": 2}, "pack": [1, 2], "nests": 4,
+		"loot": {&"raw_meat": 4, &"clay": 2, &"hide": 3}, "pack": [1, 2], "nests": 4,
 	},
 	{
 		"id": &"ember_hound", "name": "Cão de Brasa", "biome": 3, "nest": "Covil dos Cães de Brasa",
@@ -43,7 +43,7 @@ const SPECIES := [
 		"colors": {}, "glow": {}, "tint": Color(1.05, 0.95, 0.85), "emission": Color.BLACK,
 		"clips": {"attack": "Attack_Headbutt", "alert": "Idle_Headlow"},
 		"stats": {"max_health": 90.0, "wander_speed": 1.8, "chase_speed": 6.5, "charge_speed": 12.5, "charge_damage": 22.0, "bite_range": 2.4, "bite_damage": 12.0, "perception_radius": 18.0, "leash_radius": 40.0},
-		"loot": {&"raw_meat": 3, &"fiber": 2}, "pack": [1, 2], "nests": 4,
+		"loot": {&"raw_meat": 3, &"fiber": 2, &"hide": 2}, "pack": [1, 2], "nests": 4,
 	},
 ]
 

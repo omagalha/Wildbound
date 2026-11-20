@@ -66,7 +66,7 @@ func refresh() -> void:
 			count = equipment.inventory.count(id)
 		(slot["count"] as Label).text = str(count) if count > 1 else ""
 		var is_selected := i == equipment.selected
-		var lit := id == PlayerEquipment.TORCH and equipment.torch_lit
+		var lit := (id == PlayerEquipment.TORCH and equipment.torch_lit) or (id != &"" and id == equipment.worn_item)
 		var style := slot["style"] as StyleBoxFlat
 		style.border_color = COLOR_SELECTED if is_selected else (COLOR_LIT if lit else COLOR_BORDER)
 		style.set_border_width_all(3 if is_selected or lit else 1)

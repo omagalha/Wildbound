@@ -17,6 +17,7 @@ signal weapon_changed(definition: WeaponDefinition)
 signal torch_toggled(lit: bool)
 signal held_changed(item_id: StringName)
 signal hotbar_changed
+signal worn_changed(item_id: StringName)
 
 const ACTION_TORCH := &"toggle_torch"
 const ACTION_BANDAGE := &"use_bandage"
@@ -29,7 +30,12 @@ const BANDAGE := &"bandage"
 const SLOT_COUNT := 9
 ## Itens (além das ferramentas) que ganham espaço na hotbar, na ordem de prioridade.
 const ELIXIR := &"frost_elixir"
-const USABLE_ITEMS := [TORCH, BANDAGE, ELIXIR, &"golden_stew", &"cooked_meat", &"golden_berries", &"coconut", &"wild_berries"]
+## Roupas: id -> (proteção contra frio, contra calor) e tinta da roupa.
+const WEARABLES := {
+	&"fur_coat": {"protection": Vector2(25, 0), "tint": Color(0.95, 0.85, 0.72)},
+	&"cooling_cloak": {"protection": Vector2(0, 25), "tint": Color(0.7, 0.9, 1.05)},
+}
+const USABLE_ITEMS := [&"fur_coat", &"cooling_cloak", TORCH, BANDAGE, ELIXIR, &"golden_stew", &"cooked_meat", &"golden_berries", &"coconut", &"wild_berries"]
 const NAMES := {CLUB: "Clava improvisada"}
 
 @export var inventory: Inventory
@@ -61,6 +67,10 @@ var torch_lit := false
 var slots: Array[StringName] = []
 var selected := 0
 var held_item: StringName = CLUB
+## Roupa vestida (&"" = nenhuma).
+var worn_item: StringName = &""
+## Recebe a tinta da roupa vestida (opcional).
+@export var animator: CharacterAnimator
 var _bandage_left := 0.0
 var _torch_node: Node3D
 var _torch_light: OmniLight3D
@@ -130,6 +140,8 @@ func refresh() -> void:
 		_hold(CLUB, false)
 	if torch_lit and not has_torch():
 		set_torch(false)
+	if worn_item != &"" and not _owns(worn_item):
+		wear(&"")
 	_apply_held()
 	if changed:
 		hotbar_changed.emit()
@@ -144,6 +156,9 @@ func select_slot(index: int) -> bool:
 		return false
 	if is_holdable(id):
 		_hold(id, true)
+		return true
+	if WEARABLES.has(id):
+		wear(&"" if worn_item == id else id)
 		return true
 	match id:
 		TORCH:
@@ -269,11 +284,30 @@ func use_elixir() -> bool:
 	return true
 
 
+## Veste (ou tira, com &"") uma roupa.
+func wear(id: StringName) -> void:
+	if id != &"" and (not WEARABLES.has(id) or not _owns(id)):
+		return
+	if worn_item == id:
+		return
+	worn_item = id
+	if animator != null:
+		animator.set_outfit_tint(WEARABLES[id]["tint"] if id != &"" else Color.WHITE)
+	if id != &"":
+		message.emit("Vestindo: %s" % item_name(id))
+	worn_changed.emit(id)
+	hotbar_changed.emit()
+
+
+func worn_protection() -> Vector2:
+	return WEARABLES[worn_item]["protection"] if WEARABLES.has(worn_item) else Vector2.ZERO
+
+
 func get_save_data() -> Dictionary:
 	var out := []
 	for id in slots:
 		out.append(String(id))
-	return {"slots": out, "held": String(held_item)}
+	return {"slots": out, "held": String(held_item), "worn": String(worn_item)}
 
 
 func apply_save_data(data: Dictionary) -> void:
@@ -284,6 +318,7 @@ func apply_save_data(data: Dictionary) -> void:
 			id = &""
 		slots[i] = id
 	_hold(StringName(String(data.get("held", CLUB))), false)
+	wear(StringName(String(data.get("worn", ""))))
 	refresh()
 	hotbar_changed.emit()
 

@@ -25,5 +25,6 @@ recover_time = 1.2
 wall_stun_time = 2.0
 respawn_time = 90.0
 loot = {
-&"raw_meat": 2
+&"raw_meat": 2,
+&"hide": 1
 }

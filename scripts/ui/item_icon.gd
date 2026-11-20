@@ -52,6 +52,9 @@ func _draw() -> void:
 		&"iron_ore": _ore()
 		&"iron_ingot": _ingot()
 		&"ice_crystal": _shards(Color("8fe6ff"))
+		&"hide": _hide()
+		&"fur_coat": _coat(Color("c9a982"), Color("f0e6d6"))
+		&"cooling_cloak": _coat(Color("7cc6e6"), Color("d8f4ff"))
 		&"obsidian": _shards(Color("2a1e3a"))
 		&"sulfur": _lumps(Color("f2d33a"))
 		&"clay": _lumps(Color("b8683f"))
@@ -233,3 +236,15 @@ func _sword_colored(c: Color) -> void:
 	_poly([Vector2(36, 8), Vector2(42, 6), Vector2(44, 12), Vector2(22, 40), Vector2(18, 36)], c)
 	_stick(Vector2(14, 30), Vector2(28, 44), 4.0, Color("8a6a40"))
 	_stick(Vector2(20, 42), Vector2(10, 54), 4.0, WOOD_DARK)
+
+
+func _hide() -> void:
+	_poly([Vector2(14, 16), Vector2(28, 10), Vector2(36, 14), Vector2(50, 10), Vector2(54, 30), Vector2(46, 52), Vector2(32, 56), Vector2(18, 52), Vector2(10, 32)], Color("9b6a43"))
+	draw_circle(Vector2(26, 30), 4.0, _tint(Color("7a4e2e")))
+	draw_circle(Vector2(40, 36), 3.0, _tint(Color("7a4e2e")))
+
+
+func _coat(body: Color, trim: Color) -> void:
+	_poly([Vector2(20, 12), Vector2(44, 12), Vector2(56, 24), Vector2(50, 30), Vector2(46, 26), Vector2(46, 56), Vector2(18, 56), Vector2(18, 26), Vector2(14, 30), Vector2(8, 24)], body)
+	_poly([Vector2(24, 12), Vector2(40, 12), Vector2(32, 22)], trim)
+	draw_line(Vector2(32, 22), Vector2(32, 56), _tint(body.darkened(0.3)), 2.0, true)

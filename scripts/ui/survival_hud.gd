@@ -241,6 +241,10 @@ func _on_player_died(cause: StringName) -> void:
 	var text := "Você morreu"
 	if cause == DamageInfo.CAUSE_STARVATION:
 		text = "Você morreu de fome"
+	elif cause == &"cold":
+		text = "Você morreu congelado"
+	elif cause == &"heat":
+		text = "Você morreu de calor"
 	elif String(cause).begins_with("enemy:"):
 		text = "%s te derrubou" % _last_enemy_name
 	if respawn != null and respawn.active_bag != null and is_instance_valid(respawn.active_bag):

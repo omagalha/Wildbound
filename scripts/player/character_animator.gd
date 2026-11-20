@@ -217,6 +217,23 @@ static func _head_only(mesh: ArrayMesh, skin: Skin) -> ArrayMesh:
 	return out
 
 
+## Tinge as peças da roupa (roupas de frio/calor).
+func set_outfit_tint(color: Color) -> void:
+	if skeleton == null:
+		return
+	for child in skeleton.get_children():
+		if not child.has_meta(&"outfit_part"):
+			continue
+		var mi := child as MeshInstance3D
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_surface_override_material(i) as StandardMaterial3D
+			if mat == null:
+				continue
+			if not mi.has_meta(&"base_color_%d" % i):
+				mi.set_meta(&"base_color_%d" % i, mat.albedo_color)
+			mat.albedo_color = (mi.get_meta(&"base_color_%d" % i) as Color) * color
+
+
 func outfit_part_count() -> int:
 	var n := 0
 	if skeleton != null:

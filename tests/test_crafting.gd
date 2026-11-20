@@ -109,7 +109,7 @@ func _test_recipes() -> void:
 	var crafting := _crafting(world)
 	var inv := _inv(world)
 	var experience := world.get_node("Progression/Experience") as ExperienceComponent
-	_check(crafting.recipes.size() == 14, "Catorze receitas no menu", str(crafting.recipes.size()))
+	_check(crafting.recipes.size() == 16, "Dezesseis receitas no menu", str(crafting.recipes.size()))
 
 	var axe := crafting.get_recipe(&"recipe_stone_axe")
 	_check(crafting.status(axe) == CraftingManager.MISSING, "Sem materiais: 'missing'")

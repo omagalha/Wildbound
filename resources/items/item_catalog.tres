@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ItemCatalog" load_steps=31 format=3]
+[gd_resource type="Resource" script_class="ItemCatalog" load_steps=34 format=3]
 
 [ext_resource type="Script" path="res://scripts/items/item_catalog.gd" id="1_cat"]
 [ext_resource type="Resource" path="res://resources/items/wood.tres" id="2_wood"]
@@ -6,6 +6,9 @@
 [ext_resource type="Resource" path="res://resources/items/fiber.tres" id="4_fiber"]
 [ext_resource type="Resource" path="res://resources/items/wild_berries.tres" id="5_berries"]
 [ext_resource type="Script" path="res://scripts/items/item_definition.gd" id="6_def"]
+[ext_resource type="Resource" path="res://resources/items/hide.tres" id="60_hide"]
+[ext_resource type="Resource" path="res://resources/items/fur_coat.tres" id="61_fur_coat"]
+[ext_resource type="Resource" path="res://resources/items/cooling_cloak.tres" id="62_cooling_cloak"]
 [ext_resource type="Resource" path="res://resources/items/ice_crystal.tres" id="40_ice_crystal"]
 [ext_resource type="Resource" path="res://resources/items/clay.tres" id="41_clay"]
 [ext_resource type="Resource" path="res://resources/items/obsidian.tres" id="42_obsidian"]
@@ -33,4 +36,4 @@
 
 [resource]
 script = ExtResource("1_cat")
-items = Array[ExtResource("6_def")]([ExtResource("2_wood"), ExtResource("3_stone"), ExtResource("4_fiber"), ExtResource("5_berries"), ExtResource("10_stone_axe"), ExtResource("11_stone_pickaxe"), ExtResource("12_stone_spear"), ExtResource("13_torch"), ExtResource("14_bandage"), ExtResource("15_raw_meat"), ExtResource("16_cooked_meat"), ExtResource("20_flint"), ExtResource("21_flint_axe"), ExtResource("22_flint_pickaxe"), ExtResource("30_iron_ore"), ExtResource("31_iron_ingot"), ExtResource("32_iron_axe"), ExtResource("33_iron_pickaxe"), ExtResource("34_iron_sword"), ExtResource("40_ice_crystal"), ExtResource("41_clay"), ExtResource("42_obsidian"), ExtResource("43_sulfur"), ExtResource("44_golden_berries"), ExtResource("45_coconut"), ExtResource("46_golden_stew"), ExtResource("47_frost_elixir"), ExtResource("48_obsidian_sword")])
+items = Array[ExtResource("6_def")]([ExtResource("2_wood"), ExtResource("3_stone"), ExtResource("4_fiber"), ExtResource("5_berries"), ExtResource("10_stone_axe"), ExtResource("11_stone_pickaxe"), ExtResource("12_stone_spear"), ExtResource("13_torch"), ExtResource("14_bandage"), ExtResource("15_raw_meat"), ExtResource("16_cooked_meat"), ExtResource("20_flint"), ExtResource("21_flint_axe"), ExtResource("22_flint_pickaxe"), ExtResource("30_iron_ore"), ExtResource("31_iron_ingot"), ExtResource("32_iron_axe"), ExtResource("33_iron_pickaxe"), ExtResource("34_iron_sword"), ExtResource("40_ice_crystal"), ExtResource("41_clay"), ExtResource("42_obsidian"), ExtResource("43_sulfur"), ExtResource("44_golden_berries"), ExtResource("45_coconut"), ExtResource("46_golden_stew"), ExtResource("47_frost_elixir"), ExtResource("48_obsidian_sword"), ExtResource("60_hide"), ExtResource("61_fur_coat"), ExtResource("62_cooling_cloak")])

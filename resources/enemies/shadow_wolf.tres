@@ -25,7 +25,8 @@ recover_time = 0.9
 wall_stun_time = 1.5
 respawn_time = 9999.0
 loot = {
-&"raw_meat": 1
+&"raw_meat": 1,
+&"hide": 1
 }
 fears_light = true
 respawns = false

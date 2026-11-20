@@ -32,6 +32,9 @@ const ITEM_VISUALS := {
 	&"golden_stew": {"code": "ENS", "color": Color("e09a3a")},
 	&"frost_elixir": {"code": "ELX", "color": Color("6fd8ff")},
 	&"obsidian_sword": {"code": "ESO", "color": Color("6a4a8a")},
+	&"hide": {"code": "PEL", "color": Color("9b6a43")},
+	&"fur_coat": {"code": "CAS", "color": Color("c9a982")},
+	&"cooling_cloak": {"code": "MAN", "color": Color("7cc6e6")},
 }
 
 @export var inventory: Inventory
