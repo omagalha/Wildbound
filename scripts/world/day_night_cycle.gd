@@ -30,8 +30,8 @@ var _sky: ProceduralSkyMaterial
 
 # Paletas: [topo do céu, horizonte, cor da luz, energia da luz, energia ambiente, névoa]
 const PALETTE_NIGHT := [Color(0.03, 0.05, 0.13), Color(0.10, 0.13, 0.24), Color(0.55, 0.65, 1.0), 0.22, 0.28, Color(0.08, 0.10, 0.18)]
-const PALETTE_DAWN := [Color(0.30, 0.38, 0.62), Color(0.95, 0.62, 0.42), Color(1.0, 0.72, 0.5), 0.65, 0.45, Color(0.85, 0.65, 0.55)]
-const PALETTE_DAY := [Color(0.30, 0.54, 0.86), Color(0.72, 0.84, 0.93), Color(1.0, 0.97, 0.9), 1.0, 0.6, Color(0.72, 0.82, 0.9)]
+const PALETTE_DAWN := [Color(0.28, 0.34, 0.6), Color(1.0, 0.6, 0.38), Color(1.0, 0.7, 0.45), 0.8, 0.42, Color(0.85, 0.62, 0.5)]
+const PALETTE_DAY := [Color(0.2, 0.45, 0.85), Color(0.62, 0.78, 0.92), Color(1.0, 0.95, 0.85), 1.2, 0.5, Color(0.7, 0.8, 0.9)]
 
 
 func _ready() -> void:

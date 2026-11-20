@@ -134,6 +134,7 @@ func _refresh(animate_changes: bool = true) -> void:
 		var card: Dictionary = _cards[id]
 		(card["amount"] as Label).text = str(quantity) if quantity > 0 else "—"
 		(card["panel"] as PanelContainer).modulate = Color.WHITE if quantity > 0 else Color(1, 1, 1, 0.34)
+		(card["panel"] as PanelContainer).visible = quantity > 0  # só o que você tem
 		if card.has("icon"):
 			(card["icon"] as ItemIcon).dimmed = quantity <= 0
 		if animate_changes and quantity != old_quantity:

@@ -22,7 +22,7 @@ extends Node3D
 @export var rock_count: int = 140
 @export var bush_count: int = 420
 ## Tufos de grama (cada um com 3 a 5 folhas).
-@export var grass_count: int = 6000
+@export var grass_count: int = 8000
 @export var flower_count: int = 1600
 @export var mountain_count: int = 28
 ## Lado de cada pedaço de MultiMesh.
@@ -176,7 +176,7 @@ func _add_pine(p: Vector2) -> void:
 	var base := Vector3(p.x, 0, p.y)
 	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * s)
 	_push("pine_trunk", p, Transform3D(basis, base + Vector3(0, 0.9 * s, 0)), Color(0.42, 0.29, 0.19))
-	var green := Color.from_hsv(_rng.randf_range(0.30, 0.38), _rng.randf_range(0.45, 0.62), _rng.randf_range(0.30, 0.42))
+	var green := Color.from_hsv(_rng.randf_range(0.27, 0.33), _rng.randf_range(0.5, 0.66), _rng.randf_range(0.46, 0.6))
 	var layers := [[1.9, 1.0], [2.9, 0.78], [3.75, 0.55]]
 	for layer in layers:
 		var ls: float = layer[1]
@@ -194,7 +194,7 @@ func _add_broadleaf(p: Vector2, autumn: bool) -> void:
 	if autumn:
 		crown = Color.from_hsv(_rng.randf_range(0.03, 0.12), _rng.randf_range(0.65, 0.85), _rng.randf_range(0.65, 0.85))
 	else:
-		crown = Color.from_hsv(_rng.randf_range(0.22, 0.32), _rng.randf_range(0.45, 0.65), _rng.randf_range(0.38, 0.55))
+		crown = Color.from_hsv(_rng.randf_range(0.2, 0.29), _rng.randf_range(0.5, 0.7), _rng.randf_range(0.42, 0.58))
 	var main := Basis(Vector3.UP, yaw).scaled(Vector3(s, s * _rng.randf_range(0.85, 1.1), s))
 	_push("oak_crown", p, Transform3D(main, base + Vector3(0, 2.9 * s, 0)), crown)
 	var side_dir := Vector3(cos(yaw), 0, sin(yaw)) * 0.8 * s
@@ -228,8 +228,8 @@ func _try_rock() -> void:
 			continue
 		var scale := Vector3(radius * _rng.randf_range(0.9, 1.3), radius * _rng.randf_range(0.55, 0.9), radius * _rng.randf_range(0.9, 1.3))
 		var basis := Basis.from_euler(Vector3(_rng.randf_range(-0.25, 0.25), _rng.randf() * TAU, _rng.randf_range(-0.25, 0.25))).scaled(scale)
-		var grey := _rng.randf_range(0.45, 0.62)
-		var tint := Color(grey, grey * 1.01, grey * 1.04)
+		var grey := _rng.randf_range(0.5, 0.66)
+		var tint := Color(grey * 1.04, grey, grey * 0.94)  # cinza quente
 		if _rng.randf() < 0.3:
 			tint = tint.lerp(Color(0.4, 0.52, 0.3), 0.35)  # musgo
 		_push("rock", p, Transform3D(basis, Vector3(p.x, scale.y * 0.25, p.y)), tint)
@@ -263,7 +263,7 @@ func _scatter_grass() -> void:
 	var p := Vector2(_rng.randf_range(-half_size, half_size), _rng.randf_range(-half_size, half_size))
 	if p.length() < grass_clear_radius:
 		return
-	var c := Color.from_hsv(_rng.randf_range(0.22, 0.30), _rng.randf_range(0.45, 0.65), _rng.randf_range(0.42, 0.6))
+	var c := Color.from_hsv(_rng.randf_range(0.2, 0.27), _rng.randf_range(0.6, 0.8), _rng.randf_range(0.48, 0.62))
 	var s := _rng.randf_range(0.7, 1.3)
 	for blade in _rng.randi_range(3, 5):
 		var offset := Vector2.from_angle(_rng.randf() * TAU) * _rng.randf_range(0.0, 0.14)
@@ -285,6 +285,7 @@ func _scatter_flower() -> void:
 	var basis := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3.ONE * _rng.randf_range(0.8, 1.3))
 	_push("flower_stem", p, Transform3D(basis, Vector3(p.x, 0, p.y)), Color(0.3, 0.55, 0.25))
 	_push("flower", p, Transform3D(basis, Vector3(p.x, 0.26, p.y)), palette[idx])
+	_push("flower_center", p, Transform3D(basis, Vector3(p.x, 0.285, p.y)), Color(1.0, 0.85, 0.25))
 
 
 # ---------- horizonte ----------
@@ -391,7 +392,12 @@ func _build_meshes() -> void:
 	grass.radial_segments = 3
 	grass.rings = 0
 	# Origem na base: desloca a malha para cima pela metade da altura.
-	_register("grass", _lifted(grass, 0.16), _foliage_material(0.07, 0.0, 0.32), detail_view_distance)
+	var grass_mat := _foliage_material(0.07, 0.0, 0.32)
+	grass_mat.set_shader_parameter("base_darkness", 0.3)
+	grass_mat.set_shader_parameter("normal_up_blend", 0.75)
+	grass_mat.set_shader_parameter("tip_lightness", 0.08)
+	grass_mat.set_shader_parameter("rim_strength", 0.0)
+	_register("grass", _lifted(grass, 0.16), grass_mat, detail_view_distance)
 
 	var stem := CylinderMesh.new()
 	stem.top_radius = 0.012
@@ -399,14 +405,30 @@ func _build_meshes() -> void:
 	stem.height = 0.26
 	stem.radial_segments = 3
 	stem.rings = 0
-	_register("flower_stem", _lifted(stem, 0.13), _foliage_material(0.05, 0.0, 0.26), detail_view_distance)
+	var stem_mat := _foliage_material(0.05, 0.0, 0.26)
+	stem_mat.set_shader_parameter("normal_up_blend", 1.0)
+	stem_mat.set_shader_parameter("rim_strength", 0.0)
+	_register("flower_stem", _lifted(stem, 0.13), stem_mat, detail_view_distance)
 
-	var flower := SphereMesh.new()
-	flower.radius = 0.07
-	flower.height = 0.09
+	var flower := CylinderMesh.new()  # corola: disco de 5 pétalas
+	flower.top_radius = 0.11
+	flower.bottom_radius = 0.06
+	flower.height = 0.035
 	flower.radial_segments = 5
-	flower.rings = 2
-	_register("flower", flower, _foliage_material(0.05, -0.3, 0.3), detail_view_distance)
+	flower.rings = 0
+	var flower_mat := _foliage_material(0.05, -0.3, 0.3)
+	flower_mat.set_shader_parameter("base_darkness", 0.1)
+	flower_mat.set_shader_parameter("normal_up_blend", 0.8)
+	flower_mat.set_shader_parameter("rim_strength", 0.0)
+	_register("flower", flower, flower_mat, detail_view_distance)
+	var center := SphereMesh.new()
+	center.radius = 0.035
+	center.height = 0.05
+	center.radial_segments = 5
+	center.rings = 2
+	var center_mat := _foliage_material(0.05, -0.3, 0.3)
+	center_mat.set_shader_parameter("base_darkness", 0.0)
+	_register("flower_center", center, center_mat, detail_view_distance)
 
 
 func _register(kind: String, mesh: Mesh, material: Material, view_distance: float) -> void:
@@ -481,7 +503,7 @@ func _flush_batches() -> void:
 		mmi.visibility_range_end = _view[kind]
 		mmi.visibility_range_end_margin = 8.0
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		if kind in ["grass", "flower", "flower_stem", "bush"]:
+		if kind in ["grass", "flower", "flower_stem", "flower_center", "bush"]:
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_visual_root.add_child(mmi)
 	_batches.clear()

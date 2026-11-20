@@ -113,9 +113,10 @@ func _build() -> void:
 	_key = Label3D.new()
 	_key.name = "Key"
 	_key.text = "E"
-	_key.font_size = 64
+	_key.font_size = 48
 	_key.outline_size = 16
-	_key.pixel_size = 0.004
+	_key.pixel_size = 0.001
+	_key.fixed_size = true  # mesmo tamanho na tela, perto ou longe
 	_key.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_key.no_depth_test = true
 	_key.modulate = Color(1, 1, 1)

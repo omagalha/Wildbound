@@ -1,11 +1,13 @@
 shader_type spatial;
 render_mode diffuse_lambert, specular_disabled;
-// Chão da floresta: manchas de grama em dois tons e áreas secas, em coordenadas de mundo.
+// Chão da floresta: manchas de grama em vários tons, musgo, áreas secas, terra e
+// um pontilhado fino que dá textura de perto, tudo em coordenadas de mundo.
 
-uniform vec3 color_a : source_color = vec3(0.33, 0.53, 0.25);
-uniform vec3 color_b : source_color = vec3(0.44, 0.63, 0.29);
-uniform vec3 color_dry : source_color = vec3(0.60, 0.60, 0.35);
-uniform vec3 color_dirt : source_color = vec3(0.45, 0.37, 0.25);
+uniform vec3 color_a : source_color = vec3(0.27, 0.47, 0.2);
+uniform vec3 color_b : source_color = vec3(0.4, 0.6, 0.25);
+uniform vec3 color_dry : source_color = vec3(0.6, 0.58, 0.32);
+uniform vec3 color_dirt : source_color = vec3(0.42, 0.33, 0.22);
+uniform vec3 color_moss : source_color = vec3(0.2, 0.38, 0.2);
 
 varying vec3 world_pos;
 
@@ -27,12 +29,16 @@ void vertex() {
 
 void fragment() {
 	vec2 p = world_pos.xz;
-	float n = vnoise(p * 0.06) * 0.6 + vnoise(p * 0.21) * 0.4;
+	float n = vnoise(p * 0.05) * 0.5 + vnoise(p * 0.17) * 0.3 + vnoise(p * 0.6) * 0.2;
 	vec3 c = mix(color_a, color_b, n);
+	c = mix(c, color_moss, smoothstep(0.55, 0.8, vnoise(p * 0.03 + 5.0)) * 0.6);
 	float dry = vnoise(p * 0.013 + 17.0);
-	c = mix(c, color_dry, smoothstep(0.58, 0.82, dry) * 0.75);
+	c = mix(c, color_dry, smoothstep(0.6, 0.85, dry) * 0.7);
 	float dirt = vnoise(p * 0.035 + 41.0);
-	c = mix(c, color_dirt, smoothstep(0.78, 0.92, dirt) * 0.6);
+	c = mix(c, color_dirt, smoothstep(0.8, 0.93, dirt) * 0.65);
+	// pontilhado fino: folhinhas e sombras miúdas
+	float speck = vnoise(p * 3.5);
+	c *= mix(0.94, 1.05, speck);
 	ALBEDO = c;
 	ROUGHNESS = 1.0;
 }
