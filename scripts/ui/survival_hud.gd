@@ -42,6 +42,8 @@ var _last_enemy_name := "Uma criatura"
 @onready var _player_node: Node3D = respawn.player if respawn != null else null
 
 var _message_left := 0.0
+## Bloco de sobrevivência (rosto + vida + fome) do canto inferior esquerdo.
+var survival_block: SurvivalBlock
 var _bag_refresh_left := 0.0
 var _damage_tween: Tween
 var _prompt_tween: Tween
@@ -50,6 +52,7 @@ var _prompt_tween: Tween
 func _ready() -> void:
 	if player == null:
 		player = _player_node
+	_build_survival_block()
 	if _minimap != null:
 		_minimap.player = player
 	if _inventory_summary != null:
@@ -160,13 +163,48 @@ func get_toast_count() -> int:
 	return _toast_feed.get_visible_count() if _toast_feed != null else 0
 
 
+func _build_survival_block() -> void:
+	survival_block = SurvivalBlock.new()
+	survival_block.name = "SurvivalBlock"
+	survival_block.player = player
+	if player != null:
+		survival_block.animator = player.get_node_or_null("CharacterAnimator") as CharacterAnimator
+	var root := get_node("Root") as Control
+	root.add_child(survival_block)
+	survival_block.anchor_left = 0.0
+	survival_block.anchor_right = 0.0
+	survival_block.anchor_top = 0.0
+	survival_block.anchor_bottom = 0.0
+	_place_survival_block()
+	get_viewport().size_changed.connect(_place_survival_block)
+	survival_block.adopt_footer([_capacity_label, _bag_label])
+	var old := get_node_or_null("Root/TopRow/VitalsPanel") as Control
+	if old != null:
+		old.visible = false
+
+
+func _place_survival_block() -> void:
+	if survival_block == null:
+		return
+	survival_block._apply_scale()
+	var margin := 20.0
+	survival_block.offset_left = 24.0
+	survival_block.offset_right = 24.0 + survival_block.size.x
+	survival_block.offset_top = margin
+	survival_block.offset_bottom = margin + survival_block.size.y
+
+
 func _on_health_changed(current: float, maximum: float) -> void:
+	if survival_block != null:
+		survival_block.set_health(current, maximum)
 	_health_bar.max_value = maximum
 	_health_bar.value = current
 	_health_label.text = "VIDA  %d/%d" % [ceili(current), int(maximum)]
 
 
 func _on_hunger_changed(current: float, maximum: float) -> void:
+	if survival_block != null:
+		survival_block.set_hunger(current, maximum)
 	_hunger_bar.max_value = maximum
 	_hunger_bar.value = current
 	var warning := current <= maximum * hunger_warning_ratio

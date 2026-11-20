@@ -66,13 +66,13 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="ProgressPanel" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(304, 0)
+custom_minimum_size = Vector2(276, 0)
 layout_mode = 1
 anchors_preset = 0
 offset_left = 24.0
-offset_top = 204.0
-offset_right = 328.0
-offset_bottom = 286.0
+offset_top = 134.0
+offset_right = 300.0
+offset_bottom = 216.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Style_progress_panel")
 

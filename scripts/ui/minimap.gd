@@ -25,6 +25,8 @@ const COLOR_SAFE_EDGE := Color(0.5, 1.0, 0.62, 0.6)
 const COLOR_DANGER := Color(0.95, 0.35, 0.25, 0.16)
 const COLOR_DANGER_EDGE := Color(1.0, 0.45, 0.32, 0.65)
 const LABEL_HEIGHT := 34.0
+## Diâmetro do círculo numa tela de 720 px de altura; escala com a altura.
+const BASE_DIAMETER := 160.0
 
 var _view: TextureRect
 var _overlay: Control
@@ -37,12 +39,14 @@ var _zones: Array[TerritoryZone] = []
 var _camps: Array = []
 var _ruins: Array = []
 var _base_points: Array[Vector3] = []
+var ui_scale := 1.0
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip_contents = false
-	custom_minimum_size = Vector2(230, 230 + LABEL_HEIGHT)
+	_apply_scale()
+	get_viewport().size_changed.connect(_apply_scale)
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
 	_view = TextureRect.new()
@@ -77,11 +81,24 @@ func _process(delta: float) -> void:
 
 # ---------- API (testes e HUD) ----------
 
+## Diâmetro do círculo para a tela atual.
+func diameter() -> float:
+	return BASE_DIAMETER * ui_scale
+
+
+func _apply_scale() -> void:
+	var h := get_viewport().get_visible_rect().size.y if is_inside_tree() else 720.0
+	ui_scale = clampf(h / 720.0, 0.8, 1.8)
+	custom_minimum_size = Vector2(diameter() + 16.0 * ui_scale, diameter() + 12.0 * ui_scale + LABEL_HEIGHT * ui_scale)
+	size = custom_minimum_size
+	if _view != null:
+		_layout()
+
+
 ## Quadrado que contém o círculo do mapa.
 func get_map_rect() -> Rect2:
-	var d := minf(size.x, size.y - LABEL_HEIGHT) - 8.0
-	d = maxf(d, 10.0)
-	return Rect2(Vector2((size.x - d) * 0.5, 4.0), Vector2(d, d))
+	var d := diameter()
+	return Rect2(Vector2((size.x - d) * 0.5, 10.0 * ui_scale), Vector2(d, d))
 
 
 func world_to_map(world_position: Vector3) -> Vector2:
@@ -227,25 +244,26 @@ func _draw_overlay() -> void:
 		var dir := Vector2(cos(a), sin(a))
 		_overlay.draw_line(center + dir * (radius - 5.0), center + dir * (radius + 3.0), COLOR_FRAME, 2.0, true)
 	var n_pos := center + Vector2(0, -radius - 2.0)
-	_overlay.draw_circle(n_pos, 9.0, COLOR_FRAME_DARK)
-	_overlay.draw_circle(n_pos, 8.0, COLOR_FRAME)
-	_overlay.draw_string(font, n_pos + Vector2(-4.5, 5.0), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, COLOR_FRAME_DARK)
+	_overlay.draw_circle(n_pos, 8.0 * ui_scale, COLOR_FRAME_DARK)
+	_overlay.draw_circle(n_pos, 7.0 * ui_scale, COLOR_FRAME)
+	_overlay.draw_string(font, n_pos + Vector2(-4.0, 4.5) * ui_scale, "N", HORIZONTAL_ALIGNMENT_LEFT, -1, int(11 * ui_scale), COLOR_FRAME_DARK)
 	_draw_player(center)
 	# Região e coordenadas embaixo.
 	var region := "Floresta"
 	if _terrain != null and player != null:
 		region = _terrain.biome_name_at(player.global_position.x, player.global_position.z)
 	var c := _center_world()
-	var label_y := area.end.y + 16.0
+	var k := ui_scale
+	var label_y := area.end.y + 16.0 * k
 	var pill := StyleBoxFlat.new()
 	pill.bg_color = Color(0.03, 0.05, 0.04, 0.82)
 	pill.border_color = COLOR_FRAME.darkened(0.3)
 	pill.set_border_width_all(1)
 	pill.set_corner_radius_all(9)
-	var pill_w := maxf(font.get_string_size(region, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 26.0, 120.0)
-	pill.draw(_overlay.get_canvas_item(), Rect2((size.x - pill_w) * 0.5, label_y - 14.0, pill_w, 33.0))
-	_overlay.draw_string(font, Vector2(0, label_y), region, HORIZONTAL_ALIGNMENT_CENTER, size.x, 14, COLOR_TEXT)
-	_overlay.draw_string(font, Vector2(0, label_y + 15.0), "X %d · Z %d" % [roundi(c.x), roundi(c.y)], HORIZONTAL_ALIGNMENT_CENTER, size.x, 11, COLOR_TEXT.darkened(0.25))
+	var pill_w := maxf(font.get_string_size(region, HORIZONTAL_ALIGNMENT_LEFT, -1, int(12 * k)).x + 24.0 * k, 104.0 * k)
+	pill.draw(_overlay.get_canvas_item(), Rect2((size.x - pill_w) * 0.5, label_y - 12.0 * k, pill_w, 28.0 * k))
+	_overlay.draw_string(font, Vector2(0, label_y), region, HORIZONTAL_ALIGNMENT_CENTER, size.x, int(12 * k), COLOR_TEXT)
+	_overlay.draw_string(font, Vector2(0, label_y + 12.0 * k), "X %d · Z %d" % [roundi(c.x), roundi(c.y)], HORIZONTAL_ALIGNMENT_CENTER, size.x, int(10 * k), COLOR_TEXT.darkened(0.25))
 
 
 func _draw_icon(world: Vector3, kind: String, active: bool) -> void:
@@ -290,7 +308,8 @@ func _draw_player(center: Vector2) -> void:
 	if player != null and is_instance_valid(player):
 		var visual := player.get_node_or_null("Visual") as Node3D
 		yaw = visual.global_rotation.y if visual != null else player.global_rotation.y
-	var forward := Vector2(-sin(yaw), -cos(yaw))
+	var k := ui_scale * 0.85
+	var forward := Vector2(-sin(yaw), -cos(yaw)) * k
 	var right := Vector2(-forward.y, forward.x)
 	var points := PackedVector2Array([
 		center + forward * 10.0,
@@ -298,6 +317,6 @@ func _draw_player(center: Vector2) -> void:
 		center - forward * 2.5,
 		center - forward * 6.0 - right * 6.0,
 	])
-	_overlay.draw_circle(center, 13.0, Color(0, 0, 0, 0.25))
+	_overlay.draw_circle(center, 12.0 * k, Color(0, 0, 0, 0.25))
 	_overlay.draw_colored_polygon(points, COLOR_PLAYER)
 	_overlay.draw_polyline(PackedVector2Array([points[0], points[1], points[2], points[3], points[0]]), Color(0.15, 0.1, 0.03, 1.0), 1.6, true)

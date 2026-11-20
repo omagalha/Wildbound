@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="1_minimap"]
 
 [node name="Minimap" type="Control"]
-custom_minimum_size = Vector2(230, 264)
+custom_minimum_size = Vector2(176, 206)
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2

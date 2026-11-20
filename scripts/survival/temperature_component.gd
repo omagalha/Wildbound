@@ -170,7 +170,7 @@ func _build_ui() -> void:
 	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(_vignette)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(24, 296)
+	panel.position = Vector2(24, 226)
 	panel.custom_minimum_size = Vector2(190, 0)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()

@@ -35,7 +35,7 @@ func _run() -> void:
 	_check(hud != null, "SurvivalHUD preservado")
 	_check(level_hud != null, "LevelHUD preservado")
 	if hud != null:
-		_test_main_hud(hud, main.get_node_or_null("Player") as Node3D)
+		await _test_main_hud(hud, main.get_node_or_null("Player") as Node3D)
 	if level_hud != null:
 		_check(level_hud.day_night != null, "Relógio integrado ao HUD")
 		_check(level_hud.get_clock_text().begins_with("Dia "), "Dia e hora visíveis", level_hud.get_clock_text())
@@ -78,6 +78,39 @@ func _test_main_hud(hud: SurvivalHUD, player: Node3D) -> void:
 		var inventory := player.get_node("Inventory") as Inventory
 		inventory.add_item(&"wood", 3)
 		_check(inventory_summary.get_card_text(&"wood") == "MAD 3", "Quantidade compacta atualiza por sinal")
+	# Bloco de sobrevivência (canto inferior esquerdo).
+	var block := hud.survival_block
+	var screen := hud.get_viewport().get_visible_rect().size
+	_check(block != null and block.visible, "Bloco de sobrevivência existe")
+	if block != null:
+		var r := block.get_global_rect()
+		_check(r.position.x < screen.x * 0.2 and r.position.y < screen.y * 0.1, "Bloco no canto superior esquerdo", str(r))
+		_check(block.has_portrait(), "Rosto do personagem no bloco")
+		await process_frame
+		await process_frame
+		var version := block.portrait_version
+		_check(version >= 1, "Retrato fotografado ao abrir")
+		var stays := block.portrait_version
+		for i in 10:
+			await process_frame
+		_check(block.portrait_version == stays, "Retrato parado (não refaz a cada quadro)")
+		var anim := player.get_node("CharacterAnimator") as CharacterAnimator
+		anim.set_outfit_tint(Color(0.9, 0.8, 0.7))
+		await process_frame
+		await process_frame
+		await process_frame
+		_check(block.portrait_version > stays, "Trocar a roupa refaz o retrato")
+		var health := player.get_node("Health") as HealthComponent
+		health.apply_damage(DamageInfo.create(30.0, &"enemy:test"))
+		_check(block.get_health_text().begins_with("70/100") and block.get_health_text().contains("70%"), "Vida com valor e porcentagem", block.get_health_text())
+		(player.get_node("Hunger") as HungerComponent).set_hunger(42.0)
+		_check(block.get_hunger_text().begins_with("42/100"), "Fome com valor e porcentagem", block.get_hunger_text())
+		var hotbar_rect := (hud.get_node("%Hotbar") as Control).get_global_rect()
+		_check(not r.intersects(hotbar_rect.grow(-2.0)), "Bloco não cobre a barra de itens")
+		var old_panel := hud.get_node_or_null("Root/TopRow/VitalsPanel") as Control
+		_check(old_panel == null or not old_panel.visible, "Painel antigo do topo foi substituído")
+	if minimap != null:
+		_check(absf(minimap.diameter() - 160.0 * clampf(screen.y / 720.0, 0.8, 1.8)) < 0.5, "Minimapa com ~160 px a 720p (proporcional à tela)", str(minimap.diameter()))
 	_check(toast_feed != null, "Feed de mensagens existe")
 	if toast_feed != null:
 		toast_feed.clear_all()

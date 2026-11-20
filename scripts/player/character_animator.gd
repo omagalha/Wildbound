@@ -30,6 +30,9 @@ extends Node
 @export var blend_time: float = 0.15
 
 ## Nome no jogo -> nome na biblioteca.
+## A roupa (ou a cor dela) mudou: o retrato do HUD se atualiza.
+signal outfit_changed
+
 const CLIPS := {
 	"idle": "Idle", "idle_armed": "Sword_Idle", "idle_torch": "Idle_Torch", "jog": "Jog_Fwd", "sprint": "Sprint",
 	"air": "Jump", "attack": "Sword_Regular_A", "attack_heavy": "Sword_Attack",
@@ -134,6 +137,7 @@ func wear_outfit(scene: PackedScene) -> int:
 		_fix_outfit_materials(mi)
 		count += 1
 	outfit.free()
+	outfit_changed.emit()
 	return count
 
 
@@ -232,6 +236,7 @@ func set_outfit_tint(color: Color) -> void:
 			if not mi.has_meta(&"base_color_%d" % i):
 				mi.set_meta(&"base_color_%d" % i, mat.albedo_color)
 			mat.albedo_color = (mi.get_meta(&"base_color_%d" % i) as Color) * color
+	outfit_changed.emit()
 
 
 func outfit_part_count() -> int:
