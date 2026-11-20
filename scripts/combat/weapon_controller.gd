@@ -26,6 +26,9 @@ var _phase_left := 0.0
 var _hit_this_swing: Array = []
 ## Para testes e ferramentas: ignora a checagem de mouse capturado.
 var require_captured_mouse := true
+## Gira a clava no código durante o golpe. Falso quando um personagem animado
+## segura a arma (a animação faz o movimento).
+var procedural_swing := true
 
 
 func _physics_process(delta: float) -> void:
@@ -35,21 +38,25 @@ func _physics_process(delta: float) -> void:
 	_phase_left -= delta
 	match _phase:
 		1:
-			club.rotation.x = lerpf(club.rotation.x, 1.2, 0.5)
+			if procedural_swing:
+				club.rotation.x = lerpf(club.rotation.x, 1.2, 0.5)
 			if _phase_left <= 0.0:
 				_phase = 2
 				_phase_left = definition.active_time
 				strike()
 		2:
-			club.rotation.x = lerpf(club.rotation.x, -1.3, 0.6)
+			if procedural_swing:
+				club.rotation.x = lerpf(club.rotation.x, -1.3, 0.6)
 			if _phase_left <= 0.0:
 				_phase = 3
 				_phase_left = maxf(definition.interval - definition.windup - definition.active_time, 0.05)
 		3:
-			club.rotation.x = lerpf(club.rotation.x, 0.0, 0.25)
+			if procedural_swing:
+				club.rotation.x = lerpf(club.rotation.x, 0.0, 0.25)
 			if _phase_left <= 0.0:
 				_phase = 0
-				club.rotation.x = 0.0
+				if procedural_swing:
+					club.rotation.x = 0.0
 
 
 func _unhandled_input(event: InputEvent) -> void:

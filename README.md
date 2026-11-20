@@ -25,6 +25,12 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Medo do fogo** (`scripts/world/fire_light.gd`): tocha acesa (7 m) ou fogueira (9 m) e os lobos não atacam e recuam. A prévia do modo de construção não conta.
 - Zonas seguras continuam seguras. Ao amanhecer, os lobos somem. Lobo abatido deixa 1 carne crua e não renasce. Nada disso é salvo: ao carregar à noite, a caçada recomeça.
 
+## Personagem animado (2026-11-20)
+
+- Modelo **Superhero_Male** do *Universal Base Characters* e animações do *Universal Animation Library 1 e 2*, todos do Quaternius (CC0), em `assets/`. Os pacotes originais ficam em `skin/` e `movimentos/`, ignorados pelo Godot e pelo Git.
+- `scripts/player/character_animator.gd`: troca a cápsula pelo modelo e escolhe a animação: parado, trote, corrida, no ar, golpe (clava) e golpe pesado (lança), dano, comer, colher, cortar árvore, pegar do chão e morrer. Arma na mão direita e tocha na esquerda.
+- Para trocar de personagem: no nó `Player/CharacterAnimator`, mude `model_scene` (por exemplo, `Superhero_Female_FullBody.gltf`).
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).
@@ -103,6 +109,7 @@ As suítes nunca usam o save do jogo (desligam o carregamento ou gravam numa pas
 - `test_taming.gd` (58 verificações): regras de confiança e medo (T01–T20), Lumaru no mundo, vínculo, Seguir/Ficar, recuperação, respawn, Instinto Selvagem e save do companheiro.
 - `test_combat.gd` (31 verificações): clava (alcance, arco, intervalo, assistência, clique de recaptura), Javali (aviso, investida, mordida, muro, desistência), zonas segura/atenção, guarda, carência no carregamento, dificuldade e reaparecimento.
 - `test_progression.gd` (71 verificações): curva de níveis, teto de XP de coleta, marcos únicos, conhecimentos, presets e seus efeitos, tela de escolha, mochila (perda por preset, posição segura, união, recuperação parcial), respawn por preset, subida de nível com avisos, peças bloqueadas por nível e save de tudo isso.
+- `test_character.gd` (26 verificações): modelo e animações carregados, arma e tocha nas mãos, locomoção (parado, trote, corrida, no ar) e ações (golpes, dano, comer, cortar, colher, morrer e reaparecer).
 - `test_night.gd` (27 verificações): matilhas (quando, onde, quantos por preset, limite), caçada, medo da tocha e da fogueira (a prévia não conta), carne, corpo que não renasce e amanhecer.
 - `test_crafting.gd` (62 verificações): receitas (insumos, recusas, nível, itens únicos, espaço), fogueira, carne, bônus de ferramentas, árvores da floresta, lança, tocha, atadura, carne de javali, menu e save.
 - `test_world.gd` (34 verificações): floresta procedural (determinística, sem árvores na área inicial, em zonas seguras ou sobre recursos), recursos espalhados (tipos, caminhos estáveis, multiplicador do preset, save), ciclo de dia e noite (sol, lua, avisos, relógio) e save do dia e hora.

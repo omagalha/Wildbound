@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_ctrl"]
 [ext_resource type="Script" path="res://scripts/player/third_person_camera.gd" id="2_cam"]
@@ -11,6 +11,10 @@
 [ext_resource type="Resource" path="res://resources/items/item_catalog.tres" id="9_catalog"]
 [ext_resource type="Script" path="res://scripts/combat/weapon_controller.gd" id="90_weapon"]
 [ext_resource type="Resource" path="res://resources/combat/improvised_club.tres" id="91_club"]
+[ext_resource type="Script" path="res://scripts/player/character_animator.gd" id="92_anim"]
+[ext_resource type="PackedScene" path="res://assets/characters/base/Superhero_Male_FullBody.gltf" id="93_model"]
+[ext_resource type="PackedScene" path="res://assets/animations/UAL1_Standard.glb" id="94_ual1"]
+[ext_resource type="PackedScene" path="res://assets/animations/UAL2_Standard.glb" id="95_ual2"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_club"]
 albedo_color = Color(0.45, 0.3, 0.17, 1)
@@ -138,3 +142,13 @@ script = ExtResource("8_food")
 inventory = NodePath("../Inventory")
 hunger = NodePath("../Hunger")
 health = NodePath("../Health")
+
+[node name="CharacterAnimator" type="Node" parent="." node_paths=PackedStringArray("player", "health", "weapon", "food", "interaction")]
+script = ExtResource("92_anim")
+model_scene = ExtResource("93_model")
+animation_sources = Array[PackedScene]([ExtResource("94_ual1"), ExtResource("95_ual2")])
+player = NodePath("..")
+health = NodePath("../Health")
+weapon = NodePath("../Visual/Weapon")
+food = NodePath("../FoodConsumer")
+interaction = NodePath("../InteractionDetector")

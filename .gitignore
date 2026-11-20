@@ -20,3 +20,8 @@ Thumbs.db
 *.tmp
 
 # Observação: arquivos *.uid (Godot 4.4+) DEVEM ser versionados.
+
+# Pacotes baixados (os arquivos usados ficam extraídos em assets/)
+/skin/
+/movimentos/
+/prototipo animais/
