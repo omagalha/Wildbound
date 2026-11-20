@@ -32,8 +32,9 @@ const CLIPS := {
 	"air": "Jump", "attack": "Sword_Regular_A", "attack_heavy": "Sword_Attack",
 	"hit": "Hit_Chest", "death": "Death01", "eat": "Consume", "harvest": "Farm_Harvest",
 	"chop": "TreeChopping", "pickup": "PickUp_Table", "interact": "Interact",
+	"cast": "Spell_Simple_Shoot",
 }
-const ONE_SHOT_PRIORITY := {"death": 10, "attack": 5, "attack_heavy": 5, "chop": 5, "hit": 3, "eat": 2, "harvest": 2, "pickup": 2, "interact": 2}
+const ONE_SHOT_PRIORITY := {"death": 10, "attack": 5, "attack_heavy": 5, "chop": 5, "cast": 5, "hit": 3, "eat": 2, "harvest": 2, "pickup": 2, "interact": 2}
 
 ## Pegada da mão direita. Ferramentas são montadas com o cabo em +Y e a
 ## frente (lâmina, ponta) em -X; no osso da mão, +Y aponta para os dedos e -X
@@ -98,6 +99,11 @@ func _physics_process(delta: float) -> void:
 		else:
 			return
 	_update_locomotion()
+
+
+## Animação de lançar magia (chamada pelo AbilityController).
+func play_cast() -> void:
+	_play_once("cast", 0.6)
 
 
 func has_clip(game_name: String) -> bool:

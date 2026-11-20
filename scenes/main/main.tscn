@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3]
+[gd_scene load_steps=71 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="1_world"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -48,6 +48,12 @@
 [ext_resource type="Resource" path="res://resources/crafting/recipe_iron_sword.tres" id="80_r_iron_sword"]
 [ext_resource type="Script" path="res://scripts/ui/interaction_marker.gd" id="60_marker"]
 [ext_resource type="Script" path="res://scripts/ui/chest_menu.gd" id="61_chestmenu"]
+[ext_resource type="Script" path="res://scripts/abilities/ability_controller.gd" id="62_abil"]
+[ext_resource type="Script" path="res://scripts/abilities/energy_component.gd" id="63_energy"]
+[ext_resource type="Script" path="res://scripts/abilities/ability_definition.gd" id="64_adef"]
+[ext_resource type="Resource" path="res://resources/abilities/vital_pulse.tres" id="65_pulse"]
+[ext_resource type="Resource" path="res://resources/abilities/ancestral_spark.tres" id="66_spark"]
+[ext_resource type="Script" path="res://scripts/world/ancestral_ruin.gd" id="67_ruin"]
 [ext_resource type="Script" path="res://scripts/enemies/night_hunt.gd" id="46_night"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/shadow_wolf.tscn" id="47_wolf"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_stone_axe.tres" id="50_recipe_stone_axe"]
@@ -312,5 +318,31 @@ script = ExtResource("61_chestmenu")
 inventory = NodePath("../Player/Inventory")
 interaction = NodePath("../Player/InteractionDetector")
 equipment = NodePath("../PlayerEquipment")
+player = NodePath("../Player")
+hud = NodePath("../SurvivalHUD")
+
+[node name="AbilityController" type="Node" parent="." node_paths=PackedStringArray("energy", "player", "health", "knowledge", "camera", "animator", "placement", "save_manager", "hud", "respawn")]
+script = ExtResource("62_abil")
+definitions = Array[ExtResource("64_adef")]([ExtResource("65_pulse"), ExtResource("66_spark")])
+energy = NodePath("Energy")
+player = NodePath("../Player")
+health = NodePath("../Player/Health")
+knowledge = NodePath("../Progression/Knowledge")
+camera = NodePath("../Player/CameraPivot/SpringArm3D/Camera3D")
+animator = NodePath("../Player/CharacterAnimator")
+placement = NodePath("../PlacementController")
+save_manager = NodePath("../SaveManager")
+hud = NodePath("../SurvivalHUD")
+respawn = NodePath("../SimpleRespawn")
+
+[node name="Energy" type="Node" parent="AbilityController"]
+script = ExtResource("63_energy")
+
+[node name="RuinFirstFire" type="Node3D" parent="." node_paths=PackedStringArray("knowledge", "experience", "abilities", "player", "hud")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75, 0, 55)
+script = ExtResource("67_ruin")
+knowledge = NodePath("../Progression/Knowledge")
+experience = NodePath("../Progression/Experience")
+abilities = NodePath("../AbilityController")
 player = NodePath("../Player")
 hud = NodePath("../SurvivalHUD")

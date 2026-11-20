@@ -49,6 +49,7 @@ var _base_colors: Array[Color] = []
 
 
 func _ready() -> void:
+	add_to_group(&"hostiles")
 	home = global_position
 	_grace_left = startup_grace
 	if rng_seed != 0:

@@ -76,6 +76,15 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **[E] abre o painel** (`scripts/ui/chest_menu.gd`): mochila de um lado, baú do outro, a tampa abre. **Clique** move o monte inteiro, **botão direito** move 1. **"Guardar materiais"** manda tudo que não está na hotbar; **"Pegar tudo"** traz o que couber.
 - Conteúdo salvo; baú cheio não pode ser removido; fecha com [E], [Esc] ou ao se afastar.
 
+## Magias e a Ruína do Primeiro Fogo (2026-11-20)
+
+- **Energia** (`scripts/abilities/energy_component.gd`): 100, regenera 6/s começando 1 s depois do último gasto; ataques com arma não gastam. Barra e ícones no canto inferior direito.
+- **[Q] Pulso Vital** (desde o início): 35 de energia, cura 30, recarga de 12 s; recusado com vida cheia.
+- **[R] Centelha Ancestral** (desbloqueada na ruína): bola de fogo, 20 de energia, 25 de dano, 15 m, recarga de 3 s, com mira assistida num cone de 15°.
+- Recusas (recarga, sem energia, vida cheia) nunca gastam energia nem iniciam recarga (`scripts/abilities/ability_controller.gd`).
+- **Ruína do Primeiro Fogo** (`scripts/world/ancestral_ruin.gd`, em (-75, 55)): chegar a 15 m registra a descoberta (+50 XP). As **3 marcas ancestrais**, em qualquer ordem, acendem e soltam um feixe de luz; com as três, o **altar desperta**. Tocar o altar concede a Centelha uma única vez (+150 XP). Depois disso, o altar queima para sempre e espanta lobos à noite.
+- O progresso fica no `KnowledgeManager`, então vai para o save e nunca volta atrás. *Desvio do GDD:* a Centelha vai direto para o [R], sem o botão "Equipar" (só existem 2 habilidades e 2 espaços).
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).
@@ -123,6 +132,8 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 | Abrir/fechar inventário | I | `inventory` |
 | Acender/apagar tocha | T | `toggle_torch` |
 | Usar atadura | H | `use_bandage` |
+| Habilidade 1 (Pulso Vital) | Q | `ability_1` |
+| Habilidade 2 (Centelha Ancestral) | R (fora do modo construção) | `ability_2` |
 
 Peças: 1 Fundação · 2 Parede · 3 Entrada · 4 Telhado plano · 5 Fogueira · 6 Leito. Interaja (E) com um leito para defini-lo como ponto de retorno.
 

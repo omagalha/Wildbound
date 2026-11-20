@@ -106,6 +106,10 @@ func _collect_blockers() -> void:
 	for node in tree.root.find_children("*", "ResourceNode", true, false):
 		var p := (node as Node3D).global_position
 		_blockers.append(Vector4(p.x, p.z, 2.2, 0))
+	for node in tree.get_nodes_in_group(&"forest_clearing"):
+		var clearing := node as Node3D
+		var cr := float(clearing.get("clear_radius")) if clearing.get("clear_radius") != null else 10.0
+		_blockers.append(Vector4(clearing.global_position.x, clearing.global_position.z, cr, 0))
 	for node in tree.get_nodes_in_group(&"territory_zones"):
 		var zone := node as Node3D
 		var p := zone.global_position
