@@ -48,6 +48,13 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Inventário só com [I]**, com ícones desenhados (`scripts/ui/item_icon.gd`) no lugar das siglas.
 - **Indicador animado** (`scripts/ui/interaction_marker.gd`): losango brilhando e quicando, tecla **E** e anel pulsando no chão sobre o objeto interativo em foco.
 
+## Cortar e quebrar com clique (2026-11-20)
+
+- **Árvores (vivas e secas) só com machado na mão + clique**, e **montes de pedra só com picareta na mão + clique**. O golpe acerta o alvo à frente (`WeaponController.tool_strike`), solta lascas e conta como coleta (XP e avisos).
+- Árvores da floresta caem com **3 golpes** do machado de pedra ("Cortando… 1/3", "2/3", "Árvore derrubada! +5 Madeira").
+- À mão, com [E], só dá para **juntar galhos** e **pegar pedrinhas** (1 por vez), o bastante para fabricar as primeiras ferramentas. Com a ferramenta na mão, o aviso e o indicador pedem **Clique**.
+- **Pronto para vários machados e picaretas:** a força e o bônus são dados da ferramenta (`chop_power`, `mine_power` e `harvest_bonus` em `WeaponDefinition`). Uma ferramenta nova é só um item, uma ficha de dados e uma receita: um machado com força 3 derruba a árvore em 1 golpe.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

@@ -25,10 +25,16 @@ signal regrown
 @export var action_verb: String = "Coletar"
 ## Nó visual reduzido quando esgotado.
 @export var visual: Node3D
-## Unidades extras por coleta quando o jogador tem a ferramenta da categoria.
-@export var tool_bonus: int = 2
-## Ferramenta que aumenta a coleta de cada categoria.
-const TOOLS := {&"wood": &"stone_axe", &"stone": &"stone_pickaxe"}
+## Ferramenta exigida para a coleta completa: &"axe", &"pickaxe" ou &"" (nenhuma).
+## Vazio usa o padrão da categoria (madeira -> machado, pedra -> picareta).
+@export var tool_kind: StringName = &""
+## Com ferramenta exigida, quanto a coleta à mão ([E]) rende.
+@export var hand_amount: int = 1
+## Verbo da coleta à mão ("Juntar galhos", "Pegar pedrinhas").
+@export var hand_verb: String = ""
+const DEFAULT_TOOLS := {&"wood": &"axe", &"stone": &"pickaxe"}
+const TOOL_VERBS := {&"axe": "Cortar", &"pickaxe": "Quebrar"}
+const TOOL_NAMES := {&"axe": "um machado", &"pickaxe": "uma picareta"}
 ## Multiplicador de recursos do preset (injetado pelo DifficultyManager).
 var yield_multiplier: float = 1.0
 ## Gerador para o arredondamento probabilístico; injetável para testes determinísticos.
@@ -67,7 +73,31 @@ func is_depleted() -> bool:
 
 func get_interaction_prompt() -> String:
 	var item_name := item.display_name if item != null else "?"
+	if required_tool() != &"" and hand_verb != "":
+		return hand_verb
 	return "%s %s" % [action_verb, item_name]
+
+
+## Aviso conforme o que o jogador segura: com a ferramenta certa, pede o clique.
+func get_interaction_prompt_for(interactor: InteractionDetector) -> String:
+	if accepts_tool(interactor.held_tool if interactor != null else null):
+		return "[Clique] %s %s" % [TOOL_VERBS.get(required_tool(), action_verb), item.display_name if item != null else "?"]
+	return get_interaction_prompt()
+
+
+## Ferramenta que esta fonte pede (&"axe", &"pickaxe" ou &"").
+func required_tool() -> StringName:
+	return tool_kind if tool_kind != &"" else DEFAULT_TOOLS.get(category, &"")
+
+
+## A ferramenta [param tool] serve para esta fonte?
+func accepts_tool(tool: WeaponDefinition) -> bool:
+	if tool == null or is_depleted():
+		return false
+	match required_tool():
+		&"axe": return tool.chop_power > 0
+		&"pickaxe": return tool.mine_power > 0
+	return false
 
 
 func can_interact(_interactor: InteractionDetector) -> bool:
@@ -80,10 +110,27 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 	var inventory: Inventory = interactor.inventory if interactor != null else null
 	if inventory == null:
 		return {"ok": false, "message": "Sem inventário"}
-	var amount := roll_amount()
-	var used_tool := tool_for(interactor)
-	if used_tool != &"":
-		amount += tool_bonus
+	var tool := required_tool()
+	if tool != &"" and accepts_tool(interactor.held_tool):
+		return {"ok": false, "message": "Clique para %s" % TOOL_VERBS.get(tool, "coletar").to_lower()}
+	var amount := roll_amount() if tool == &"" else maxi(hand_amount, 1)
+	var result := _harvest(inventory, amount, "")
+	if result["ok"] and tool != &"":
+		result["message"] += "  ·  com %s rende mais" % TOOL_NAMES.get(tool, "ferramenta")
+	return result
+
+
+## Golpe de ferramenta (clique com machado/picareta na mão): coleta completa + bônus.
+func tool_strike(interactor: InteractionDetector, tool: WeaponDefinition) -> Dictionary:
+	if not accepts_tool(tool):
+		return {"ok": false, "message": ""}
+	var inventory: Inventory = interactor.inventory if interactor != null else null
+	if inventory == null:
+		return {"ok": false, "message": "Sem inventário"}
+	return _harvest(inventory, roll_amount() + tool.harvest_bonus, tool.display_name)
+
+
+func _harvest(inventory: Inventory, amount: int, tool_name: String) -> Dictionary:
 	if not inventory.add_item(item.id, amount):
 		return {"ok": false, "message": "Inventário cheio"}
 	harvests_left -= 1
@@ -93,20 +140,9 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 		_update_visual()
 		depleted.emit()
 	var message := "+%d %s" % [amount, item.display_name]
-	if used_tool != &"":
-		var tool_item := inventory.catalog.get_item(used_tool) if inventory.catalog != null else null
-		message += " (%s)" % (tool_item.display_name if tool_item != null else String(used_tool))
-	return {"ok": true, "message": message, "item_id": item.id, "amount": amount, "tool": used_tool}
-
-
-## A ferramenta na mão que melhora esta fonte, ou &"" se nenhuma.
-func tool_for(interactor: InteractionDetector) -> StringName:
-	var tool: StringName = TOOLS.get(category, &"")
-	if tool == &"" or interactor == null or interactor.held_item != tool:
-		return &""
-	if interactor.inventory == null or not interactor.inventory.has_item(tool):
-		return &""
-	return tool
+	if tool_name != "":
+		message += " (%s)" % tool_name
+	return {"ok": true, "message": message, "item_id": item.id, "amount": amount}
 
 
 ## Quantidade de uma coleta com o multiplicador do preset (SURVIVAL_DIFFICULTY.md 2.3):

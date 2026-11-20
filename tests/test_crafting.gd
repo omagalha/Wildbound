@@ -182,35 +182,57 @@ func _test_station() -> void:
 # ---------- ferramentas ----------
 
 func _test_tools() -> void:
-	print("-- Ferramentas --")
+	print("-- Ferramentas (clique) --")
 	var world := await _new_world()
 	var inv := _inv(world)
-	var detector := world.get_node("Player/InteractionDetector") as InteractionDetector
+	var player := world.get_node("Player") as CharacterBody3D
+	var detector := player.get_node("InteractionDetector") as InteractionDetector
+	var weapon := player.get_node("Visual/Weapon") as WeaponController
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
 	var tree := world.get_node("ResourceField/DeadTrees/DeadTree01") as ResourceNode
 	var stone := world.get_node("ResourceField/StonePiles/StonePile01") as ResourceNode
 	var bush := world.get_node("ResourceField/BerryBushs/BerryBush01") as ResourceNode
 	for n in [tree, stone, bush]:
 		n.yield_multiplier = 1.0
+
+	# À mão ([E]): galhos e pedrinhas, 1 de cada vez; frutas normais.
+	_check(tree.get_interaction_prompt_for(detector) == "Juntar galhos", "Árvore seca à mão: 'Juntar galhos'", tree.get_interaction_prompt_for(detector))
 	var r := tree.interact(detector)
-	_check(r["ok"] and inv.count(&"wood") == tree.amount_per_harvest, "Sem machado: coleta normal")
-	inv.add_item(&"stone_axe", 1)
-	inv.add_item(&"stone_pickaxe", 1)
-	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
-	var before_wood := inv.count(&"wood")
-	tree.interact(detector)
-	_check(inv.count(&"wood") == before_wood + tree.amount_per_harvest, "Machado só no inventário (não na mão): sem bônus")
-	inv.remove_item(&"wood", tree.amount_per_harvest)
-	_check(equipment.select_slot(equipment.slot_of(&"stone_axe")) and equipment.held_item == &"stone_axe", "Seleciona o machado na hotbar")
-	r = tree.interact(detector)
-	_check(inv.count(&"wood") == tree.amount_per_harvest * 2 + 2, "Com machado: +2 madeira", str(inv.count(&"wood")))
-	_check(String(r["message"]).contains("Machado"), "Aviso cita o machado", r["message"])
-	var before := inv.count(&"stone")
-	equipment.select_slot(equipment.slot_of(&"stone_pickaxe"))
-	stone.interact(detector)
-	_check(inv.count(&"stone") == before + stone.amount_per_harvest + 2, "Com picareta: +2 pedra")
-	before = inv.count(&"wild_berries")
+	_check(r["ok"] and inv.count(&"wood") == 1, "À mão: só 1 madeira (galhos)")
+	r = stone.interact(detector)
+	_check(r["ok"] and inv.count(&"stone") == 1 and stone.get_interaction_prompt_for(detector) == "Pegar pedrinhas", "À mão: só 1 pedra (pedrinhas)")
 	bush.interact(detector)
-	_check(inv.count(&"wild_berries") == before + bush.amount_per_harvest, "Frutas não ganham bônus de ferramenta")
+	_check(inv.count(&"wild_berries") == bush.amount_per_harvest, "Frutas não pedem ferramenta")
+
+	# Machado na mão: o [E] pede clique; o clique (golpe) corta com bônus.
+	inv.add_all({&"stone_axe": 1, &"stone_pickaxe": 1})
+	_check(not weapon.tool_strike().get("ok", false), "Machado só no inventário: clique não corta")
+	equipment.select_slot(equipment.slot_of(&"stone_axe"))
+	_check(detector.held_tool != null and detector.held_tool.chop_power > 0, "Machado na mão tem força de corte")
+	_check(tree.get_interaction_prompt_for(detector).begins_with("[Clique] Cortar"), "Com machado: aviso pede clique", tree.get_interaction_prompt_for(detector))
+	r = tree.interact(detector)
+	_check(not r["ok"] and inv.count(&"wood") == 1, "Com machado, o [E] não corta")
+	_face(player, tree.global_position)
+	player.global_position = tree.global_position + Vector3(0, 0.1, 1.4)
+	_face(player, tree.global_position)
+	await _wait(3)
+	var before := inv.count(&"wood")
+	r = weapon.tool_strike()
+	_check(r.get("ok", false) and inv.count(&"wood") == before + tree.amount_per_harvest + 2, "Clique com machado: coleta completa +2", str(inv.count(&"wood") - before))
+	_check(String(r.get("message", "")).contains("Machado"), "Aviso cita o machado", r.get("message", ""))
+	var stone_before := inv.count(&"stone")
+	weapon.tool_strike()
+	_check(inv.count(&"stone") == stone_before, "Machado não quebra pedra")
+
+	equipment.select_slot(equipment.slot_of(&"stone_pickaxe"))
+	player.global_position = stone.global_position + Vector3(0, 0.1, 1.4)
+	_face(player, stone.global_position)
+	await _wait(3)
+	r = weapon.tool_strike()
+	_check(r.get("ok", false) and inv.count(&"stone") == stone_before + stone.amount_per_harvest + 2, "Clique com picareta: pedra completa +2")
+	player.global_position = stone.global_position + Vector3(0, 0.1, 6.0)
+	await _wait(3)
+	_check(weapon.tool_strike().is_empty(), "Longe demais: o golpe não acerta nada")
 	await _free_world(world)
 
 
@@ -221,30 +243,51 @@ func _test_forest_tree() -> void:
 	var forest := world.get_node("TestWorld/Forest") as ForestGenerator
 	var detector := world.get_node("Player/InteractionDetector") as InteractionDetector
 	var player := world.get_node("Player") as CharacterBody3D
+	var weapon := player.get_node("Visual/Weapon") as WeaponController
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	var experience := world.get_node("Progression/Experience") as ExperienceComponent
 	var tree := forest.tree_bodies[0] as ForestTree
 	_check(tree != null and (tree.collision_layer & 4) != 0, "Árvores da floresta são interativas")
 	player.global_position = tree.global_position + Vector3(1.2, 0.1, 0)
+	_face(player, tree.global_position)
 	await _wait(3)
 	detector.refresh_focus()
-	_check(detector.get_focused() is ForestTree, "[E] mira a árvore ao lado", str(detector.get_focused()))
-	var r := detector.try_interact()
-	_check(not r["ok"] and String(r["message"]).contains("Machado") and inv.count(&"wood") == 0, "Sem machado: recusa e explica")
+	_check(not (detector.get_focused() is ForestTree), "Sem machado na mão, árvores não viram alvo do aviso")
+	_check(weapon.tool_strike().is_empty() and inv.count(&"wood") == 0, "Clique com a clava não corta")
 	inv.add_item(&"stone_axe", 1)
-	r = detector.try_interact()
-	_check(not r["ok"] and String(r["message"]).contains("Segure"), "Machado guardado: pede para segurar", r["message"])
-	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
 	equipment.select_slot(equipment.slot_of(&"stone_axe"))
-	var experience := world.get_node("Progression/Experience") as ExperienceComponent
+	detector.refresh_focus()
+	_check(detector.get_focused() is ForestTree, "Machado na mão: a árvore vira alvo", str(detector.get_focused()))
+	var marker := world.get_node("InteractionMarker") as InteractionMarker
+	await _wait(2)
+	_check((marker.get_node("Key") as Label3D).text == "Clique", "Indicador mostra 'Clique'")
+	var target := weapon.tool_target() as ForestTree
+	_check(target != null, "Golpe encontra a árvore à frente")
 	var xp := experience.total_xp
-	r = detector.try_interact()
-	_check(r["ok"] and inv.count(&"wood") == 3, "Com machado: +3 madeira")
-	_check(experience.total_xp > xp, "Cortar dá XP de coleta")
-	r = detector.try_interact()
-	_check(not r["ok"] and inv.count(&"wood") == 3, "Mesma árvore logo depois: precisa de tempo")
+	var r := weapon.tool_strike()
+	_check(r.get("ok", false) and target.hits == 1 and inv.count(&"wood") == 0, "1º golpe: 1/3, ainda sem madeira", r.get("message", ""))
+	r = weapon.tool_strike()
+	_check(target.hits == 2 and String(r.get("message", "")).contains("2/3"), "2º golpe: 2/3")
+	r = weapon.tool_strike()
+	_check(r.get("felled", false) and inv.count(&"wood") == 5, "3º golpe derruba: +5 madeira (3 + bônus 2)", str(inv.count(&"wood")))
+	_check(experience.total_xp > xp, "Derrubar dá XP de coleta")
+	r = weapon.tool_strike()
+	_check(not r.get("ok", true) and inv.count(&"wood") == 5, "Derrubada: precisa de tempo para render de novo")
+
+	# Machados melhores (dados): mais força derruba em menos golpes.
+	var strong := (load("res://resources/combat/stone_axe.tres") as WeaponDefinition).duplicate() as WeaponDefinition
+	strong.chop_power = 3
+	var other := forest.tree_bodies[1] as ForestTree
+	r = other.tool_strike(detector, strong)
+	_check(r.get("felled", false), "Machado com força 3 derruba em 1 golpe")
 	await _free_world(world)
 
 
-# ---------- equipamento ----------
+## Vira o personagem para olhar [param point] (o modelo olha para -Z).
+func _face(player: CharacterBody3D, point: Vector3) -> void:
+	var to := point - player.global_position
+	(player.get_node("Visual") as Node3D).rotation.y = atan2(-to.x, -to.z)
+
 
 func _test_equipment() -> void:
 	print("-- Equipamento --")

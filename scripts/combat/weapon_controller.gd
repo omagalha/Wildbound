@@ -9,6 +9,8 @@ extends Node3D
 
 signal swung
 signal hit(target: Node, damage: float)
+## Golpe de ferramenta acertou uma árvore ou pedra (machado, picareta).
+signal tool_struck(target: Node, result: Dictionary)
 
 const ACTION_ATTACK := &"attack"
 const CAUSE_PREFIX := "player:"
@@ -17,6 +19,10 @@ const CAUSE_PREFIX := "player:"
 @export var player: CharacterBody3D
 @export var health: HealthComponent
 @export_flags_3d_physics var enemy_mask: int = 8
+## Quem coleta (inventário e item na mão) nos golpes de ferramenta.
+@export var interaction: InteractionDetector
+## Camada das árvores e fontes de recurso.
+@export_flags_3d_physics var resource_mask: int = 4
 
 @onready var club: Node3D = $Club
 
@@ -101,7 +107,82 @@ func strike() -> int:
 			if target.has_method("apply_knockback"):
 				target.apply_knockback(forward() * definition.knockback)
 			hit.emit(target, applied)
+	if count == 0:
+		tool_strike()
 	return count
+
+
+## Machado ou picareta na mão: acerta a árvore/pedra à frente. Devolve o resultado.
+func tool_strike() -> Dictionary:
+	if definition == null or (definition.chop_power <= 0 and definition.mine_power <= 0):
+		return {}
+	var target := tool_target()
+	if target == null:
+		return {}
+	var result: Dictionary = target.tool_strike(interaction, definition)
+	tool_struck.emit(target, result)
+	if interaction != null and result.get("message", "") != "":
+		interaction.interacted.emit(target, result)  # HUD, XP e animação reagem como numa coleta
+	if result.get("ok", false):
+		_spawn_chips(target, result.get("item_id", &"") == &"stone" or target.get("category") == &"stone")
+	return result
+
+
+## A árvore ou fonte de recurso mais próxima à frente que aceita a ferramenta na mão.
+func tool_target() -> Node3D:
+	var origin := _origin()
+	var shape := SphereShape3D.new()
+	shape.radius = definition.reach + 0.8
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape = shape
+	params.transform = Transform3D(Basis.IDENTITY, origin)
+	params.collision_mask = resource_mask
+	var best: Node3D = null
+	var best_distance := INF
+	var fwd := forward()
+	for hit_data in get_world_3d().direct_space_state.intersect_shape(params, 24):
+		var node := hit_data["collider"] as Node3D
+		if node == null or not node.has_method("tool_strike") or not node.accepts_tool(definition):
+			continue
+		var to := node.global_position - origin
+		to.y = 0.0
+		if to.length() - 0.45 > definition.reach:
+			continue
+		if to.length() > 0.3 and rad_to_deg(fwd.angle_to(to.normalized())) > 60.0:
+			continue
+		if to.length() < best_distance:
+			best = node
+			best_distance = to.length()
+	return best
+
+
+func _spawn_chips(target: Node3D, stone: bool) -> void:
+	var chips := CPUParticles3D.new()
+	chips.one_shot = true
+	chips.emitting = false
+	chips.amount = 14
+	chips.lifetime = 0.7
+	chips.explosiveness = 0.95
+	chips.direction = Vector3(0, 1, 0)
+	chips.spread = 70.0
+	chips.initial_velocity_min = 2.0
+	chips.initial_velocity_max = 4.5
+	chips.gravity = Vector3(0, -12, 0)
+	chips.scale_amount_min = 0.05
+	chips.scale_amount_max = 0.11
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3.ONE
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.6, 0.62, 0.65) if stone else Color(0.72, 0.52, 0.3)
+	mesh.material = mat
+	chips.mesh = mesh
+	var holder: Node = get_tree().current_scene if get_tree().current_scene != null else target.get_parent()
+	holder.add_child(chips)
+	var toward := (_origin() - target.global_position)
+	toward.y = 0.0
+	chips.global_position = target.global_position + toward.normalized() * 0.4 + Vector3(0, 1.0, 0)
+	chips.emitting = true
+	get_tree().create_timer(1.2).timeout.connect(chips.queue_free)
 
 
 ## Direção para onde o personagem olha (plano horizontal).

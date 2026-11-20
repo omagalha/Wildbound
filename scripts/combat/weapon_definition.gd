@@ -17,3 +17,10 @@ extends Resource
 @export var assist_cone_degrees: float = 60.0
 ## Empurrão aplicado ao alvo atingido (m/s).
 @export var knockback: float = 3.0
+## Ferramenta: força de corte (machados). Cada golpe numa árvore soma isto;
+## a árvore cai quando a soma chega à resistência dela. 0 = não corta.
+@export var chop_power: int = 0
+## Ferramenta: força de mineração (picaretas). 0 = não quebra pedra.
+@export var mine_power: int = 0
+## Unidades extras por coleta feita com esta ferramenta.
+@export var harvest_bonus: int = 0

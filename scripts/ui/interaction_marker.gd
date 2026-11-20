@@ -53,8 +53,9 @@ func is_showing() -> bool:
 	return target != null and visible
 
 
-func _on_focus_changed(new_target: Node, _prompt: String) -> void:
+func _on_focus_changed(new_target: Node, prompt: String) -> void:
 	target = new_target as Node3D
+	_key.text = "Clique" if prompt.begins_with("[Clique]") else "E"
 	if target != null:
 		_top = _height_of(target)
 		global_position = target.global_position

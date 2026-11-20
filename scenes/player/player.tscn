@@ -82,12 +82,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -0.4)
 mesh = SubResource("BoxMesh_facing")
 surface_material_override/0 = SubResource("Material_facing")
 
-[node name="Weapon" type="Node3D" parent="Visual" node_paths=PackedStringArray("player", "health")]
+[node name="Weapon" type="Node3D" parent="Visual" node_paths=PackedStringArray("player", "health", "interaction")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.95, -0.1)
 script = ExtResource("90_weapon")
 definition = ExtResource("91_club")
 player = NodePath("../..")
 health = NodePath("../../Health")
+interaction = NodePath("../../InteractionDetector")
 
 [node name="Club" type="Node3D" parent="Visual/Weapon"]
 

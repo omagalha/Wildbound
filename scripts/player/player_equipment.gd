@@ -279,11 +279,12 @@ func _definition_for(id: StringName) -> WeaponDefinition:
 
 
 func _apply_held() -> void:
+	var wanted := _definition_for(held_item)
 	if interaction != null:
 		interaction.held_item = held_item
+		interaction.held_tool = wanted
 	if weapon == null:
 		return
-	var wanted := _definition_for(held_item)
 	if wanted != null and weapon.definition != wanted:
 		weapon.definition = wanted
 		weapon_changed.emit(wanted)

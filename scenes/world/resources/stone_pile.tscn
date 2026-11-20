@@ -34,6 +34,7 @@ max_harvests = 4
 regrow_time = 180.0
 category = &"stone"
 action_verb = "Quebrar"
+hand_verb = "Pegar pedrinhas"
 visual = NodePath("Visual")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

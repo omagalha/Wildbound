@@ -33,7 +33,7 @@ const CLIPS := {
 	"hit": "Hit_Chest", "death": "Death01", "eat": "Consume", "harvest": "Farm_Harvest",
 	"chop": "TreeChopping", "pickup": "PickUp_Table", "interact": "Interact",
 }
-const ONE_SHOT_PRIORITY := {"death": 10, "attack": 5, "attack_heavy": 5, "hit": 3, "eat": 2, "harvest": 2, "chop": 2, "pickup": 2, "interact": 2}
+const ONE_SHOT_PRIORITY := {"death": 10, "attack": 5, "attack_heavy": 5, "chop": 5, "hit": 3, "eat": 2, "harvest": 2, "pickup": 2, "interact": 2}
 
 static var _clip_cache := {}  # caminho da biblioteca -> {nome: Animation}
 
@@ -120,7 +120,12 @@ func _update_locomotion() -> void:
 
 func _on_swung() -> void:
 	var interval := weapon.definition.interval if weapon.definition != null else 0.6
-	var clip := "attack_heavy" if weapon.definition != null and weapon.definition.id == &"stone_spear" else "attack"
+	var clip := "attack"
+	if weapon.definition != null:
+		if weapon.definition.chop_power > 0 or weapon.definition.mine_power > 0:
+			clip = "chop"
+		elif weapon.definition.id == &"stone_spear":
+			clip = "attack_heavy"
 	_play_once(clip, interval * 1.15)
 
 

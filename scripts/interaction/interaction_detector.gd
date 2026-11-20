@@ -31,6 +31,8 @@ const ACTION_INTERACT := &"interact"
 @export var enabled: bool = true
 ## Item na mão do jogador (ferramentas só ajudam na coleta quando estão na mão).
 var held_item: StringName = &""
+## Dados do item na mão (força de corte/mineração); null = mãos vazias.
+var held_tool: WeaponDefinition
 
 var _focused: Node = null
 var _scan_timer: float = 0.0
@@ -59,7 +61,7 @@ func refresh_focus() -> void:
 	var target: Node = find_nearest() if enabled else null
 	var prompt := ""
 	if target != null:
-		prompt = target.get_interaction_prompt()
+		prompt = target.get_interaction_prompt_for(self) if target.has_method("get_interaction_prompt_for") else target.get_interaction_prompt()
 	if target != _focused or prompt != _last_prompt:
 		_focused = target
 		_last_prompt = prompt

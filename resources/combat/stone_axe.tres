@@ -15,3 +15,5 @@ active_time = 0.1
 assist_distance = 2.5
 assist_cone_degrees = 60.0
 knockback = 3.0
+chop_power = 1
+harvest_bonus = 2

@@ -192,7 +192,10 @@ func _refresh_inventory() -> void:
 
 
 func _on_focus_changed(target: Node, prompt: String) -> void:
-	_prompt_label.text = "[E] %s" % prompt if target != null else ""
+	if target == null:
+		_prompt_label.text = ""
+	else:
+		_prompt_label.text = prompt if prompt.begins_with("[") else "[E] %s" % prompt
 	_animate_prompt(target != null)
 
 
