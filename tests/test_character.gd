@@ -69,6 +69,27 @@ func _test_model() -> void:
 	_check(animator.model != null and animator.model.get_parent() == player.visual, "Modelo carregado dentro do Visual")
 	_check(not (player.visual.get_node("MeshInstance3D") as Node3D).visible, "Cápsula provisória escondida")
 	_check(animator.skeleton != null and animator.skeleton.find_bone("hand_r") >= 0, "Esqueleto com mãos")
+	_check(animator.outfit_part_count() >= 5, "Roupa de patrulheiro vestida", str(animator.outfit_part_count()))
+	var part: MeshInstance3D = null
+	for child in animator.skeleton.get_children():
+		if child.has_meta(&"outfit_part"):
+			part = child
+	_check(part != null and part.get_node(part.skeleton) == animator.skeleton, "Roupa usa o esqueleto do personagem (segue as animações)")
+	var mat := part.get_surface_override_material(0) as StandardMaterial3D
+	_check(mat != null and mat.metallic == 0.0, "Material da roupa fosco (não fica preto)")
+	var trimmed := 0
+	for mi in animator._body_meshes:
+		var original: Mesh = animator._body_meshes[mi]
+		var now: Mesh = (mi as MeshInstance3D).mesh
+		if now != original and now.surface_get_array_index_len(0) < original.surface_get_array_index_len(0) / 3:
+			trimmed += 1
+	_check(trimmed == 1, "Corpo base mostra só a cabeça (não atravessa a roupa)", str(trimmed))
+	animator.wear_outfit(null)
+	await _wait(2)
+	_check(animator.outfit_part_count() == 0, "Tirar a roupa volta ao corpo original")
+	animator.wear_outfit(load("res://assets/characters/outfits/Male_Peasant.gltf"))
+	await _wait(2)
+	_check(animator.outfit_part_count() >= 3, "Trocar para a roupa de aldeão")
 	var missing := []
 	for clip in ["idle", "idle_torch", "jog", "sprint", "air", "attack", "attack_heavy", "hit", "death", "eat", "harvest", "chop", "pickup", "interact"]:
 		if not animator.has_clip(clip):

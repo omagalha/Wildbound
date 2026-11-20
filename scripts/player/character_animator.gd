@@ -14,6 +14,9 @@ extends Node
 
 ## Modelo do personagem (glTF com Armature/Skeleton3D). Vazio = mantém a cápsula.
 @export var model_scene: PackedScene
+## Roupa vestida por cima do corpo (Modular Character Outfits). Vazio = sem roupa.
+## As malhas da roupa passam a usar o esqueleto do modelo, então seguem as animações.
+@export var outfit_scene: PackedScene
 ## Bibliotecas de animação com o mesmo esqueleto (UAL1, UAL2).
 @export var animation_sources: Array[PackedScene] = []
 @export var player: PlayerController
@@ -68,6 +71,7 @@ func _ready() -> void:
 		if node != null:
 			node.visible = false
 	skeleton = model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	wear_outfit(outfit_scene)
 	_build_animation_player()
 	_attach_hands()
 	if weapon != null:
@@ -104,6 +108,122 @@ func _physics_process(delta: float) -> void:
 ## Animação de lançar magia (chamada pelo AbilityController).
 func play_cast() -> void:
 	_play_once("cast", 0.6)
+
+
+## Veste uma roupa: move as malhas dela para o esqueleto do personagem.
+## Devolve quantas peças foram vestidas. Chamar de novo troca a roupa.
+func wear_outfit(scene: PackedScene) -> int:
+	if skeleton == null:
+		return 0
+	for old in skeleton.get_children():
+		if old.has_meta(&"outfit_part"):
+			old.queue_free()
+	_show_head_only(scene != null)
+	if scene == null:
+		return 0
+	var outfit := scene.instantiate()
+	var count := 0
+	for node in outfit.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		mi.get_parent().remove_child(mi)
+		mi.owner = null
+		mi.set_meta(&"outfit_part", true)
+		skeleton.add_child(mi)
+		mi.skeleton = mi.get_path_to(skeleton)
+		mi.transform = Transform3D.IDENTITY
+		_fix_outfit_materials(mi)
+		count += 1
+	outfit.free()
+	return count
+
+
+## Os materiais vêm exportados como 100% metálicos (canal da Unity); sem
+## reflexos isso fica preto. Vira tecido/couro fosco.
+func _fix_outfit_materials(mi: MeshInstance3D) -> void:
+	if mi.mesh == null:
+		return
+	for i in mi.mesh.get_surface_count():
+		var base := mi.mesh.surface_get_material(i) as StandardMaterial3D
+		if base == null:
+			continue
+		var mat := base.duplicate() as StandardMaterial3D
+		mat.metallic = 0.0
+		mat.metallic_texture = null
+		mat.roughness = 0.85
+		mi.set_surface_override_material(i, mat)
+
+
+## Ossos cuja pele fica visível sob a roupa (o resto do corpo base some, senão
+## o corpo musculoso atravessa as roupas feitas para o corpo "normal").
+const HEAD_BONES := ["Head", "neck_01"]
+static var _head_mesh_cache := {}  # malha original -> malha só com a cabeça
+var _body_meshes := {}  # MeshInstance3D -> malha original
+
+
+## Liga/desliga o "só cabeça" no corpo base (olhos e sobrancelhas ficam).
+func _show_head_only(enabled: bool) -> void:
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.has_meta(&"outfit_part") or mi.mesh == null or mi.skin == null:
+			continue
+		if not _body_meshes.has(mi):
+			_body_meshes[mi] = mi.mesh
+		var original: Mesh = _body_meshes[mi]
+		if original.get_surface_count() == 0 or (original as ArrayMesh) == null:
+			continue
+		# Só o corpo (malha grande): olhos e sobrancelhas já são só cabeça.
+		if original.get_aabb().size.y < 1.0:
+			continue
+		mi.mesh = _head_only(original, mi.skin) if enabled else original
+
+
+static func _head_only(mesh: ArrayMesh, skin: Skin) -> ArrayMesh:
+	if _head_mesh_cache.has(mesh):
+		return _head_mesh_cache[mesh]
+	var keep_binds := {}
+	for b in skin.get_bind_count():
+		if String(skin.get_bind_name(b)) in HEAD_BONES:
+			keep_binds[b] = true
+	var out := ArrayMesh.new()
+	for surface in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(surface)
+		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		if bones.is_empty() or verts.is_empty():
+			continue
+		var per := bones.size() / verts.size()
+		var head_vertex := PackedByteArray()
+		head_vertex.resize(verts.size())
+		for v in verts.size():
+			var w := 0.0
+			for k in per:
+				if keep_binds.has(bones[v * per + k]):
+					w += weights[v * per + k]
+			head_vertex[v] = 1 if w > 0.5 else 0
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		var kept := PackedInt32Array()
+		for t in range(0, indices.size(), 3):
+			if head_vertex[indices[t]] and head_vertex[indices[t + 1]] and head_vertex[indices[t + 2]]:
+				kept.append(indices[t])
+				kept.append(indices[t + 1])
+				kept.append(indices[t + 2])
+		if kept.is_empty():
+			continue
+		arrays[Mesh.ARRAY_INDEX] = kept
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, mesh.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		out.surface_set_material(out.get_surface_count() - 1, mesh.surface_get_material(surface))
+	_head_mesh_cache[mesh] = out
+	return out
+
+
+func outfit_part_count() -> int:
+	var n := 0
+	if skeleton != null:
+		for child in skeleton.get_children():
+			if child.has_meta(&"outfit_part"):
+				n += 1
+	return n
 
 
 func has_clip(game_name: String) -> bool:
