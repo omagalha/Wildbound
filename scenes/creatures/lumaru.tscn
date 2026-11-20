@@ -1,5 +1,7 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=20 format=3]
 
+[ext_resource type="Script" path="res://scripts/creatures/creature_model.gd" id="80_cmodel"]
+[ext_resource type="PackedScene" path="res://assets/creatures/Fox.gltf" id="81_fox"]
 [ext_resource type="Script" path="res://scripts/creatures/creature_controller.gd" id="1_ctrl"]
 [ext_resource type="Resource" path="res://resources/creatures/lumaru.tres" id="2_def"]
 [ext_resource type="Script" path="res://scripts/taming/taming_component.gd" id="3_taming"]
@@ -154,3 +156,19 @@ creature = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
 mesh = SubResource("Mesh_marker")
 cast_shadow = 0
+
+[node name="CreatureModel" type="Node" parent="."]
+script = ExtResource("80_cmodel")
+model_scene = ExtResource("81_fox")
+target_length = 1.05
+color_overrides = {
+"Main": Color(0.9, 0.66, 0.32, 1),
+"Main_Light": Color(0.98, 0.94, 0.84, 1),
+"Black": Color(0.38, 0.28, 0.55, 1),
+"Grey": Color(0.55, 0.45, 0.7, 1)
+}
+glow_overrides = {
+"Eyes": Color(0.55, 0.4, 0.9, 1)
+}
+walk_reference_speed = 1.4
+run_reference_speed = 5.0

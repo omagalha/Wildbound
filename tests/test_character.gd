@@ -19,6 +19,7 @@ func _run() -> void:
 	await _test_model()
 	await _test_locomotion()
 	await _test_actions()
+	await _test_creatures()
 	print("== Resultado: %d passaram, %d falharam ==" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -188,4 +189,47 @@ func _test_actions() -> void:
 		health.revive(80.0)
 	await _wait(3)
 	_check(animator.current_clip() == "idle", "Reapareceu: de pé", animator.current_clip())
+	await _free_world(world)
+
+
+# ---------- animais ----------
+
+func _test_creatures() -> void:
+	print("-- Animais --")
+	var world := await _new_world()
+	var lumaru := world.get_node("Creatures/Lumaru") as CreatureController
+	var lmodel := lumaru.get_node("CreatureModel") as CreatureModel
+	_check(lmodel.model != null and lmodel.anim != null, "Lumaru com modelo animado (raposa)")
+	var hidden := true
+	for child in lumaru.visual.get_children():
+		if child is MeshInstance3D and (child as MeshInstance3D).visible:
+			hidden = false
+	_check(hidden, "Formas provisórias do Lumaru escondidas")
+	var missing := []
+	for st in ["idle", "walk", "run", "alert", "eat", "happy"]:
+		if not lmodel.has_clip(st):
+			missing.append(st)
+	_check(missing.is_empty(), "Lumaru tem todas as animações", str(missing))
+	await _wait(5)
+	_check(lmodel.current == lumaru.get_anim_state() or lmodel.current == "hit", "Animação segue o estado do Lumaru", "%s vs %s" % [lmodel.current, lumaru.get_anim_state()])
+
+	var hunt := world.get_node("NightHunt") as NightHunt
+	hunt.set_physics_process(false)
+	hunt.spawn_pack()
+	var wolf := hunt.wolves()[0]
+	await _wait(3)
+	var wmodel := wolf.get_node("CreatureModel") as CreatureModel
+	_check(wmodel.model != null and wmodel.has_clip("attack") and wmodel.has_clip("death"), "Lobo com modelo e animações de ataque e morte")
+	_check(wmodel.model.scale.x > 0.0 and wmodel.model.scale.x < 1.0, "Lobo escalado para ~1,5 m")
+	wolf._set_state(HostileCreature.State.BITE)
+	await _wait(2)
+	_check(wmodel.current == "attack", "Mordida: animação de ataque", wmodel.current)
+	wolf.receive_damage(DamageInfo.create(5.0, &"player:test"))
+	await _wait(1)
+	_check(wmodel.current == "hit" and wmodel._meshes[0].material_overlay != null, "Golpe: reage e pisca")
+	await _wait(12)
+	_check(wmodel._meshes[0].material_overlay == null, "Piscada termina")
+	wolf.receive_damage(DamageInfo.create(500.0, &"player:test"))
+	await _wait(3)
+	_check(wmodel.current == "death" and is_zero_approx(wolf.visual.rotation.z), "Morte: animação, sem tombar duas vezes")
 	await _free_world(world)

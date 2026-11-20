@@ -58,7 +58,9 @@ func _ready() -> void:
 	apply_multipliers(damage_multiplier, health_multiplier)
 	health.damaged.connect(_on_damaged)
 	health.died.connect(_on_died)
-	for mesh in visual.find_children("*", "MeshInstance3D", true, false):
+	# Com modelo animado (CreatureModel), o piscar de dano é feito por ele.
+	var meshes: Array = [] if visual.has_node("Model") else visual.find_children("*", "MeshInstance3D", true, false)
+	for mesh in meshes:
 		var m := (mesh as MeshInstance3D).mesh
 		if m != null and m.surface_get_material(0) is StandardMaterial3D:
 			var mat := (m.surface_get_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
@@ -114,6 +116,22 @@ func state_name() -> String:
 
 func is_dead() -> bool:
 	return state == State.DEAD
+
+
+func has_animated_model() -> bool:
+	return visual != null and visual.has_node("Model")
+
+
+## Animação pedida ao CreatureModel.
+func get_anim_state() -> String:
+	match state:
+		State.DEAD: return "death"
+		State.BITE: return "attack"
+		State.CHARGE: return "run"
+		State.TELEGRAPH: return "alert"
+		State.RECOVER: return "stunned"
+		State.CHASE, State.RETURN: return "run"
+	return "walk" if Vector2(velocity.x, velocity.z).length() > 0.3 else "idle"
 
 
 func body_radius() -> float:
@@ -255,7 +273,8 @@ func _do_telegraph() -> void:
 	if player != null:
 		_face(player.global_position, 0.35)
 	# Raspa o chão: tremidinha no visual.
-	visual.position.x = sin(_state_time * 60.0) * 0.03
+	if not has_animated_model():
+		visual.position.x = sin(_state_time * 60.0) * 0.03
 	if _state_time < definition.telegraph_time:
 		return
 	visual.position.x = 0.0
@@ -303,7 +322,8 @@ func _do_bite() -> void:
 
 func _do_recover() -> void:
 	_brake()
-	visual.rotation.z = sin(_state_time * 8.0) * 0.08
+	if not has_animated_model():
+		visual.rotation.z = sin(_state_time * 8.0) * 0.08
 	if _state_time < _recover_duration:
 		return
 	visual.rotation.z = 0.0
@@ -327,7 +347,8 @@ func _do_return() -> void:
 func _do_dead(delta: float) -> void:
 	velocity.x = 0.0
 	velocity.z = 0.0
-	visual.rotation.z = lerpf(visual.rotation.z, PI * 0.5, 0.15)
+	if not has_animated_model():
+		visual.rotation.z = lerpf(visual.rotation.z, PI * 0.5, 0.15)
 	if _state_time > 3.0:
 		visual.visible = false
 		if not definition.respawns:

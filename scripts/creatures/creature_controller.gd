@@ -387,7 +387,22 @@ func _face(point: Vector3) -> void:
 	visual.rotation.y = lerp_angle(visual.rotation.y, target_yaw, 0.2)
 
 
+## Animação pedida ao CreatureModel.
+func get_anim_state() -> String:
+	var speed := Vector2(velocity.x, velocity.z).length()
+	match state:
+		State.EATING: return "eat"
+		State.SCARED: return "run"
+		State.ALERT: return "alert"
+		State.BONDED: return "happy"
+	if speed > 3.0:
+		return "run"
+	return "walk" if speed > 0.2 else "idle"
+
+
 func _animate(delta: float) -> void:
+	if visual.has_node("Model"):
+		return  # o modelo animado cuida disso
 	var speed := Vector2(velocity.x, velocity.z).length()
 	if speed > 0.2:
 		_bob += delta * (8.0 + speed * 1.5)

@@ -1,5 +1,7 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 
+[ext_resource type="Script" path="res://scripts/creatures/creature_model.gd" id="80_cmodel"]
+[ext_resource type="PackedScene" path="res://assets/creatures/Wolf.gltf" id="81_wolf"]
 [ext_resource type="Script" path="res://scripts/enemies/hostile_creature.gd" id="1_enemy"]
 [ext_resource type="Resource" path="res://resources/enemies/shadow_wolf.tres" id="2_def"]
 [ext_resource type="Script" path="res://scripts/survival/health_component.gd" id="3_health"]
@@ -128,3 +130,18 @@ outline_modulate = Color(0, 0, 0, 1)
 font_size = 72
 outline_size = 14
 text = ""
+
+[node name="CreatureModel" type="Node" parent="."]
+script = ExtResource("80_cmodel")
+model_scene = ExtResource("81_wolf")
+target_length = 1.5
+color_overrides = {
+"Main": Color(0.11, 0.12, 0.19, 1),
+"Main_Light": Color(0.2, 0.22, 0.32, 1),
+"Nose": Color(0.02, 0.02, 0.04, 1)
+}
+glow_overrides = {
+"Eyes_Black": Color(0.4, 0.85, 1, 1)
+}
+walk_reference_speed = 2.0
+run_reference_speed = 6.0
