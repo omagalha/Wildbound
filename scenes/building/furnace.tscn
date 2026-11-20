@@ -1,7 +1,9 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/building/furnace.gd" id="1_furnace"]
 [ext_resource type="Script" path="res://scripts/world/fire_light.gd" id="2_fire"]
+[ext_resource type="Script" path="res://scripts/world/prop_model.gd" id="3_prop"]
+[ext_resource type="PackedScene" path="res://assets/props/Anvil_Log.gltf" id="4_anvil"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_stone"]
 albedo_color = Color(0.46, 0.44, 0.42, 1)
@@ -116,3 +118,9 @@ scale_amount_min = 0.15
 scale_amount_max = 0.25
 scale_amount_curve = SubResource("Curve_smoke")
 color_ramp = SubResource("Grad_smoke")
+
+[node name="Anvil" type="Node3D" parent="."]
+transform = Transform3D(0.5, 0, 0.5, 0, 0.7071, 0, -0.5, 0, 0.5, 1.15, 0, 0.35)
+script = ExtResource("3_prop")
+model = ExtResource("4_anvil")
+model_scale = 0.85

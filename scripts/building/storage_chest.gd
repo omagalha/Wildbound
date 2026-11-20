@@ -8,18 +8,38 @@ signal opened
 signal closed
 
 @onready var storage: Inventory = $Storage
+## Tampa: osso "Chest_Top" do modelo (ou um nó "Lid" nas versões antigas).
 @onready var _lid: Node3D = get_node_or_null("Lid")
+var _skeleton: Skeleton3D
+var _lid_bone := -1
+var _lid_rest := Quaternion.IDENTITY
 
 var is_open := false
 var _lid_angle := 0.0
 
 
+func _ready() -> void:
+	var model := get_node_or_null("Model")
+	if model != null:
+		var found := model.find_children("*", "Skeleton3D", true, false)
+		if not found.is_empty():
+			_skeleton = found[0]
+			_lid_bone = _skeleton.find_bone("Chest_Top")
+			if _lid_bone >= 0:
+				_lid_rest = _skeleton.get_bone_pose_rotation(_lid_bone)
+
+
 func _physics_process(delta: float) -> void:
-	if _lid == null:
-		return
 	var target := -1.15 if is_open else 0.0
 	_lid_angle = move_toward(_lid_angle, target, delta * 5.0)
-	_lid.rotation.x = _lid_angle
+	if _lid != null:
+		_lid.rotation.x = _lid_angle
+	elif _lid_bone >= 0:
+		_skeleton.set_bone_pose_rotation(_lid_bone, _lid_rest * Quaternion(Vector3.RIGHT, _lid_angle))
+
+
+func lid_angle() -> float:
+	return _lid_angle
 
 
 func get_interaction_prompt() -> String:
