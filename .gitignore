@@ -1,0 +1,22 @@
+# Godot 4 — cache e importações geradas localmente
+.godot/
+/android/
+
+# Exportações
+/export/
+/builds/
+*.ipa
+*.apk
+*.aab
+*.pck
+*.zip
+export_credentials.cfg
+
+# Editores e sistema
+.vscode/*
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Observação: arquivos *.uid (Godot 4.4+) DEVEM ser versionados.

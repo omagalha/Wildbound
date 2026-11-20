@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_torch"
+display_name = "Tocha"
+description = "Ilumina a noite. [T] acende e apaga"
+inputs = {&"wood": 1, &"fiber": 2}
+outputs = {&"torch": 1}
+station = &""
+required_knowledge = &"knowledge_basic_tools"

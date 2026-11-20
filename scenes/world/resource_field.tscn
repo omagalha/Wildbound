@@ -1,0 +1,82 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/resources/berry_bush.tscn" id="1_berry_bush"]
+[ext_resource type="PackedScene" path="res://scenes/world/resources/fiber_plant.tscn" id="2_fiber_plant"]
+[ext_resource type="PackedScene" path="res://scenes/world/resources/stone_pile.tscn" id="3_stone_pile"]
+[ext_resource type="PackedScene" path="res://scenes/world/resources/dead_tree.tscn" id="4_dead_tree"]
+[ext_resource type="Script" path="res://scripts/world/resource_scatter.gd" id="5_scatter"]
+
+[node name="ResourceField" type="Node3D"]
+script = ExtResource("5_scatter")
+berry_scene = ExtResource("1_berry_bush")
+fiber_scene = ExtResource("2_fiber_plant")
+stone_scene = ExtResource("3_stone_pile")
+wood_scene = ExtResource("4_dead_tree")
+
+[node name="BerryBushs" type="Node3D" parent="."]
+
+[node name="BerryBush01" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 14)
+
+[node name="BerryBush02" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 15)
+
+[node name="BerryBush03" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 9)
+
+[node name="BerryBush04" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 13)
+
+[node name="BerryBush05" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 19)
+
+[node name="BerryBush06" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -19)
+
+[node name="BerryBush07" parent="BerryBushs" instance=ExtResource("1_berry_bush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -28)
+
+[node name="FiberPlants" type="Node3D" parent="."]
+
+[node name="FiberPlant01" parent="FiberPlants" instance=ExtResource("2_fiber_plant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 4)
+
+[node name="FiberPlant02" parent="FiberPlants" instance=ExtResource("2_fiber_plant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 4)
+
+[node name="FiberPlant03" parent="FiberPlants" instance=ExtResource("2_fiber_plant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 17)
+
+[node name="FiberPlant04" parent="FiberPlants" instance=ExtResource("2_fiber_plant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 17)
+
+[node name="FiberPlant05" parent="FiberPlants" instance=ExtResource("2_fiber_plant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 11)
+
+[node name="StonePiles" type="Node3D" parent="."]
+
+[node name="StonePile01" parent="StonePiles" instance=ExtResource("3_stone_pile")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 10)
+
+[node name="StonePile02" parent="StonePiles" instance=ExtResource("3_stone_pile")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 14)
+
+[node name="StonePile03" parent="StonePiles" instance=ExtResource("3_stone_pile")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -13)
+
+[node name="StonePile04" parent="StonePiles" instance=ExtResource("3_stone_pile")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -6)
+
+[node name="DeadTrees" type="Node3D" parent="."]
+
+[node name="DeadTree01" parent="DeadTrees" instance=ExtResource("4_dead_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 4)
+
+[node name="DeadTree02" parent="DeadTrees" instance=ExtResource("4_dead_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 6)
+
+[node name="DeadTree03" parent="DeadTrees" instance=ExtResource("4_dead_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 23)
+
+[node name="DeadTree04" parent="DeadTrees" instance=ExtResource("4_dead_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 21)

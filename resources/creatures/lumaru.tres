@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CreatureDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/creatures/creature_definition.gd" id="1_def"]
+[ext_resource type="Resource" path="res://resources/creatures/lumaru_taming.tres" id="2_taming"]
+
+[resource]
+script = ExtResource("1_def")
+species_id = &"lumaru"
+display_name = "Lumaru"
+walk_speed = 2.0
+flee_speed = 7.0
+home_radius = 10.0
+flee_distance = 15.0
+flee_max_from_home = 25.0
+max_health = 50.0
+required_knowledge = &"knowledge_initial_bond"
+taming = ExtResource("2_taming")
+follow_start_distance = 3.5
+follow_stop_distance = 2.5
+recover_distance = 20.0

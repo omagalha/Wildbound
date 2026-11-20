@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="LevelCurve" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/level_curve.gd" id="1_curve"]
+
+[resource]
+script = ExtResource("1_curve")
+base_xp = 100
+step_xp = 50
+max_level = 5
+level_names = PackedStringArray("Sobrevivente", "Coletor", "Construtor", "Explorador", "Pioneiro")
+unlocks = {
+1: [&"knowledge_campfire", &"knowledge_initial_bond", &"knowledge_basic_tools"],
+2: [&"knowledge_primitive_shelter", &"knowledge_stone_spear"],
+3: [&"knowledge_flat_roof", &"knowledge_survival_bed"],
+4: [&"knowledge_gathering_capacity"],
+5: [&"knowledge_pioneer"]
+}
+knowledge_names = {
+&"knowledge_basic_tools": "Ferramentas básicas (machado, picareta, tocha, atadura)",
+&"knowledge_stone_spear": "Lança de pedra",
+&"knowledge_campfire": "Fogueira",
+&"knowledge_flat_roof": "Telhado plano",
+&"knowledge_gathering_capacity": "Capacidade de coleta (+5 espaços)",
+&"knowledge_initial_bond": "Vínculo Inicial",
+&"knowledge_pioneer": "Marco: Pioneiro",
+&"knowledge_primitive_shelter": "Abrigo Primitivo (fundação, parede, entrada)",
+&"knowledge_survival_bed": "Leito de Sobrevivência"
+}

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DifficultySettings" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/difficulty/difficulty_settings.gd" id="1_diff"]
+[ext_resource type="Resource" path="res://resources/death/death_rules_hard.tres" id="2_rules"]
+
+[resource]
+script = ExtResource("1_diff")
+id = &"hard"
+display_name = "Difícil"
+description = "Fome mais rápida, criaturas mais perigosas, recursos mais escassos. Ao morrer, itens e equipamento ficam na mochila."
+version = 1
+hunger_multiplier = 1.5
+enemy_damage_multiplier = 1.4
+enemy_health_multiplier = 1.2
+resource_multiplier = 0.9
+exploration_reward_multiplier = 1.1
+permadeath = false
+experimental = false
+death_rules = ExtResource("2_rules")

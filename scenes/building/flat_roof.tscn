@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_piece.gd" id="1_piece"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_thatch"]
+albedo_color = Color(0.76, 0.66, 0.38, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_0"]
+size = Vector3(3.2, 0.2, 3.2)
+material = SubResource("Mat_thatch")
+
+[sub_resource type="BoxShape3D" id="Shape_0"]
+size = Vector3(3.2, 0.2, 3.2)
+
+[node name="FlatRoof" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_piece")
+
+[node name="Roof" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("Mesh_0")
+
+[node name="RoofCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("Shape_0")

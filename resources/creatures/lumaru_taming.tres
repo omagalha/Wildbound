@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="TamingProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/taming/taming_profile.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+max_trust = 100.0
+preferred_foods = Array[StringName]([&"wild_berries"])
+preferred_gain = 25.0
+acceptable_foods = Array[StringName]([])
+acceptable_gain = 10.0
+aggressive_fear = 35.0
+aggressive_interval = 1.0
+scare_trust_penalty = 10.0
+flee_threshold = 70.0
+accept_fear_max = 30.0
+fear_decay_per_second = 5.0
+feed_cooldown = 8.0
+interaction_distance = 2.5
+alert_radius = 8.0

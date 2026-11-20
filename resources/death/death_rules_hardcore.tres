@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DeathRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/death/death_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+drop_carried_items = true
+drop_equipped_items = true
+respawn_health_ratio = 0.6
+respawn_hunger_ratio = 0.35
+respawn_energy_ratio = 0.6
+exhaustion_enabled = false

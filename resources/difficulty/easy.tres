@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DifficultySettings" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/difficulty/difficulty_settings.gd" id="1_diff"]
+[ext_resource type="Resource" path="res://resources/death/death_rules_easy.tres" id="2_rules"]
+
+[resource]
+script = ExtResource("1_diff")
+id = &"easy"
+display_name = "Fácil"
+description = "Exploração: conhecer o mundo, construir e domesticar com menos pressão. A fome existe e mata se for ignorada. Ao morrer, mantém todos os itens."
+version = 1
+hunger_multiplier = 0.6
+enemy_damage_multiplier = 0.7
+enemy_health_multiplier = 0.8
+resource_multiplier = 1.3
+exploration_reward_multiplier = 1.0
+permadeath = false
+experimental = false
+death_rules = ExtResource("2_rules")

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_definition.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"stone_spear"
+display_name = "Lança de pedra"
+damage = 20.0
+reach = 2.6
+arc_degrees = 60.0
+interval = 0.75
+windup = 0.2
+active_time = 0.1
+assist_distance = 3.2
+assist_cone_degrees = 50.0
+knockback = 4.5

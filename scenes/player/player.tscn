@@ -1,0 +1,140 @@
+[gd_scene load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_ctrl"]
+[ext_resource type="Script" path="res://scripts/player/third_person_camera.gd" id="2_cam"]
+[ext_resource type="Script" path="res://scripts/survival/health_component.gd" id="3_health"]
+[ext_resource type="Script" path="res://scripts/survival/hunger_component.gd" id="4_hunger"]
+[ext_resource type="Script" path="res://scripts/survival/starvation_damage.gd" id="5_starve"]
+[ext_resource type="Script" path="res://scripts/inventory/inventory.gd" id="6_inv"]
+[ext_resource type="Script" path="res://scripts/interaction/interaction_detector.gd" id="7_interact"]
+[ext_resource type="Script" path="res://scripts/survival/food_consumer.gd" id="8_food"]
+[ext_resource type="Resource" path="res://resources/items/item_catalog.tres" id="9_catalog"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_controller.gd" id="90_weapon"]
+[ext_resource type="Resource" path="res://resources/combat/improvised_club.tres" id="91_club"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_club"]
+albedo_color = Color(0.45, 0.3, 0.17, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_club"]
+material = SubResource("Mat_club")
+top_radius = 0.09
+bottom_radius = 0.04
+height = 0.75
+radial_segments = 8
+
+[sub_resource type="SphereMesh" id="Mesh_club_head"]
+material = SubResource("Mat_club")
+radius = 0.13
+height = 0.26
+radial_segments = 8
+rings = 4
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.4
+height = 1.8
+radial_segments = 12
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="Material_body"]
+albedo_color = Color(0.93, 0.56, 0.22, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_facing"]
+size = Vector3(0.22, 0.16, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Material_facing"]
+albedo_color = Color(0.22, 0.2, 0.25, 1)
+roughness = 0.9
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_camera"]
+radius = 0.25
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera_pivot", "visual")]
+collision_layer = 2
+collision_mask = 1
+floor_snap_length = 0.3
+script = ExtResource("1_ctrl")
+camera_pivot = NodePath("CameraPivot")
+visual = NodePath("Visual")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_body")
+surface_material_override/0 = SubResource("Material_body")
+
+[node name="FacingIndicator" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -0.4)
+mesh = SubResource("BoxMesh_facing")
+surface_material_override/0 = SubResource("Material_facing")
+
+[node name="Weapon" type="Node3D" parent="Visual" node_paths=PackedStringArray("player", "health")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.95, -0.1)
+script = ExtResource("90_weapon")
+definition = ExtResource("91_club")
+player = NodePath("../..")
+health = NodePath("../../Health")
+
+[node name="Club" type="Node3D" parent="Visual/Weapon"]
+
+[node name="Handle" type="MeshInstance3D" parent="Visual/Weapon/Club"]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.87, 0, 0.87, 0.5, 0, 0.16, -0.28)
+mesh = SubResource("Mesh_club")
+cast_shadow = 0
+
+[node name="Head" type="MeshInstance3D" parent="Visual/Weapon/Club"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, -0.6)
+mesh = SubResource("Mesh_club_head")
+cast_shadow = 0
+
+[node name="CameraPivot" type="Node3D" parent="." node_paths=PackedStringArray("spring_arm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+script = ExtResource("2_cam")
+spring_arm = NodePath("SpringArm3D")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+collision_mask = 1
+shape = SubResource("SphereShape3D_camera")
+spring_length = 5.0
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+fov = 70.0
+far = 300.0
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("3_health")
+
+[node name="Hunger" type="Node" parent="."]
+script = ExtResource("4_hunger")
+
+[node name="StarvationDamage" type="Node" parent="." node_paths=PackedStringArray("hunger", "health")]
+script = ExtResource("5_starve")
+hunger = NodePath("../Hunger")
+health = NodePath("../Health")
+
+[node name="Inventory" type="Node" parent="."]
+script = ExtResource("6_inv")
+catalog = ExtResource("9_catalog")
+
+[node name="InteractionDetector" type="Node3D" parent="." node_paths=PackedStringArray("inventory")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+script = ExtResource("7_interact")
+inventory = NodePath("../Inventory")
+
+[node name="FoodConsumer" type="Node" parent="." node_paths=PackedStringArray("inventory", "hunger", "health")]
+script = ExtResource("8_food")
+inventory = NodePath("../Inventory")
+hunger = NodePath("../Hunger")
+health = NodePath("../Health")

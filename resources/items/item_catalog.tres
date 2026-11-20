@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemCatalog" load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_catalog.gd" id="1_cat"]
+[ext_resource type="Resource" path="res://resources/items/wood.tres" id="2_wood"]
+[ext_resource type="Resource" path="res://resources/items/stone.tres" id="3_stone"]
+[ext_resource type="Resource" path="res://resources/items/fiber.tres" id="4_fiber"]
+[ext_resource type="Resource" path="res://resources/items/wild_berries.tres" id="5_berries"]
+[ext_resource type="Script" path="res://scripts/items/item_definition.gd" id="6_def"]
+[ext_resource type="Resource" path="res://resources/items/stone_axe.tres" id="10_stone_axe"]
+[ext_resource type="Resource" path="res://resources/items/stone_pickaxe.tres" id="11_stone_pickaxe"]
+[ext_resource type="Resource" path="res://resources/items/stone_spear.tres" id="12_stone_spear"]
+[ext_resource type="Resource" path="res://resources/items/torch.tres" id="13_torch"]
+[ext_resource type="Resource" path="res://resources/items/bandage.tres" id="14_bandage"]
+[ext_resource type="Resource" path="res://resources/items/raw_meat.tres" id="15_raw_meat"]
+[ext_resource type="Resource" path="res://resources/items/cooked_meat.tres" id="16_cooked_meat"]
+
+[resource]
+script = ExtResource("1_cat")
+items = Array[ExtResource("6_def")]([ExtResource("2_wood"), ExtResource("3_stone"), ExtResource("4_fiber"), ExtResource("5_berries"), ExtResource("10_stone_axe"), ExtResource("11_stone_pickaxe"), ExtResource("12_stone_spear"), ExtResource("13_torch"), ExtResource("14_bandage"), ExtResource("15_raw_meat"), ExtResource("16_cooked_meat")])

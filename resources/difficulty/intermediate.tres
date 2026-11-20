@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DifficultySettings" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/difficulty/difficulty_settings.gd" id="1_diff"]
+[ext_resource type="Resource" path="res://resources/death/death_rules_intermediate.tres" id="2_rules"]
+
+[resource]
+script = ExtResource("1_diff")
+id = &"intermediate"
+display_name = "Intermediário"
+description = "A experiência padrão: alimentação regular e preparação para explorar. Ao morrer, os itens carregados ficam numa mochila no local."
+version = 1
+hunger_multiplier = 1.0
+enemy_damage_multiplier = 1.0
+enemy_health_multiplier = 1.0
+resource_multiplier = 1.0
+exploration_reward_multiplier = 1.0
+permadeath = false
+experimental = false
+death_rules = ExtResource("2_rules")

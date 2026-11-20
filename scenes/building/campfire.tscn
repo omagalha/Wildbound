@@ -1,0 +1,135 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_piece.gd" id="1_piece"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_ember"]
+albedo_color = Color(0.95, 0.45, 0.12, 1)
+roughness = 1.0
+emission_enabled = true
+emission = Color(1, 0.45, 0.1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+albedo_color = Color(0.48, 0.48, 0.5, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood_dark"]
+albedo_color = Color(0.45, 0.32, 0.2, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_0"]
+size = Vector3(0.3, 0.2, 0.2)
+material = SubResource("Mat_stone")
+
+[sub_resource type="BoxShape3D" id="Shape_0"]
+size = Vector3(0.3, 0.2, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_1"]
+size = Vector3(0.3, 0.2, 0.2)
+material = SubResource("Mat_stone")
+
+[sub_resource type="BoxShape3D" id="Shape_1"]
+size = Vector3(0.3, 0.2, 0.2)
+
+[sub_resource type="BoxMesh" id="Mesh_2"]
+size = Vector3(0.2, 0.2, 0.3)
+material = SubResource("Mat_stone")
+
+[sub_resource type="BoxShape3D" id="Shape_2"]
+size = Vector3(0.2, 0.2, 0.3)
+
+[sub_resource type="BoxMesh" id="Mesh_3"]
+size = Vector3(0.2, 0.2, 0.3)
+material = SubResource("Mat_stone")
+
+[sub_resource type="BoxShape3D" id="Shape_3"]
+size = Vector3(0.2, 0.2, 0.3)
+
+[sub_resource type="BoxMesh" id="Mesh_4"]
+size = Vector3(0.7, 0.12, 0.12)
+material = SubResource("Mat_wood_dark")
+
+[sub_resource type="BoxShape3D" id="Shape_4"]
+size = Vector3(0.7, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_5"]
+size = Vector3(0.12, 0.12, 0.7)
+material = SubResource("Mat_wood_dark")
+
+[sub_resource type="BoxShape3D" id="Shape_5"]
+size = Vector3(0.12, 0.12, 0.7)
+
+[sub_resource type="BoxMesh" id="Mesh_6"]
+size = Vector3(0.25, 0.15, 0.25)
+material = SubResource("Mat_ember")
+
+[sub_resource type="BoxShape3D" id="Shape_6"]
+size = Vector3(0.25, 0.15, 0.25)
+
+[node name="Campfire" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_piece")
+
+[node name="StoneN" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.42)
+mesh = SubResource("Mesh_0")
+
+[node name="StoneNCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.42)
+shape = SubResource("Shape_0")
+
+[node name="StoneS" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0.42)
+mesh = SubResource("Mesh_1")
+
+[node name="StoneSCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0.42)
+shape = SubResource("Shape_1")
+
+[node name="StoneE" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.1, 0)
+mesh = SubResource("Mesh_2")
+
+[node name="StoneECollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.1, 0)
+shape = SubResource("Shape_2")
+
+[node name="StoneW" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.1, 0)
+mesh = SubResource("Mesh_3")
+
+[node name="StoneWCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.1, 0)
+shape = SubResource("Shape_3")
+
+[node name="Log1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+mesh = SubResource("Mesh_4")
+
+[node name="Log1Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+shape = SubResource("Shape_4")
+
+[node name="Log2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+mesh = SubResource("Mesh_5")
+
+[node name="Log2Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+shape = SubResource("Shape_5")
+
+[node name="Ember" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("Mesh_6")
+
+[node name="EmberCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+shape = SubResource("Shape_6")
+
+[node name="FireLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+light_color = Color(1, 0.62, 0.3, 1)
+light_energy = 1.4
+omni_range = 6.0
+shadow_enabled = false

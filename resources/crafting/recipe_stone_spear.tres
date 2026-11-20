@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_stone_spear"
+display_name = "Lança de pedra"
+description = "Arma: mais dano e alcance que a clava"
+inputs = {&"wood": 4, &"stone": 2, &"fiber": 3}
+outputs = {&"stone_spear": 1}
+station = &""
+required_knowledge = &"knowledge_stone_spear"

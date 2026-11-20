@@ -1,0 +1,78 @@
+class_name ResourceScatter
+extends Node3D
+## Espalha fontes de recurso extras pela floresta, em grupos, de forma determinística.
+##
+## Fica na raiz do ResourceField. Os nós criados têm nomes estáveis
+## ("Wilds/W000_berry"...), então o SaveManager encontra os mesmos caminhos ao
+## carregar. Roda no _ready, antes do SaveManager e do DifficultyManager (que
+## vêm depois na árvore da cena principal).
+
+@export var world_seed: int = 4242
+## Grupos não aparecem a menos disso da origem (a área inicial já tem os seus).
+@export var inner_radius: float = 50.0
+@export var half_size: float = 138.0
+@export var cluster_count: int = 34
+@export var berry_scene: PackedScene
+@export var fiber_scene: PackedScene
+@export var stone_scene: PackedScene
+@export var wood_scene: PackedScene
+## Peso relativo de cada tipo nos grupos: frutas, fibra, pedra, madeira.
+@export var weights: Vector4 = Vector4(0.3, 0.25, 0.22, 0.23)
+
+var spawned: Array[ResourceNode] = []
+
+
+func _ready() -> void:
+	spawn_all()
+
+
+func spawn_all() -> void:
+	if not spawned.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = world_seed
+	var root := Node3D.new()
+	root.name = "Wilds"
+	add_child(root)
+	var kinds := [["berry", berry_scene], ["fiber", fiber_scene], ["stone", stone_scene], ["wood", wood_scene]]
+	var centers: Array[Vector2] = []
+	var index := 0
+	for c in cluster_count:
+		var center := Vector2.ZERO
+		for attempt in 20:
+			center = Vector2(rng.randf_range(-half_size, half_size), rng.randf_range(-half_size, half_size))
+			if center.length() < inner_radius:
+				continue
+			var ok := true
+			for other in centers:
+				if other.distance_to(center) < 16.0:
+					ok = false
+					break
+			if ok:
+				break
+		centers.append(center)
+		var kind := _pick(rng)
+		var scene: PackedScene = kinds[kind][1]
+		if scene == null:
+			continue
+		var amount := rng.randi_range(2, 5)
+		for i in amount:
+			var offset := Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(1.5, 5.0)
+			var node := scene.instantiate() as ResourceNode
+			node.name = "W%03d_%s" % [index, kinds[kind][0]]
+			index += 1
+			root.add_child(node)
+			node.position = Vector3(center.x + offset.x, 0, center.y + offset.y)
+			node.rotation.y = rng.randf() * TAU
+			spawned.append(node)
+
+
+func _pick(rng: RandomNumberGenerator) -> int:
+	var total := weights.x + weights.y + weights.z + weights.w
+	var r := rng.randf() * total
+	var values := [weights.x, weights.y, weights.z, weights.w]
+	for i in values.size():
+		r -= values[i]
+		if r <= 0.0:
+			return i
+	return 3

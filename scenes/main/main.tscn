@@ -1,0 +1,269 @@
+[gd_scene load_steps=48 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="1_world"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/world/resource_field.tscn" id="3_field"]
+[ext_resource type="PackedScene" path="res://scenes/ui/survival_hud.tscn" id="4_hud"]
+[ext_resource type="Script" path="res://scripts/death/simple_respawn.gd" id="5_respawn"]
+[ext_resource type="Script" path="res://scripts/building/building_manager.gd" id="6_bmanager"]
+[ext_resource type="Script" path="res://scripts/building/placement_controller.gd" id="7_placement"]
+[ext_resource type="Resource" path="res://resources/building/building_catalog.tres" id="8_bcatalog"]
+[ext_resource type="PackedScene" path="res://scenes/ui/building_hud.tscn" id="9_bhud"]
+[ext_resource type="Script" path="res://scripts/save/save_manager.gd" id="10_save"]
+[ext_resource type="Script" path="res://scripts/difficulty/difficulty_manager.gd" id="11_diff"]
+[ext_resource type="Resource" path="res://resources/difficulty/easy.tres" id="12_easy"]
+[ext_resource type="Resource" path="res://resources/difficulty/intermediate.tres" id="13_intermediate"]
+[ext_resource type="Resource" path="res://resources/difficulty/hard.tres" id="14_hard"]
+[ext_resource type="Resource" path="res://resources/difficulty/hardcore.tres" id="15_hardcore"]
+[ext_resource type="Script" path="res://scripts/difficulty/difficulty_settings.gd" id="16_settings"]
+[ext_resource type="PackedScene" path="res://scenes/ui/difficulty_select.tscn" id="17_select"]
+[ext_resource type="Script" path="res://scripts/progression/experience_component.gd" id="18_xp"]
+[ext_resource type="Script" path="res://scripts/progression/level_manager.gd" id="19_level"]
+[ext_resource type="Script" path="res://scripts/progression/knowledge_manager.gd" id="20_knowledge"]
+[ext_resource type="Resource" path="res://resources/progression/mvp_level_curve.tres" id="21_curve"]
+[ext_resource type="Resource" path="res://resources/progression/mvp_xp_rules.tres" id="22_rules"]
+[ext_resource type="PackedScene" path="res://scenes/ui/level_hud.tscn" id="23_levelhud"]
+[ext_resource type="PackedScene" path="res://scenes/creatures/lumaru.tscn" id="24_lumaru"]
+[ext_resource type="PackedScene" path="res://scenes/ui/taming_hud.tscn" id="25_taminghud"]
+[ext_resource type="Script" path="res://scripts/world/territory_zone.gd" id="26_zone"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/spiny_boar.tscn" id="27_boar"]
+[ext_resource type="Script" path="res://scripts/crafting/crafting_manager.gd" id="40_craft"]
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="41_recipe"]
+[ext_resource type="Script" path="res://scripts/ui/crafting_menu.gd" id="42_menu"]
+[ext_resource type="Script" path="res://scripts/player/player_equipment.gd" id="43_equip"]
+[ext_resource type="Resource" path="res://resources/combat/improvised_club.tres" id="44_club"]
+[ext_resource type="Resource" path="res://resources/combat/stone_spear.tres" id="45_spear"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_stone_axe.tres" id="50_recipe_stone_axe"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_stone_pickaxe.tres" id="51_recipe_stone_pickaxe"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_torch.tres" id="52_recipe_torch"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_bandage.tres" id="53_recipe_bandage"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_stone_spear.tres" id="54_recipe_stone_spear"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_cooked_meat.tres" id="55_recipe_cooked_meat"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_danger"]
+albedo_color = Color(0.45, 0.4, 0.25, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_danger"]
+material = SubResource("Mat_danger")
+top_radius = 14.0
+bottom_radius = 14.0
+height = 0.02
+radial_segments = 40
+
+[sub_resource type="StandardMaterial3D" id="Mat_clearing"]
+albedo_color = Color(0.36, 0.58, 0.32, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_clearing"]
+material = SubResource("Mat_clearing")
+top_radius = 9.0
+bottom_radius = 9.0
+height = 0.02
+radial_segments = 32
+
+[node name="Main" type="Node3D"]
+
+[node name="TestWorld" parent="." instance=ExtResource("1_world")]
+
+[node name="ResourceField" parent="." instance=ExtResource("3_field")]
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
+
+[node name="BuildingManager" type="Node3D" parent="."]
+script = ExtResource("6_bmanager")
+catalog = ExtResource("8_bcatalog")
+
+[node name="Bags" type="Node3D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
+
+[node name="Clearing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.01, -24)
+mesh = SubResource("Mesh_clearing")
+cast_shadow = 0
+
+[node name="Zones" type="Node3D" parent="."]
+
+[node name="SafeStart" type="Node3D" parent="Zones"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+script = ExtResource("26_zone")
+zone_name = "Clareira inicial"
+radius = 22.0
+description = "Nada hostil entra aqui"
+
+[node name="BoarGrounds" type="Node3D" parent="Zones"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -30)
+script = ExtResource("26_zone")
+zone_name = "Território dos Javalis"
+level = 1
+radius = 14.0
+description = "Javalis Espinhosos guardam esta área"
+
+[node name="BoarGroundsGround" type="MeshInstance3D" parent="Zones/BoarGrounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, 0)
+mesh = SubResource("Mesh_danger")
+cast_shadow = 0
+
+[node name="ThornHollow" type="Node3D" parent="Zones"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0, 80)
+script = ExtResource("26_zone")
+zone_name = "Vale dos Espinhos"
+level = 1
+radius = 16.0
+description = "Um casal de javalis guarda o vale"
+
+[node name="ThornHollowGround" type="MeshInstance3D" parent="Zones/ThornHollow"]
+transform = Transform3D(1.15, 0, 0, 0, 1, 0, 0, 0, 1.15, 0, 0.012, 0)
+mesh = SubResource("Mesh_danger")
+cast_shadow = 0
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="SpinyBoar1" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("27_boar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0.1, -30)
+player = NodePath("../../Player")
+
+[node name="SpinyBoar2" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("27_boar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0.1, -33)
+player = NodePath("../../Player")
+
+[node name="SpinyBoar3" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("27_boar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0.1, -26)
+player = NodePath("../../Player")
+
+[node name="SpinyBoar4" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("27_boar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0.1, 78)
+player = NodePath("../../Player")
+
+[node name="SpinyBoar5" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("27_boar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98, 0.1, 83)
+player = NodePath("../../Player")
+
+[node name="Creatures" type="Node3D" parent="."]
+
+[node name="Lumaru" parent="Creatures" node_paths=PackedStringArray("player", "knowledge", "experience", "respawn") instance=ExtResource("24_lumaru")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.1, -24)
+player = NodePath("../../Player")
+knowledge = NodePath("../../Progression/Knowledge")
+experience = NodePath("../../Progression/Experience")
+respawn = NodePath("../../SimpleRespawn")
+
+[node name="Progression" type="Node" parent="."]
+
+[node name="Knowledge" type="Node" parent="Progression"]
+script = ExtResource("20_knowledge")
+
+[node name="Experience" type="Node" parent="Progression" node_paths=PackedStringArray("interaction", "building_manager")]
+script = ExtResource("18_xp")
+rules = ExtResource("22_rules")
+interaction = NodePath("../../Player/InteractionDetector")
+building_manager = NodePath("../../BuildingManager")
+
+[node name="LevelManager" type="Node" parent="Progression" node_paths=PackedStringArray("experience", "knowledge", "inventory")]
+script = ExtResource("19_level")
+curve = ExtResource("21_curve")
+experience = NodePath("../Experience")
+knowledge = NodePath("../Knowledge")
+inventory = NodePath("../../Player/Inventory")
+
+[node name="PlacementController" type="Node3D" parent="." node_paths=PackedStringArray("manager", "inventory", "player", "camera", "health", "knowledge")]
+script = ExtResource("7_placement")
+catalog = ExtResource("8_bcatalog")
+manager = NodePath("../BuildingManager")
+inventory = NodePath("../Player/Inventory")
+player = NodePath("../Player")
+camera = NodePath("../Player/CameraPivot/SpringArm3D/Camera3D")
+health = NodePath("../Player/Health")
+knowledge = NodePath("../Progression/Knowledge")
+level_curve = ExtResource("21_curve")
+
+[node name="SimpleRespawn" type="Node" parent="." node_paths=PackedStringArray("player", "health", "hunger", "inventory", "interaction", "spawn_point", "building_manager", "bag_root")]
+script = ExtResource("5_respawn")
+player = NodePath("../Player")
+health = NodePath("../Player/Health")
+hunger = NodePath("../Player/Hunger")
+inventory = NodePath("../Player/Inventory")
+interaction = NodePath("../Player/InteractionDetector")
+spawn_point = NodePath("../SpawnPoint")
+building_manager = NodePath("../BuildingManager")
+bag_root = NodePath("../Bags")
+
+[node name="SaveManager" type="Node" parent="." node_paths=PackedStringArray("player", "health", "hunger", "inventory", "building_manager", "respawn", "resources_root", "spawn_point", "difficulty", "experience", "level_manager", "knowledge", "creatures_root", "day_night")]
+script = ExtResource("10_save")
+player = NodePath("../Player")
+health = NodePath("../Player/Health")
+hunger = NodePath("../Player/Hunger")
+inventory = NodePath("../Player/Inventory")
+building_manager = NodePath("../BuildingManager")
+respawn = NodePath("../SimpleRespawn")
+resources_root = NodePath("../ResourceField")
+spawn_point = NodePath("../SpawnPoint")
+difficulty = NodePath("../DifficultyManager")
+experience = NodePath("../Progression/Experience")
+level_manager = NodePath("../Progression/LevelManager")
+knowledge = NodePath("../Progression/Knowledge")
+creatures_root = NodePath("../Creatures")
+day_night = NodePath("../TestWorld/DayNight")
+
+[node name="DifficultyManager" type="Node" parent="." node_paths=PackedStringArray("hunger", "respawn", "resources_root", "save_manager", "enemies_root")]
+script = ExtResource("11_diff")
+presets = Array[ExtResource("16_settings")]([ExtResource("12_easy"), ExtResource("13_intermediate"), ExtResource("14_hard"), ExtResource("15_hardcore")])
+hunger = NodePath("../Player/Hunger")
+respawn = NodePath("../SimpleRespawn")
+resources_root = NodePath("../ResourceField")
+save_manager = NodePath("../SaveManager")
+enemies_root = NodePath("../Enemies")
+
+[node name="SurvivalHUD" parent="." node_paths=PackedStringArray("health", "hunger", "inventory", "interaction", "food_consumer", "respawn") instance=ExtResource("4_hud")]
+health = NodePath("../Player/Health")
+hunger = NodePath("../Player/Hunger")
+inventory = NodePath("../Player/Inventory")
+interaction = NodePath("../Player/InteractionDetector")
+food_consumer = NodePath("../Player/FoodConsumer")
+respawn = NodePath("../SimpleRespawn")
+
+[node name="BuildingHUD" parent="." node_paths=PackedStringArray("controller", "inventory") instance=ExtResource("9_bhud")]
+controller = NodePath("../PlacementController")
+inventory = NodePath("../Player/Inventory")
+
+[node name="LevelHUD" parent="." node_paths=PackedStringArray("level_manager", "experience", "difficulty", "player") instance=ExtResource("23_levelhud")]
+player = NodePath("../Player")
+level_manager = NodePath("../Progression/LevelManager")
+experience = NodePath("../Progression/Experience")
+difficulty = NodePath("../DifficultyManager")
+
+[node name="TamingHUD" parent="." node_paths=PackedStringArray("creatures_root", "player") instance=ExtResource("25_taminghud")]
+creatures_root = NodePath("../Creatures")
+player = NodePath("../Player")
+
+[node name="DifficultySelect" parent="." node_paths=PackedStringArray("manager") instance=ExtResource("17_select")]
+manager = NodePath("../DifficultyManager")
+
+[node name="CraftingManager" type="Node" parent="." node_paths=PackedStringArray("inventory", "knowledge", "building_manager", "player", "health", "experience")]
+script = ExtResource("40_craft")
+recipes = Array[ExtResource("41_recipe")]([ExtResource("50_recipe_stone_axe"), ExtResource("51_recipe_stone_pickaxe"), ExtResource("52_recipe_torch"), ExtResource("53_recipe_bandage"), ExtResource("54_recipe_stone_spear"), ExtResource("55_recipe_cooked_meat")])
+inventory = NodePath("../Player/Inventory")
+knowledge = NodePath("../Progression/Knowledge")
+building_manager = NodePath("../BuildingManager")
+player = NodePath("../Player")
+health = NodePath("../Player/Health")
+experience = NodePath("../Progression/Experience")
+
+[node name="PlayerEquipment" type="Node" parent="." node_paths=PackedStringArray("inventory", "health", "weapon", "visual", "hud")]
+script = ExtResource("43_equip")
+inventory = NodePath("../Player/Inventory")
+health = NodePath("../Player/Health")
+weapon = NodePath("../Player/Visual/Weapon")
+visual = NodePath("../Player/Visual")
+club_definition = ExtResource("44_club")
+spear_definition = ExtResource("45_spear")
+hud = NodePath("../SurvivalHUD")
+
+[node name="CraftingMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("manager", "placement", "hud")]
+script = ExtResource("42_menu")
+manager = NodePath("../CraftingManager")
+placement = NodePath("../PlacementController")
+hud = NodePath("../SurvivalHUD")

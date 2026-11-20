@@ -1,0 +1,78 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/resource_node.gd" id="1_node"]
+[ext_resource type="Resource" path="res://resources/items/fiber.tres" id="2_item"]
+
+[sub_resource type="CylinderShape3D" id="Shape_main"]
+radius = 0.45
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_grass"]
+albedo_color = Color(0.62, 0.7, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.0
+bottom_radius = 0.12
+height = 1.3
+radial_segments = 4
+rings = 0
+material = SubResource("Mat_grass")
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.0
+bottom_radius = 0.1
+height = 1.0
+radial_segments = 4
+rings = 0
+material = SubResource("Mat_grass")
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.0
+bottom_radius = 0.1
+height = 1.1
+radial_segments = 4
+rings = 0
+material = SubResource("Mat_grass")
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.0
+bottom_radius = 0.1
+height = 0.9
+radial_segments = 4
+rings = 0
+material = SubResource("Mat_grass")
+
+[node name="FiberPlant" type="StaticBody3D" node_paths=PackedStringArray("visual")]
+collision_layer = 5
+collision_mask = 0
+script = ExtResource("1_node")
+item = ExtResource("2_item")
+amount_per_harvest = 3
+max_harvests = 3
+regrow_time = 60.0
+category = &"fiber"
+action_verb = "Colher"
+visual = NodePath("Visual")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("Shape_main")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Blade1" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+mesh = SubResource("Mesh_0")
+
+[node name="Blade2" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.5, 0.1)
+mesh = SubResource("Mesh_1")
+
+[node name="Blade3" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.55, 0.2)
+mesh = SubResource("Mesh_2")
+
+[node name="Blade4" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 0.45, -0.25)
+mesh = SubResource("Mesh_3")

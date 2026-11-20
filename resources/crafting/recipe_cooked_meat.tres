@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_cooked_meat"
+display_name = "Carne assada"
+description = "Recupera 40 de fome. Javalis deixam carne crua"
+inputs = {&"raw_meat": 1}
+outputs = {&"cooked_meat": 1}
+station = &"campfire"
+required_knowledge = &""

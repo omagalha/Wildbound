@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BuildingCatalog" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_catalog.gd" id="1_cat"]
+[ext_resource type="Resource" path="res://resources/building/foundation.tres" id="2_foundation"]
+[ext_resource type="Resource" path="res://resources/building/wall.tres" id="3_wall"]
+[ext_resource type="Resource" path="res://resources/building/doorway.tres" id="4_doorway"]
+[ext_resource type="Resource" path="res://resources/building/flat_roof.tres" id="5_flat_roof"]
+[ext_resource type="Resource" path="res://resources/building/campfire.tres" id="6_campfire"]
+[ext_resource type="Resource" path="res://resources/building/survival_bed.tres" id="7_survival_bed"]
+[ext_resource type="Script" path="res://scripts/building/building_piece_definition.gd" id="99_def"]
+
+[resource]
+script = ExtResource("1_cat")
+pieces = Array[ExtResource("99_def")]([ExtResource("2_foundation"), ExtResource("3_wall"), ExtResource("4_doorway"), ExtResource("5_flat_roof"), ExtResource("6_campfire"), ExtResource("7_survival_bed")])

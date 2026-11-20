@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_bandage"
+display_name = "Atadura"
+description = "Cura 30 de vida. [H] para usar"
+inputs = {&"fiber": 4}
+outputs = {&"bandage": 1}
+station = &""
+required_knowledge = &"knowledge_basic_tools"

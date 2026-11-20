@@ -1,0 +1,151 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/hostile_creature.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://resources/enemies/spiny_boar.tres" id="2_def"]
+[ext_resource type="Script" path="res://scripts/survival/health_component.gd" id="3_health"]
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(0.9, 0.9, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_hide"]
+albedo_color = Color(0.42, 0.27, 0.18, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_spine"]
+albedo_color = Color(0.16, 0.12, 0.1, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_tusk"]
+albedo_color = Color(0.95, 0.92, 0.82, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_eye"]
+albedo_color = Color(0.9, 0.15, 0.1, 1)
+emission_enabled = true
+emission = Color(0.9, 0.1, 0.05, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="CapsuleMesh" id="Mesh_body"]
+material = SubResource("Mat_hide")
+radius = 0.42
+height = 1.5
+radial_segments = 12
+rings = 4
+
+[sub_resource type="BoxMesh" id="Mesh_head"]
+material = SubResource("Mat_hide")
+size = Vector3(0.5, 0.45, 0.55)
+
+[sub_resource type="CylinderMesh" id="Mesh_spine"]
+material = SubResource("Mat_spine")
+top_radius = 0.0
+bottom_radius = 0.07
+height = 0.42
+radial_segments = 6
+
+[sub_resource type="CylinderMesh" id="Mesh_tusk"]
+material = SubResource("Mat_tusk")
+top_radius = 0.0
+bottom_radius = 0.045
+height = 0.3
+radial_segments = 6
+
+[sub_resource type="SphereMesh" id="Mesh_eye"]
+material = SubResource("Mat_eye")
+radius = 0.04
+height = 0.08
+radial_segments = 6
+rings = 3
+
+[sub_resource type="CylinderMesh" id="Mesh_leg"]
+material = SubResource("Mat_spine")
+top_radius = 0.08
+bottom_radius = 0.07
+height = 0.35
+radial_segments = 6
+
+[node name="SpinyBoar" type="CharacterBody3D"]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_enemy")
+definition = ExtResource("2_def")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("Shape_body")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("3_health")
+max_health = 60.0
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.62, 0)
+mesh = SubResource("Mesh_body")
+
+[node name="Head" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0.97, -0.24, 0, 0.24, 0.97, 0, 0.6, 0.85)
+mesh = SubResource("Mesh_head")
+
+[node name="TuskL" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.87, 0, -0.87, 0.5, -0.17, 0.48, 1.13)
+mesh = SubResource("Mesh_tusk")
+
+[node name="TuskR" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.87, 0, -0.87, 0.5, 0.17, 0.48, 1.13)
+mesh = SubResource("Mesh_tusk")
+
+[node name="EyeL" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.72, 1.1)
+mesh = SubResource("Mesh_eye")
+
+[node name="EyeR" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.72, 1.1)
+mesh = SubResource("Mesh_eye")
+
+[node name="Spine1" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0.94, -0.34, 0, 0.34, 0.94, 0, 1.1, 0.35)
+mesh = SubResource("Mesh_spine")
+
+[node name="Spine2" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0.94, -0.34, 0, 0.34, 0.94, 0, 1.12, 0)
+mesh = SubResource("Mesh_spine")
+
+[node name="Spine3" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 0.94, -0.34, 0, 0.34, 0.94, 0, 1.08, -0.35)
+mesh = SubResource("Mesh_spine")
+
+[node name="Spine4" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(0.94, -0.34, 0, 0.34, 0.94, 0, 0, 0, 1, -0.2, 1.02, 0.15)
+mesh = SubResource("Mesh_spine")
+
+[node name="Spine5" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(0.94, 0.34, 0, -0.34, 0.94, 0, 0, 0, 1, 0.2, 1.02, 0.15)
+mesh = SubResource("Mesh_spine")
+
+[node name="LegFL" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.17, 0.45)
+mesh = SubResource("Mesh_leg")
+
+[node name="LegFR" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.17, 0.45)
+mesh = SubResource("Mesh_leg")
+
+[node name="LegBL" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.17, -0.45)
+mesh = SubResource("Mesh_leg")
+
+[node name="LegBR" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.17, -0.45)
+mesh = SubResource("Mesh_leg")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.4, 0.3, 1)
+outline_modulate = Color(0, 0, 0, 1)
+font_size = 72
+outline_size = 14
+text = ""
