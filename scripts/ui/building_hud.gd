@@ -62,7 +62,8 @@ func is_panel_visible() -> bool:
 
 func _on_mode_changed(active: bool) -> void:
 	_panel.visible = active
-	_hint_label.visible = not active
+	# A barra retangular do HUD principal concentra os atalhos fora do modo.
+	_hint_label.visible = false
 	_status_label.text = ""
 	_refresh_pieces()
 

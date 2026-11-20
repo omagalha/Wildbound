@@ -1,74 +1,153 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/survival_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/minimap.tscn" id="2_minimap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/shortcut_bar.tscn" id="3_shortcuts"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_summary.tscn" id="4_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_toast_feed.tscn" id="5_toasts"]
+
+[sub_resource type="Shader" id="Shader_damage_vignette"]
+code = "shader_type canvas_item;\n\nvoid fragment() {\n\tvec2 centered = UV * 2.0 - 1.0;\n\tfloat edge = smoothstep(0.28, 1.0, length(centered));\n\tCOLOR = vec4(0.72, 0.025, 0.015, edge * 0.48);\n}\n"
+
+[sub_resource type="ShaderMaterial" id="Material_damage_vignette"]
+shader = SubResource("Shader_damage_vignette")
 
 [sub_resource type="StyleBoxFlat" id="Style_panel"]
-bg_color = Color(0.08, 0.1, 0.08, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
+bg_color = Color(0.025, 0.045, 0.038, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.44, 0.57, 0.38, 0.82)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14.0
+content_margin_top = 11.0
+content_margin_right = 14.0
+content_margin_bottom = 11.0
 
 [sub_resource type="StyleBoxFlat" id="Style_health_fill"]
-bg_color = Color(0.82, 0.24, 0.24, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.78, 0.22, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="Style_hunger_fill"]
-bg_color = Color(0.9, 0.62, 0.2, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.92, 0.61, 0.18, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="Style_bar_bg"]
-bg_color = Color(0, 0, 0, 0.45)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.005, 0.01, 0.008, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.46, 0.34, 0.55)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="Style_prompt"]
+bg_color = Color(0.025, 0.04, 0.032, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.64, 0.7, 0.48, 0.72)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 14.0
+content_margin_top = 5.0
+content_margin_right = 14.0
+content_margin_bottom = 5.0
 
 [node name="SurvivalHUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="Root" type="MarginContainer" parent="."]
+[node name="Root" type="Control" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
 
-[node name="Bars" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(260, 0)
+[node name="DamageVignette" type="ColorRect" parent="Root"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+material = SubResource("Material_damage_vignette")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopRow" type="HBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 194.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="VitalsPanel" type="PanelContainer" parent="Root/TopRow"]
+custom_minimum_size = Vector2(304, 0)
 layout_mode = 2
-size_flags_horizontal = 0
 size_flags_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Style_panel")
 
-[node name="VBox" type="VBoxContainer" parent="Root/Bars"]
+[node name="Vitals" type="VBoxContainer" parent="Root/TopRow/VitalsPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Header" type="HBoxContainer" parent="Root/TopRow/VitalsPanel/Vitals"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="HealthLabel" type="Label" parent="Root/Bars/VBox"]
+[node name="Title" type="Label" parent="Root/TopRow/VitalsPanel/Vitals/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.9, 0.75, 1)
+theme_override_font_sizes/font_size = 12
+text = "SOBREVIVENTE"
+
+[node name="HeaderSpacer" type="Control" parent="Root/TopRow/VitalsPanel/Vitals/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CapacityLabel" type="Label" parent="Root/TopRow/VitalsPanel/Vitals/Header"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Vida 100/100"
+theme_override_colors/font_color = Color(0.7, 0.76, 0.66, 1)
+theme_override_font_sizes/font_size = 11
+text = "MOCHILA 0/20"
 
-[node name="HealthBar" type="ProgressBar" parent="Root/Bars/VBox"]
+[node name="HealthLabel" type="Label" parent="Root/TopRow/VitalsPanel/Vitals"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.76, 1)
+theme_override_font_sizes/font_size = 13
+text = "VIDA 100/100"
+
+[node name="HealthBar" type="ProgressBar" parent="Root/TopRow/VitalsPanel/Vitals"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 13)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/background = SubResource("Style_bar_bg")
@@ -76,14 +155,16 @@ theme_override_styles/fill = SubResource("Style_health_fill")
 value = 100.0
 show_percentage = false
 
-[node name="HungerLabel" type="Label" parent="Root/Bars/VBox"]
+[node name="HungerLabel" type="Label" parent="Root/TopRow/VitalsPanel/Vitals"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Fome 100/100"
+theme_override_colors/font_color = Color(1, 0.86, 0.64, 1)
+theme_override_font_sizes/font_size = 13
+text = "FOME 100/100"
 
-[node name="HungerBar" type="ProgressBar" parent="Root/Bars/VBox"]
+[node name="HungerBar" type="ProgressBar" parent="Root/TopRow/VitalsPanel/Vitals"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 14)
+custom_minimum_size = Vector2(0, 13)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/background = SubResource("Style_bar_bg")
@@ -91,44 +172,93 @@ theme_override_styles/fill = SubResource("Style_hunger_fill")
 value = 100.0
 show_percentage = false
 
-[node name="BagLabel" type="Label" parent="Root/Bars/VBox"]
+[node name="BagLabel" type="Label" parent="Root/TopRow/VitalsPanel/Vitals"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+theme_override_colors/font_color = Color(1, 0.84, 0.4, 1)
+theme_override_font_sizes/font_size = 12
 
-[node name="Inventory" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(200, 0)
+[node name="TopSpacer" type="Control" parent="Root/TopRow"]
 layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 0
+size_flags_horizontal = 3
 mouse_filter = 2
-theme_override_styles/panel = SubResource("Style_panel")
 
-[node name="InventoryLabel" type="Label" parent="Root/Inventory"]
+[node name="RightStack" type="VBoxContainer" parent="Root/TopRow"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Minimap" parent="Root/TopRow/RightStack" instance=ExtResource("2_minimap")]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Inventário 0/20
-(vazio)"
 
-[node name="Bottom" type="VBoxContainer" parent="Root"]
+[node name="InventorySummary" parent="Root/TopRow/RightStack" instance=ExtResource("4_inventory")]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 8
+
+[node name="BottomStack" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -382.0
+offset_top = -286.0
+offset_right = 382.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
 mouse_filter = 2
+theme_override_constants/separation = 5
 alignment = 2
 
-[node name="MessageLabel" type="Label" parent="Root/Bottom"]
+[node name="ToastCenter" type="CenterContainer" parent="Root/BottomStack"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ToastFeed" parent="Root/BottomStack/ToastCenter" instance=ExtResource("5_toasts")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+
+[node name="MessageLabel" type="Label" parent="Root/BottomStack"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.58, 1)
+theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.01, 1)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
-[node name="PromptLabel" type="Label" parent="Root/Bottom"]
+[node name="PromptCenter" type="CenterContainer" parent="Root/BottomStack"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PromptPanel" type="PanelContainer" parent="Root/BottomStack/PromptCenter"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_prompt")
+
+[node name="PromptLabel" type="Label" parent="Root/BottomStack/PromptCenter/PromptPanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.96, 0.86, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+
+[node name="ShortcutBar" parent="Root/BottomStack" instance=ExtResource("3_shortcuts")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
+
+[node name="CompatibilityData" type="Control" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="InventoryLabel" type="Label" parent="Root/CompatibilityData"]
+unique_name_in_owner = true
+layout_mode = 0
+text = "Inventário 0/20\n(vazio)"

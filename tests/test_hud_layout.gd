@@ -1,0 +1,116 @@
+extends SceneTree
+## Regressão estrutural da primeira parte do HUD para PC.
+
+const MAIN_SCENE := "res://scenes/main/main.tscn"
+
+var _passed := 0
+var _failed := 0
+
+
+func _initialize() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	print("== Wildbound HUD PC: testes automatizados ==")
+	var packed := load(MAIN_SCENE) as PackedScene
+	_check(packed != null and packed.can_instantiate(), "Cena principal carrega")
+	if packed == null:
+		_finish()
+		return
+	var main := packed.instantiate()
+	var save := main.get_node_or_null("SaveManager")
+	if save != null:
+		save.load_on_start = false
+		save.autosave_interval = 0.0
+	var difficulty := main.get_node_or_null("DifficultyManager")
+	if difficulty != null:
+		difficulty.ask_on_new_world = false
+	root.add_child(main)
+	await process_frame
+	await process_frame
+
+	var hud := main.get_node_or_null("SurvivalHUD") as SurvivalHUD
+	var level_hud := main.get_node_or_null("LevelHUD") as LevelHUD
+	_check(hud != null, "SurvivalHUD preservado")
+	_check(level_hud != null, "LevelHUD preservado")
+	if hud != null:
+		_test_main_hud(hud, main.get_node_or_null("Player") as Node3D)
+	if level_hud != null:
+		_check(level_hud.day_night != null, "Relógio integrado ao HUD")
+		_check(level_hud.get_clock_text().begins_with("Dia "), "Dia e hora visíveis", level_hud.get_clock_text())
+
+	main.queue_free()
+	await process_frame
+	_finish()
+
+
+func _test_main_hud(hud: SurvivalHUD, player: Node3D) -> void:
+	var minimap := hud.get_node_or_null("%Minimap") as WildboundMinimap
+	var shortcuts := hud.get_node_or_null("%ShortcutBar") as ShortcutBar
+	var inventory_summary := hud.get_node_or_null("%InventorySummary") as InventorySummary
+	var toast_feed := hud.get_node_or_null("%ToastFeed") as HudToastFeed
+	_check(minimap != null and minimap.visible, "Minimapa visível")
+	_check(minimap != null and minimap.mouse_filter == Control.MOUSE_FILTER_IGNORE,
+		"Minimapa não bloqueia o mouse")
+	_check(minimap != null and minimap.player == player, "Minimapa acompanha o jogador")
+	if minimap != null and player != null:
+		var center := minimap.get_map_rect().get_center()
+		var marker := minimap.world_to_map(player.global_position)
+		_check(marker.distance_to(center) < 0.01, "Jogador fica no centro do minimapa", str(marker))
+		var east := minimap.world_to_map(player.global_position + Vector3(10.0, 0.0, 0.0))
+		_check(east.x > marker.x, "Conversão X/Z do minimapa")
+	_check(shortcuts != null, "Barra retangular de atalhos existe")
+	_check(hud.get_shortcut_count() == 7, "Barra mostra os 7 atalhos atuais")
+	if shortcuts != null:
+		_check(shortcuts.get_shortcut_text(0) == "M1 ATACAR", "Primeiro atalho é o ataque")
+		_check(shortcuts.get_shortcut_text(6) == "H ATADURA", "Último atalho é a atadura")
+		_check(shortcuts.mouse_filter == Control.MOUSE_FILTER_IGNORE,
+			"Barra de atalhos não bloqueia o gameplay")
+	_check(inventory_summary != null, "Inventário compacto existe")
+	if inventory_summary != null:
+		_check(inventory_summary.get_item_card_count() == 11,
+			"Inventário compacto tem os 11 itens em posições fixas")
+		_check(inventory_summary.mouse_filter == Control.MOUSE_FILTER_IGNORE,
+			"Inventário compacto não bloqueia o mouse")
+		_check(inventory_summary.get_card_text(&"wood") == "MAD —", "Item ausente aparece esmaecido")
+		var inventory := player.get_node("Inventory") as Inventory
+		inventory.add_item(&"wood", 3)
+		_check(inventory_summary.get_card_text(&"wood") == "MAD 3", "Quantidade compacta atualiza por sinal")
+	_check(toast_feed != null, "Feed de mensagens existe")
+	if toast_feed != null:
+		toast_feed.clear_all()
+		hud.show_message("")
+		_check(toast_feed.get_visible_count() == 0, "Mensagem vazia não apaga nem cria aviso")
+		hud.show_message("Coleta concluída", 2.0, HudToastFeed.Kind.SUCCESS)
+		hud.show_message("Coleta concluída", 2.0, HudToastFeed.Kind.SUCCESS)
+		_check(toast_feed.get_visible_count() == 1, "Mensagens repetidas são deduplicadas")
+		hud.show_message("Você morreu", 999.0, HudToastFeed.Kind.CRITICAL)
+		hud.show_message("Mensagem comum", 2.0, HudToastFeed.Kind.INFO)
+		_check(toast_feed.get_visible_count() == 1 and toast_feed.get_primary_text() == "Você morreu",
+			"Aviso crítico não é sobrescrito")
+		toast_feed.clear_all()
+	var health := player.get_node("Health") as HealthComponent
+	var vignette := hud.get_node("%DamageVignette") as ColorRect
+	health.apply_damage(DamageInfo.create(1.0, &"enemy:hud_test"))
+	_check(vignette.modulate.a > 0.9, "Dano dispara feedback visual nas bordas")
+	var player_inventory := player.get_node("Inventory") as Inventory
+	player_inventory.add_item(&"stone", 2)
+	var bag := hud.respawn.drop_inventory_into_bag(player.global_position + Vector3(10.0, 0.0, 0.0))
+	hud._update_bag_label()
+	_check(bag != null and hud.get_bag_text().contains("itens") and hud.get_bag_text().contains("m"),
+		"Cartão da mochila mostra itens, direção e distância", hud.get_bag_text())
+
+
+func _check(condition: bool, name: String, detail: String = "") -> void:
+	if condition:
+		_passed += 1
+		print("  [PASS] ", name)
+	else:
+		_failed += 1
+		print("  [FAIL] ", name, (" -> " + detail) if detail != "" else "")
+
+
+func _finish() -> void:
+	print("== Resultado: %d passaram, %d falharam ==" % [_passed, _failed])
+	quit(1 if _failed > 0 else 0)

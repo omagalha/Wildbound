@@ -32,11 +32,13 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Animais** (`scripts/creatures/creature_model.gd`, modelos do pacote de animais do Quaternius em `assets/creatures/`): Lobos Sombrios usam o **Wolf** recolorido (azul-escuro, olhos brilhando) e o Lumaru usa a **Fox** dourada com patas roxas. Animações de andar, galopar, alerta, atacar, comer, reagir a golpe e morrer, conforme o estado da criatura. O javali continua com o modelo provisório.
 - Para trocar de personagem: no nó `Player/CharacterAnimator`, mude `model_scene` (por exemplo, `Superhero_Female_FullBody.gltf`).
 
-## HUD para PC — parte 1 (2026-11-20)
+## HUD para PC — partes 1 e 2 (2026-11-20)
 
 - Layout em 1280 × 720 com âncoras e containers: vida, fome, mochila, nível/XP, dificuldade, dia/hora e zona atual.
 - **Minimapa 2D estilizado** (`scripts/ui/minimap.gd`): acompanha o jogador, mostra norte, grade e zonas próximas sem revelar recursos ou inimigos e sem renderizar o mundo 3D uma segunda vez.
 - **Barra retangular de atalhos** (`scripts/ui/shortcut_bar.gd`): ataque, interação, comida, construção, fabricação, tocha e atadura, com realce ao pressionar.
+- **Inventário compacto** (`scripts/ui/inventory_summary.gd`): grade fixa com os 11 tipos do catálogo, quantidades, cores e realce quando algo muda.
+- **Feedback contextual** (`scripts/ui/hud_toast_feed.gd`): até três mensagens com prioridade, deduplicação, prompt animado, vinheta de dano e indicador direcional da mochila de recuperação.
 - Primeira entrega feita para teclado e mouse; a adaptação final para proporções diferentes, área segura do iPhone e controles touch continua em etapa posterior.
 
 ## Requisitos
@@ -119,7 +121,7 @@ As suítes nunca usam o save do jogo (desligam o carregamento ou gravam numa pas
 - `test_combat.gd` (31 verificações): clava (alcance, arco, intervalo, assistência, clique de recaptura), Javali (aviso, investida, mordida, muro, desistência), zonas segura/atenção, guarda, carência no carregamento, dificuldade e reaparecimento.
 - `test_progression.gd` (71 verificações): curva de níveis, teto de XP de coleta, marcos únicos, conhecimentos, presets e seus efeitos, tela de escolha, mochila (perda por preset, posição segura, união, recuperação parcial), respawn por preset, subida de nível com avisos, peças bloqueadas por nível e save de tudo isso.
 - `test_character.gd` (36 verificações): modelo e animações carregados, arma e tocha nas mãos, locomoção (parado, trote, corrida, no ar), ações (golpes, dano, comer, cortar, colher, morrer e reaparecer) e modelos dos animais (Lumaru e lobo).
-- `test_hud_layout.gd` (15 verificações): minimapa, conversão X/Z, marcador do jogador, barra de sete atalhos, mouse livre para o gameplay e integração de dia/hora.
+- `test_hud_layout.gd` (26 verificações): minimapa, barra de sete atalhos, inventário compacto, fila de mensagens, prioridade crítica, vinheta de dano, mochila direcional e integração de dia/hora.
 - `test_night.gd` (27 verificações): matilhas (quando, onde, quantos por preset, limite), caçada, medo da tocha e da fogueira (a prévia não conta), carne, corpo que não renasce e amanhecer.
 - `test_crafting.gd` (62 verificações): receitas (insumos, recusas, nível, itens únicos, espaço), fogueira, carne, bônus de ferramentas, árvores da floresta, lança, tocha, atadura, carne de javali, menu e save.
 - `test_world.gd` (34 verificações): floresta procedural (determinística, sem árvores na área inicial, em zonas seguras ou sobre recursos), recursos espalhados (tipos, caminhos estáveis, multiplicador do preset, save), ciclo de dia e noite (sol, lua, avisos, relógio) e save do dia e hora.

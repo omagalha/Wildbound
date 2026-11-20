@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud_toast_feed.gd" id="1_feed"]
+
+[node name="ToastFeed" type="VBoxContainer"]
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+script = ExtResource("1_feed")

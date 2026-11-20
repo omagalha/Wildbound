@@ -25,6 +25,7 @@ const DUSK := 19.0
 
 var _was_night := false
 var _clock: Label
+var _clock_layer: CanvasLayer
 var _sky: ProceduralSkyMaterial
 
 # Paletas: [topo do céu, horizonte, cor da luz, energia da luz, energia ambiente, névoa]
@@ -90,6 +91,13 @@ func apply_save_data(data: Dictionary) -> void:
 	apply_lighting()
 
 
+## Permite que um HUD composto substitua o relógio legado sem recriá-lo.
+func set_builtin_clock_visible(visible: bool) -> void:
+	show_clock = visible
+	if _clock_layer != null:
+		_clock_layer.visible = visible
+
+
 ## Altura do sol de -1 (meia-noite) a 1 (meio-dia).
 func sun_height() -> float:
 	return sin((hour - 6.0) / 24.0 * TAU)
@@ -146,9 +154,9 @@ func _mix(a: Array, b: Array, t: float) -> Array:
 
 
 func _build_clock() -> void:
-	var layer := CanvasLayer.new()
-	layer.layer = 1
-	add_child(layer)
+	_clock_layer = CanvasLayer.new()
+	_clock_layer.layer = 1
+	add_child(_clock_layer)
 	_clock = Label.new()
 	_clock.anchor_left = 0.5
 	_clock.anchor_right = 0.5
@@ -160,4 +168,4 @@ func _build_clock() -> void:
 	_clock.add_theme_color_override("font_outline_color", Color.BLACK)
 	_clock.add_theme_constant_override("outline_size", 5)
 	_clock.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layer.add_child(_clock)
+	_clock_layer.add_child(_clock)

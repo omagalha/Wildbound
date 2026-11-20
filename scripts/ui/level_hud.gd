@@ -5,6 +5,7 @@ extends CanvasLayer
 @export var level_manager: LevelManager
 @export var experience: ExperienceComponent
 @export var difficulty: DifficultyManager
+@export var day_night: DayNightCycle
 @export var notice_duration: float = 4.0
 ## Para mostrar em que zona o jogador está.
 @export var player: Node3D
@@ -14,12 +15,15 @@ extends CanvasLayer
 @onready var _notice_label: Label = %NoticeLabel
 @onready var _difficulty_label: Label = %DifficultyLabel
 @onready var _zone_label: Label = %ZoneLabel
+@onready var _clock_label: Label = %ClockLabel
 var _zone_check := 0.0
 
 var _notice_left := 0.0
 
 
 func _ready() -> void:
+	if day_night != null:
+		day_night.set_builtin_clock_visible(false)
 	if experience != null:
 		experience.xp_changed.connect(func(_t): _refresh())
 	if level_manager != null:
@@ -28,13 +32,14 @@ func _ready() -> void:
 		difficulty.settings_applied.connect(func(_s): _refresh())
 	_notice_label.text = ""
 	_refresh()
+	_update_world_info()
 
 
 func _process(delta: float) -> void:
 	_zone_check -= delta
 	if _zone_check <= 0.0:
 		_zone_check = 0.25
-		_update_zone()
+		_update_world_info()
 	if _notice_left > 0.0:
 		_notice_left -= delta
 		if _notice_left <= 0.0:
@@ -47,6 +52,15 @@ func get_level_text() -> String:
 
 func get_zone_text() -> String:
 	return _zone_label.text
+
+
+func get_clock_text() -> String:
+	return _clock_label.text
+
+
+func _update_world_info() -> void:
+	_update_zone()
+	_clock_label.text = day_night.clock_text() if day_night != null else ""
 
 
 func _update_zone() -> void:

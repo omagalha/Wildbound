@@ -219,23 +219,25 @@ resources_root = NodePath("../ResourceField")
 save_manager = NodePath("../SaveManager")
 enemies_root = NodePath("../Enemies")
 
-[node name="SurvivalHUD" parent="." node_paths=PackedStringArray("health", "hunger", "inventory", "interaction", "food_consumer", "respawn") instance=ExtResource("4_hud")]
+[node name="SurvivalHUD" parent="." node_paths=PackedStringArray("health", "hunger", "inventory", "interaction", "food_consumer", "respawn", "player") instance=ExtResource("4_hud")]
 health = NodePath("../Player/Health")
 hunger = NodePath("../Player/Hunger")
 inventory = NodePath("../Player/Inventory")
 interaction = NodePath("../Player/InteractionDetector")
 food_consumer = NodePath("../Player/FoodConsumer")
 respawn = NodePath("../SimpleRespawn")
+player = NodePath("../Player")
 
 [node name="BuildingHUD" parent="." node_paths=PackedStringArray("controller", "inventory") instance=ExtResource("9_bhud")]
 controller = NodePath("../PlacementController")
 inventory = NodePath("../Player/Inventory")
 
-[node name="LevelHUD" parent="." node_paths=PackedStringArray("level_manager", "experience", "difficulty", "player") instance=ExtResource("23_levelhud")]
+[node name="LevelHUD" parent="." node_paths=PackedStringArray("level_manager", "experience", "difficulty", "day_night", "player") instance=ExtResource("23_levelhud")]
 player = NodePath("../Player")
 level_manager = NodePath("../Progression/LevelManager")
 experience = NodePath("../Progression/Experience")
 difficulty = NodePath("../DifficultyManager")
+day_night = NodePath("../TestWorld/DayNight")
 
 [node name="TamingHUD" parent="." node_paths=PackedStringArray("creatures_root", "player") instance=ExtResource("25_taminghud")]
 creatures_root = NodePath("../Creatures")
