@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3]
+[gd_scene load_steps=64 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="1_world"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -40,6 +40,12 @@
 [ext_resource type="Script" path="res://scripts/combat/weapon_definition.gd" id="72_wdef"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_flint_axe.tres" id="73_r_flint_axe"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_flint_pickaxe.tres" id="74_r_flint_pick"]
+[ext_resource type="Resource" path="res://resources/combat/iron_axe.tres" id="75_iron_axe"]
+[ext_resource type="Resource" path="res://resources/combat/iron_pickaxe.tres" id="76_iron_pick"]
+[ext_resource type="Resource" path="res://resources/combat/iron_sword.tres" id="77_iron_sword"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_iron_axe.tres" id="78_r_iron_axe"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_iron_pickaxe.tres" id="79_r_iron_pick"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_iron_sword.tres" id="80_r_iron_sword"]
 [ext_resource type="Script" path="res://scripts/ui/interaction_marker.gd" id="60_marker"]
 [ext_resource type="Script" path="res://scripts/enemies/night_hunt.gd" id="46_night"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/shadow_wolf.tscn" id="47_wolf"]
@@ -257,7 +263,7 @@ manager = NodePath("../DifficultyManager")
 
 [node name="CraftingManager" type="Node" parent="." node_paths=PackedStringArray("inventory", "knowledge", "building_manager", "player", "health", "experience")]
 script = ExtResource("40_craft")
-recipes = Array[ExtResource("41_recipe")]([ExtResource("50_recipe_stone_axe"), ExtResource("51_recipe_stone_pickaxe"), ExtResource("52_recipe_torch"), ExtResource("53_recipe_bandage"), ExtResource("54_recipe_stone_spear"), ExtResource("55_recipe_cooked_meat"), ExtResource("73_r_flint_axe"), ExtResource("74_r_flint_pick")])
+recipes = Array[ExtResource("41_recipe")]([ExtResource("50_recipe_stone_axe"), ExtResource("51_recipe_stone_pickaxe"), ExtResource("52_recipe_torch"), ExtResource("53_recipe_bandage"), ExtResource("54_recipe_stone_spear"), ExtResource("55_recipe_cooked_meat"), ExtResource("73_r_flint_axe"), ExtResource("74_r_flint_pick"), ExtResource("78_r_iron_axe"), ExtResource("79_r_iron_pick"), ExtResource("80_r_iron_sword")])
 inventory = NodePath("../Player/Inventory")
 knowledge = NodePath("../Progression/Knowledge")
 building_manager = NodePath("../BuildingManager")
@@ -275,7 +281,7 @@ club_definition = ExtResource("44_club")
 spear_definition = ExtResource("45_spear")
 axe_definition = ExtResource("48_axe")
 pickaxe_definition = ExtResource("49_pick")
-extra_definitions = Array[ExtResource("72_wdef")]([ExtResource("70_flint_axe"), ExtResource("71_flint_pick")])
+extra_definitions = Array[ExtResource("72_wdef")]([ExtResource("70_flint_axe"), ExtResource("71_flint_pick"), ExtResource("75_iron_axe"), ExtResource("76_iron_pick"), ExtResource("77_iron_sword")])
 food = NodePath("../Player/FoodConsumer")
 interaction = NodePath("../Player/InteractionDetector")
 placement = NodePath("../PlacementController")

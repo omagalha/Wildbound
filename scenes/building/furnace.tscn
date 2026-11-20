@@ -1,0 +1,118 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/furnace.gd" id="1_furnace"]
+[ext_resource type="Script" path="res://scripts/world/fire_light.gd" id="2_fire"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+albedo_color = Color(0.46, 0.44, 0.42, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.12, 0.1, 0.09, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_fire"]
+albedo_color = Color(1, 0.55, 0.15, 1)
+emission_enabled = true
+emission = Color(1, 0.45, 0.1, 1)
+emission_energy_multiplier = 3.0
+shading_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="Mat_smoke"]
+albedo_color = Color(1, 1, 1, 1)
+vertex_color_use_as_albedo = true
+transparency = 1
+shading_mode = 0
+
+[sub_resource type="CylinderMesh" id="Mesh_body"]
+material = SubResource("Mat_stone")
+top_radius = 0.55
+bottom_radius = 0.75
+height = 1.2
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="Mesh_chimney"]
+material = SubResource("Mat_stone")
+top_radius = 0.18
+bottom_radius = 0.24
+height = 0.7
+radial_segments = 6
+rings = 0
+
+[sub_resource type="BoxMesh" id="Mesh_mouth_frame"]
+material = SubResource("Mat_dark")
+size = Vector3(0.5, 0.4, 0.1)
+
+[sub_resource type="BoxMesh" id="Mesh_mouth"]
+material = SubResource("Mat_fire")
+size = Vector3(0.38, 0.28, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_smoke"]
+material = SubResource("Mat_smoke")
+size = Vector3(1, 1, 1)
+
+[sub_resource type="CylinderShape3D" id="Shape_body"]
+height = 1.2
+radius = 0.72
+
+[sub_resource type="Curve" id="Curve_smoke"]
+_data = [Vector2(0, 0.4), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Grad_smoke"]
+colors = PackedColorArray(0.4, 0.4, 0.4, 0.6, 0.6, 0.6, 0.6, 0)
+
+[node name="Furnace" type="StaticBody3D"]
+collision_layer = 5
+collision_mask = 0
+script = ExtResource("1_furnace")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("Mesh_body")
+
+[node name="BodyCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("Shape_body")
+
+[node name="Chimney" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 1.5, 0.1)
+mesh = SubResource("Mesh_chimney")
+
+[node name="MouthFrame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.66)
+mesh = SubResource("Mesh_mouth_frame")
+
+[node name="Mouth" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.7)
+visible = false
+mesh = SubResource("Mesh_mouth")
+
+[node name="FireGlow" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 1.0)
+visible = false
+light_color = Color(1, 0.6, 0.3, 1)
+light_energy = 1.4
+omni_range = 6.0
+
+[node name="FearLight" type="Node3D" parent="."]
+visible = false
+script = ExtResource("2_fire")
+radius = 8.0
+
+[node name="Smoke" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 1.9, 0.1)
+emitting = false
+amount = 12
+lifetime = 2.5
+mesh = SubResource("Mesh_smoke")
+direction = Vector3(0, 1, 0)
+spread = 15.0
+gravity = Vector3(0.3, 0.6, 0)
+initial_velocity_min = 0.4
+initial_velocity_max = 0.8
+scale_amount_min = 0.15
+scale_amount_max = 0.25
+scale_amount_curve = SubResource("Curve_smoke")
+color_ramp = SubResource("Grad_smoke")

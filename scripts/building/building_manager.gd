@@ -111,6 +111,9 @@ func remove(piece: BuildingPiece, inventory: Inventory) -> Dictionary:
 	if not dependents.is_empty():
 		removal_blocked.emit(piece, "dependents", dependents)
 		return {"ok": false, "message": "Remova antes as peças apoiadas nesta (%d)" % dependents.size()}
+	if piece.has_method("blocks_removal") and piece.blocks_removal():
+		removal_blocked.emit(piece, "not_empty", [])
+		return {"ok": false, "message": "Esvazie antes de remover"}
 	var refund := refund_for(piece)
 	if inventory == null or not inventory.can_add_all(refund):
 		removal_blocked.emit(piece, "inventory_full", [])

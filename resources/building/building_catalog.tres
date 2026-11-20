@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="BuildingCatalog" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="BuildingCatalog" load_steps=10 format=3]
 
+[ext_resource type="Resource" path="res://resources/building/furnace.tres" id="8_furnace"]
 [ext_resource type="Script" path="res://scripts/building/building_catalog.gd" id="1_cat"]
 [ext_resource type="Resource" path="res://resources/building/foundation.tres" id="2_foundation"]
 [ext_resource type="Resource" path="res://resources/building/wall.tres" id="3_wall"]
@@ -11,4 +12,4 @@
 
 [resource]
 script = ExtResource("1_cat")
-pieces = Array[ExtResource("99_def")]([ExtResource("2_foundation"), ExtResource("3_wall"), ExtResource("4_doorway"), ExtResource("5_flat_roof"), ExtResource("6_campfire"), ExtResource("7_survival_bed")])
+pieces = Array[ExtResource("99_def")]([ExtResource("2_foundation"), ExtResource("3_wall"), ExtResource("4_doorway"), ExtResource("5_flat_roof"), ExtResource("6_campfire"), ExtResource("7_survival_bed"), ExtResource("8_furnace")])

@@ -17,8 +17,8 @@ const ALREADY_HAVE := &"already_have"
 const NO_SPACE := &"no_space"
 const DEAD := &"dead"
 
-const STATION_PIECES := {&"campfire": &"building_campfire_primitive"}
-const STATION_NAMES := {&"campfire": "fogueira"}
+const STATION_PIECES := {&"campfire": &"building_campfire_primitive", &"furnace": &"building_furnace"}
+const STATION_NAMES := {&"campfire": "fogueira", &"furnace": "fornalha"}
 
 @export var recipes: Array[CraftingRecipe] = []
 @export var inventory: Inventory

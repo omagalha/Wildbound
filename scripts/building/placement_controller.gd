@@ -93,8 +93,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		remove_aimed()
 	else:
 		handled = false
-		for i in 6:
-			if event.is_action_pressed(StringName("build_piece_%d" % (i + 1))):
+		for i in mini(catalog.pieces.size(), 9) if catalog != null else 0:
+			var action := StringName("build_piece_%d" % (i + 1))
+			if InputMap.has_action(action) and event.is_action_pressed(action):
 				select(i)
 				handled = true
 	if handled:

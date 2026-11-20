@@ -28,6 +28,7 @@ const BONE := Color("efe6d4")
 const CLOTH := Color("ece2cc")
 const BERRY := Color("c8445f")
 const FLINT := Color("33405a")
+const IRON := Color("c3c8d0")
 const OUTLINE := Color(0.05, 0.05, 0.05, 0.9)
 
 
@@ -45,6 +46,11 @@ func _draw() -> void:
 		&"flint_axe": _axe(FLINT)
 		&"flint_pickaxe": _pickaxe(FLINT)
 		&"flint": _flint()
+		&"iron_axe": _axe(IRON)
+		&"iron_pickaxe": _pickaxe(IRON)
+		&"iron_sword": _sword()
+		&"iron_ore": _ore()
+		&"iron_ingot": _ingot()
 		&"stone_spear": _spear()
 		&"improvised_club": _club()
 		&"torch": _torch()
@@ -156,3 +162,22 @@ func _flint() -> void:
 	_poly([Vector2(32, 50), Vector2(42, 14), Vector2(54, 40), Vector2(44, 56)], FLINT.lightened(0.15))
 	draw_line(Vector2(26, 16), Vector2(24, 40), _tint(Color(0.6, 0.75, 1.0, 0.7)), 2.0, true)
 	draw_line(Vector2(42, 20), Vector2(46, 44), _tint(Color(0.6, 0.75, 1.0, 0.7)), 2.0, true)
+
+
+func _sword() -> void:
+	_poly([Vector2(36, 8), Vector2(42, 6), Vector2(44, 12), Vector2(22, 40), Vector2(18, 36)], IRON)
+	_stick(Vector2(14, 30), Vector2(28, 44), 4.0, Color("8a6a40"))
+	_stick(Vector2(20, 42), Vector2(10, 54), 4.0, WOOD_DARK)
+
+
+func _ore() -> void:
+	_poly([Vector2(10, 42), Vector2(18, 18), Vector2(40, 10), Vector2(56, 28), Vector2(50, 50), Vector2(26, 56)], Color("4f4844"))
+	for c in [Vector2(26, 26), Vector2(40, 36), Vector2(28, 44)]:
+		_circle(c, 5.0, Color("c47a45"))
+
+
+func _ingot() -> void:
+	_poly([Vector2(8, 42), Vector2(18, 28), Vector2(56, 28), Vector2(46, 42)], IRON.darkened(0.15))
+	_poly([Vector2(8, 42), Vector2(46, 42), Vector2(46, 50), Vector2(8, 50)], IRON.darkened(0.35))
+	_poly([Vector2(46, 42), Vector2(56, 28), Vector2(56, 36), Vector2(46, 50)], IRON.darkened(0.45))
+	draw_line(Vector2(20, 32), Vector2(40, 32), _tint(Color(1, 1, 1, 0.6)), 2.0, true)

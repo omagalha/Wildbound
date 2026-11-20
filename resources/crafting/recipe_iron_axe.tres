@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_iron_axe"
+display_name = "Machado de ferro"
+description = "Derruba árvores em 1 golpe e rende +6 madeira"
+inputs = {&"iron_ingot": 3, &"wood": 2}
+outputs = {&"iron_axe": 1}
+station = &"furnace"
+required_knowledge = &"knowledge_iron_tools"

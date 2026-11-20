@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_definition.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"iron_axe"
+display_name = "Machado de ferro"
+damage = 22.0
+reach = 2.0
+arc_degrees = 80.0
+interval = 0.58
+windup = 0.14
+active_time = 0.1
+assist_distance = 2.8
+assist_cone_degrees = 60.0
+knockback = 3.5
+visual_kind = &"axe"
+chop_power = 3
+harvest_bonus = 6
+handle_length = 0.78
+head_color = Color(0.72, 0.74, 0.78, 1)
+handle_color = Color(0.33, 0.22, 0.14, 1)

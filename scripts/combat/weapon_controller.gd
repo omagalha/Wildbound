@@ -142,7 +142,10 @@ func tool_target() -> Node3D:
 	var fwd := forward()
 	for hit_data in get_world_3d().direct_space_state.intersect_shape(params, 24):
 		var node := hit_data["collider"] as Node3D
-		if node == null or not node.has_method("tool_strike") or not node.accepts_tool(definition):
+		if node == null or not node.has_method("tool_strike"):
+			continue
+		var weak_match: bool = node.has_method("matches_tool_kind") and node.matches_tool_kind(definition)
+		if not node.accepts_tool(definition) and not weak_match:
 			continue
 		var to := node.global_position - origin
 		to.y = 0.0

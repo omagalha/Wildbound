@@ -63,6 +63,13 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Machado de sílex** (força de corte 2: derruba árvores em 2 golpes, +4 de bônus) e **picareta de sílex** (força 2, +4), liberados no **nível 3**.
 - Novas ferramentas: `extra_definitions` no `PlayerEquipment`, mais item, receita e conhecimento. A hotbar, o golpe e o visual se ajustam sozinhos.
 
+## Ferro e forja (2026-11-20)
+
+- **Veios de ferro** (`scenes/world/resources/iron_vein.tscn`): 10, só a mais de 90 m do início. Pedem picareta com força 2 (sílex ou melhor). A de pedra recebe o aviso "fraca demais"; à mão, nada.
+- **Fornalha** (`scripts/building/furnace.gd`, peça 7 da construção, nível 4): [E] coloca minério em pares e a lenha necessária (1 madeira para cada 2 minérios). Ela funde **1 lingote a cada 8 s**, com fogo, luz e fumaça, e **espanta lobos** enquanto queima. [E] recolhe os lingotes. O conteúdo vai para o save, e ela não pode ser removida cheia.
+- **Forja perto da fornalha** (nível 5): **machado de ferro** (derruba árvore em 1 golpe, +6), **picareta de ferro** (força 3, +6) e **espada de ferro** (30 de dano, golpe largo).
+- Peças podem guardar dados próprios no save (`get_piece_data` / `apply_piece_data`).
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

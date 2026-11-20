@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_iron_sword"
+display_name = "Espada de ferro"
+description = "Arma: 30 de dano, golpe largo e rápido"
+inputs = {&"iron_ingot": 4, &"wood": 1, &"fiber": 2}
+outputs = {&"iron_sword": 1}
+station = &"furnace"
+required_knowledge = &"knowledge_iron_tools"

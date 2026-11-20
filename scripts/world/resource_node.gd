@@ -34,6 +34,8 @@ signal regrown
 @export var hand_verb: String = ""
 ## Força mínima da ferramenta (minérios melhores pedem picaretas melhores).
 @export var min_tool_power: int = 1
+## Falso: nada sai à mão (minérios).
+@export var hand_allowed: bool = true
 ## Item extra que às vezes sai nos golpes de ferramenta (sílex nas pedras).
 @export var bonus_item: ItemDefinition
 ## Chance do item extra por golpe, somada a 10% por ponto de força acima de 1.
@@ -110,6 +112,16 @@ func can_interact(_interactor: InteractionDetector) -> bool:
 	return item != null and not is_depleted()
 
 
+## A ferramenta é do tipo certo, mesmo que fraca demais (para dar o aviso no golpe).
+func matches_tool_kind(tool: WeaponDefinition) -> bool:
+	if tool == null or is_depleted():
+		return false
+	match required_tool():
+		&"axe": return tool.chop_power > 0
+		&"pickaxe": return tool.mine_power > 0
+	return false
+
+
 func interact(interactor: InteractionDetector) -> Dictionary:
 	if not can_interact(interactor):
 		return {"ok": false, "message": "Esgotado"}
@@ -119,6 +131,8 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 	var tool := required_tool()
 	if tool != &"" and accepts_tool(interactor.held_tool):
 		return {"ok": false, "message": "Clique para %s" % TOOL_VERBS.get(tool, "coletar").to_lower()}
+	if not hand_allowed:
+		return {"ok": false, "message": "Precisa de %s mais forte" % TOOL_NAMES.get(tool, "ferramenta")}
 	var amount := roll_amount() if tool == &"" else maxi(hand_amount, 1)
 	var result := _harvest(inventory, amount, "")
 	if result["ok"] and tool != &"":
@@ -129,6 +143,8 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 ## Golpe de ferramenta (clique com machado/picareta na mão): coleta completa + bônus.
 func tool_strike(interactor: InteractionDetector, tool: WeaponDefinition) -> Dictionary:
 	if not accepts_tool(tool):
+		if matches_tool_kind(tool):
+			return {"ok": false, "message": "%s fraca demais: precisa de força %d" % [tool.display_name, min_tool_power]}
 		return {"ok": false, "message": ""}
 	var inventory: Inventory = interactor.inventory if interactor != null else null
 	if inventory == null:

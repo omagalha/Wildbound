@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildingPieceDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_piece_definition.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/building/furnace.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"building_furnace"
+display_name = "Fornalha"
+kind = 1
+snap_type = &""
+cost = {&"stone": 12, &"flint": 2, &"wood": 4}
+scene = ExtResource("2_scene")
+validation_size = Vector3(1.4, 0.4, 1.4)
+validation_center = Vector3(0, 0.3, 0)
+allows_free_ground_placement = false
+max_slope_degrees = 20
+needs_wall_support = false
+required_knowledge = &"knowledge_smelting"

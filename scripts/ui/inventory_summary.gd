@@ -18,6 +18,11 @@ const ITEM_VISUALS := {
 	&"flint": {"code": "SIL", "color": Color("6f86b8")},
 	&"flint_axe": {"code": "MCS", "color": Color("6f86b8")},
 	&"flint_pickaxe": {"code": "PCS", "color": Color("6f86b8")},
+	&"iron_ore": {"code": "MIN", "color": Color("c47a45")},
+	&"iron_ingot": {"code": "LIN", "color": Color("c3c8d0")},
+	&"iron_axe": {"code": "MCF", "color": Color("c3c8d0")},
+	&"iron_pickaxe": {"code": "PCF", "color": Color("c3c8d0")},
+	&"iron_sword": {"code": "ESP", "color": Color("c3c8d0")},
 }
 
 @export var inventory: Inventory

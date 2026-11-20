@@ -353,6 +353,22 @@ static func build_held_visual(def: WeaponDefinition) -> Node3D:
 	var length := def.handle_length
 	var grip := 0.12 if def.visual_kind != &"spear" else length * 0.38  # cabo abaixo do punho
 	var top := length - grip
+	if def.visual_kind == &"sword":
+		# Empunhadura curta, guarda e lâmina longa saindo do punho.
+		var metal := StandardMaterial3D.new()
+		metal.albedo_color = def.head_color
+		metal.metallic = 0.75
+		metal.roughness = 0.3
+		_add_mesh(root, _cylinder(0.024, 0.026, 0.2, wood), Vector3(0, 0.0, 0), Vector3.ZERO)
+		_add_mesh(root, _box(Vector3(0.05, 0.05, 0.05), metal), Vector3(0, -0.11, 0), Vector3.ZERO)
+		_add_mesh(root, _box(Vector3(0.22, 0.035, 0.05), metal), Vector3(0, 0.11, 0), Vector3.ZERO)
+		var blade_len := length - 0.25
+		_add_mesh(root, _box(Vector3(0.065, blade_len, 0.014), metal), Vector3(0, 0.13 + blade_len * 0.5, 0), Vector3.ZERO)
+		var tip := PrismMesh.new()
+		tip.size = Vector3(0.065, 0.1, 0.014)
+		tip.material = metal
+		_add_mesh(root, tip, Vector3(0, 0.13 + blade_len + 0.05, 0), Vector3.ZERO)
+		return root
 	_add_mesh(root, _cylinder(0.026, 0.032, length, wood), Vector3(0, top - length * 0.5, 0), Vector3.ZERO)
 	match def.visual_kind:
 		&"axe":

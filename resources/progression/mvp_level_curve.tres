@@ -12,10 +12,12 @@ unlocks = {
 1: [&"knowledge_campfire", &"knowledge_initial_bond", &"knowledge_basic_tools"],
 2: [&"knowledge_primitive_shelter", &"knowledge_stone_spear"],
 3: [&"knowledge_flat_roof", &"knowledge_survival_bed", &"knowledge_flint_tools"],
-4: [&"knowledge_gathering_capacity"],
-5: [&"knowledge_pioneer"]
+4: [&"knowledge_gathering_capacity", &"knowledge_smelting"],
+5: [&"knowledge_pioneer", &"knowledge_iron_tools"]
 }
 knowledge_names = {
+&"knowledge_smelting": "Fornalha e fundição de ferro",
+&"knowledge_iron_tools": "Ferramentas e espada de ferro",
 &"knowledge_flint_tools": "Ferramentas de sílex",
 &"knowledge_basic_tools": "Ferramentas básicas (machado, picareta, tocha, atadura)",
 &"knowledge_stone_spear": "Lança de pedra",

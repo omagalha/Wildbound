@@ -148,12 +148,15 @@ func collect_state() -> Dictionary:
 	if building_manager != null:
 		var pieces := []
 		for piece in building_manager.get_pieces():
-			pieces.append({
+			var entry := {
 				"id": String(piece.piece_id),
 				"definition": String(piece.definition.id),
 				"transform": _transform_to_array(piece.global_transform),
 				"support": String(piece.support_id),
-			})
+			}
+			if piece.has_method("get_piece_data"):
+				entry["data"] = piece.get_piece_data()
+			pieces.append(entry)
 		state["building"] = {
 			"pieces": pieces,
 			"active_bed": String(respawn.active_bed.piece_id) if respawn != null and respawn.active_bed != null and is_instance_valid(respawn.active_bed) else "",
@@ -281,6 +284,8 @@ func apply_state(state: Dictionary) -> void:
 				push_warning("SaveManager: peça '%s' com definição desconhecida foi ignorada." % entry.get("id", "?"))
 				continue
 			var piece := building_manager.restore_piece(definition, _array_to_transform(entry["transform"]), StringName(entry["id"]), StringName(entry.get("support", "")))
+			if piece != null and piece.has_method("apply_piece_data") and typeof(entry.get("data")) == TYPE_DICTIONARY:
+				piece.apply_piece_data(entry["data"])
 			if piece != null and piece is SurvivalBed and piece.piece_id == bed_id and respawn != null:
 				respawn.set_active_bed(piece)
 
