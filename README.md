@@ -99,6 +99,13 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Nado:** no mar e no lago o jogador flutua e nada (mais devagar); [Espaço] sobe para sair na margem.
 - Consultas para outros sistemas: `IslandTerrain.find(tree).height_at(x, z)`, `biome_at(x, z)` e `is_water(x, z)`.
 
+## Regiões vivas e minimapa novo (2026-11-20)
+
+- **Recursos por região:** cristal de gelo e ferro (Montanhas Geladas), argila e ferro (Terras Rochosas), obsidiana e enxofre (vulcão; a obsidiana pede picareta de ferro), frutas douradas e fibra (Planícies), cocos (praias).
+- **Novos usos:** Ensopado dourado (+70 fome) e Elixir de gelo (cura 60, pela barra), feitos na fogueira; Espada de obsidiana (42 de dano), na fornalha; **Braseiro de vigília** (peça 9: enxofre + argila), um fogo permanente que espanta lobos num raio de 14 m.
+- **Criaturas por região** (`scripts/enemies/region_creatures.gd`), em tocas que viram zonas de atenção: Lobo das Neves (★★★), Touro das Rochas (★★, muito resistente), Cão de Brasa (★★★★, rápido) e Cervo Chifrudo (★★), cada um com saque próprio. Longe do jogador, as criaturas dormem.
+- **Minimapa** (`scripts/ui/minimap.gd`): redondo, com o desenho da ilha (cores das regiões, sombra do relevo, mar e praias), moldura dourada e norte, mostrando acampamentos (tenda dourada quando descobertos), a ruína, as tocas, a sua base e a região atual. Ícones fora do alcance ficam presos na borda, apontando a direção.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

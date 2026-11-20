@@ -1,86 +1,111 @@
 class_name WildboundMinimap
 extends Control
-## Minimapa 2D leve, desenhado pelas coordenadas X/Z do mundo.
+## Minimapa redondo com o desenho da ilha.
 ##
-## Não usa uma segunda câmera 3D: isso evita renderizar a floresta novamente e
-## mantém o componente adequado ao futuro alvo mobile. Recursos e inimigos não
-## aparecem, preservando a exploração e a habilidade do Lumaru.
+## A imagem da ilha é "assada" uma vez a partir do IslandTerrain (cores das
+## regiões, sombra do relevo, mar raso/fundo e praias) e recortada num círculo
+## centrado no jogador por um shader. Por cima: zonas, acampamentos, ruína,
+## tocas, sua base e a seta do jogador. Sem segunda câmera 3D (leve para o
+## celular). Norte para cima.
 
 @export var player: Node3D
-## Metros visíveis do centro até a borda vertical do mapa.
-@export_range(20.0, 120.0, 1.0) var view_radius: float = 55.0
-## Intervalo entre redesenhos. Dez atualizações por segundo são suficientes.
+## Metros do centro até a borda do círculo.
+@export_range(40.0, 400.0, 5.0) var view_radius: float = 130.0
 @export_range(0.05, 1.0, 0.05) var refresh_interval: float = 0.1
-@export_range(5.0, 50.0, 5.0) var grid_step: float = 20.0
+## Tamanho de cada pixel da imagem da ilha, em metros.
+@export var bake_meters_per_pixel: float = 6.0
 
-const COLOR_FRAME := Color(0.55, 0.68, 0.48, 0.9)
-const COLOR_BACKGROUND := Color(0.035, 0.075, 0.065, 0.94)
-const COLOR_INNER := Color(0.075, 0.13, 0.105, 0.96)
-const COLOR_GRID := Color(0.55, 0.68, 0.55, 0.12)
-const COLOR_SAFE := Color(0.28, 0.72, 0.43, 0.20)
-const COLOR_SAFE_EDGE := Color(0.45, 0.9, 0.58, 0.48)
-const COLOR_DANGER := Color(0.9, 0.38, 0.25, 0.18)
-const COLOR_DANGER_EDGE := Color(1.0, 0.5, 0.34, 0.52)
-const COLOR_PLAYER := Color(1.0, 0.83, 0.36, 1.0)
-const COLOR_TEXT := Color(0.88, 0.93, 0.82, 1.0)
+const SHADER := preload("res://resources/shaders/minimap.gdshader")
+const COLOR_FRAME := Color(0.85, 0.7, 0.38, 1.0)
+const COLOR_FRAME_DARK := Color(0.2, 0.15, 0.08, 1.0)
+const COLOR_PLAYER := Color(1.0, 0.86, 0.36, 1.0)
+const COLOR_TEXT := Color(0.92, 0.94, 0.86, 1.0)
+const COLOR_SAFE := Color(0.35, 0.9, 0.5, 0.18)
+const COLOR_SAFE_EDGE := Color(0.5, 1.0, 0.62, 0.6)
+const COLOR_DANGER := Color(0.95, 0.35, 0.25, 0.16)
+const COLOR_DANGER_EDGE := Color(1.0, 0.45, 0.32, 0.65)
+const LABEL_HEIGHT := 34.0
 
+var _view: TextureRect
+var _overlay: Control
+var _material: ShaderMaterial
+var _terrain: IslandTerrain
+var _world_half := 750.0
 var _refresh_left := 0.0
+var _poi_left := 0.0
 var _zones: Array[TerritoryZone] = []
+var _camps: Array = []
+var _ruins: Array = []
+var _base_points: Array[Vector3] = []
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	clip_contents = true
-	resized.connect(queue_redraw)
-	_refresh_zones()
-	queue_redraw()
+	clip_contents = false
+	custom_minimum_size = Vector2(230, 230 + LABEL_HEIGHT)
+	_material = ShaderMaterial.new()
+	_material.shader = SHADER
+	_view = TextureRect.new()
+	_view.name = "MapView"
+	_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_view.stretch_mode = TextureRect.STRETCH_SCALE
+	_view.material = _material
+	add_child(_view)
+	_overlay = Control.new()
+	_overlay.name = "Overlay"
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_overlay.draw.connect(_draw_overlay)
+	add_child(_overlay)
+	resized.connect(_layout)
+	_layout()
+	_bake.call_deferred()
 
 
 func _process(delta: float) -> void:
 	_refresh_left -= delta
+	_poi_left -= delta
+	if _poi_left <= 0.0:
+		_poi_left = 2.0
+		_refresh_points()
 	if _refresh_left <= 0.0:
 		_refresh_left = refresh_interval
-		if _zones.is_empty():
-			_refresh_zones()
-		queue_redraw()
+		_update_view()
+		_overlay.queue_redraw()
 
 
-func _draw() -> void:
-	var full := Rect2(Vector2.ZERO, size)
-	draw_rect(full, COLOR_BACKGROUND, true)
-	draw_rect(full.grow(-1.0), COLOR_FRAME, false, 2.0)
+# ---------- API (testes e HUD) ----------
 
-	var font := ThemeDB.fallback_font
-	draw_string(font, Vector2(12.0, 19.0), "MAPA", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, COLOR_TEXT)
-	draw_string(font, Vector2(size.x - 27.0, 19.0), "N", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, COLOR_PLAYER)
-
-	var area := get_map_rect()
-	draw_rect(area, COLOR_INNER, true)
-	_draw_grid(area)
-	_draw_zones(area)
-	_draw_player(area)
-	draw_rect(area, COLOR_FRAME.darkened(0.2), false, 1.0)
-
-	var position_text := "X %d  Z %d" % [roundi(_center_world().x), roundi(_center_world().y)]
-	draw_string(font, Vector2(12.0, size.y - 7.0), position_text,
-		HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, COLOR_TEXT.darkened(0.12))
-
-
+## Quadrado que contém o círculo do mapa.
 func get_map_rect() -> Rect2:
-	return Rect2(10.0, 26.0, maxf(size.x - 20.0, 1.0), maxf(size.y - 45.0, 1.0))
+	var d := minf(size.x, size.y - LABEL_HEIGHT) - 8.0
+	d = maxf(d, 10.0)
+	return Rect2(Vector2((size.x - d) * 0.5, 4.0), Vector2(d, d))
 
 
-## Converte uma posição 3D em coordenada local do minimapa.
 func world_to_map(world_position: Vector3) -> Vector2:
 	var area := get_map_rect()
-	var meters_per_pixel := (view_radius * 2.0) / maxf(area.size.y, 1.0)
-	var center := _center_world()
-	var offset := Vector2(world_position.x, world_position.z) - center
-	return area.get_center() + offset / meters_per_pixel
+	var mpp := (view_radius * 2.0) / area.size.x
+	var offset := Vector2(world_position.x, world_position.z) - _center_world()
+	return area.get_center() + offset / mpp
 
 
 func is_world_position_visible(world_position: Vector3) -> bool:
-	return get_map_rect().has_point(world_to_map(world_position))
+	var area := get_map_rect()
+	return world_to_map(world_position).distance_to(area.get_center()) <= area.size.x * 0.5
+
+
+func has_terrain_image() -> bool:
+	return _view.texture != null
+
+
+# ---------- interno ----------
+
+func _layout() -> void:
+	var area := get_map_rect()
+	_view.position = area.position
+	_view.size = area.size
 
 
 func _center_world() -> Vector2:
@@ -89,55 +114,178 @@ func _center_world() -> Vector2:
 	return Vector2(player.global_position.x, player.global_position.z)
 
 
-func _refresh_zones() -> void:
-	_zones.clear()
+func _update_view() -> void:
+	var c := _center_world()
+	_material.set_shader_parameter("center_uv", (c + Vector2(_world_half, _world_half)) / (_world_half * 2.0))
+	_material.set_shader_parameter("radius_uv", view_radius / (_world_half * 2.0))
+
+
+## Desenha a ilha numa imagem (uma vez).
+func _bake() -> void:
+	_terrain = IslandTerrain.find(get_tree()) if is_inside_tree() else null
+	var px: int
+	var img: Image
+	if _terrain == null:
+		img = Image.create(8, 8, false, Image.FORMAT_RGB8)
+		img.fill(Color(0.2, 0.36, 0.2))
+		_world_half = 160.0
+	else:
+		_world_half = _terrain.half_size
+		px = int(_world_half * 2.0 / bake_meters_per_pixel)
+		img = Image.create(px, px, false, Image.FORMAT_RGB8)
+		var step := bake_meters_per_pixel
+		var light := Vector3(-0.5, 0.75, -0.45).normalized()
+		for iy in px:
+			var z := -_world_half + (iy + 0.5) * step
+			for ix in px:
+				var x := -_world_half + (ix + 0.5) * step
+				var h := _terrain.height_at(x, z)
+				var col := _pixel_color(x, z, h)
+				if h >= _terrain.sea_level:
+					var hx := _terrain.height_at(x + step, z) - h
+					var hz := _terrain.height_at(x, z + step) - h
+					var n := Vector3(-hx, step, -hz).normalized()
+					col = col * clampf(0.55 + n.dot(light) * 0.6, 0.6, 1.2)
+				img.set_pixel(ix, iy, col)
+	_view.texture = ImageTexture.create_from_image(img)
+	_material.set_shader_parameter("map_tex", _view.texture)
+	_update_view()
+
+
+func _pixel_color(x: float, z: float, h: float) -> Color:
+	var sea := _terrain.sea_level
+	if h < sea:
+		var depth := clampf((sea - h) / 14.0, 0.0, 1.0)
+		return Color(0.25, 0.62, 0.68).lerp(Color(0.06, 0.24, 0.38), depth)
+	var B := IslandTerrain.Biome
+	match _terrain.biome_at(x, z):
+		B.BEACH: return Color(0.9, 0.82, 0.58)
+		B.SNOW: return Color(0.42, 0.55, 0.38).lerp(Color(0.96, 0.97, 1.0), smoothstep(30.0, 60.0, h))
+		B.ROCKY: return Color(0.78, 0.5, 0.32)
+		B.VOLCANIC:
+			var vd := Vector2(x, z).distance_to(_terrain.volcano_center)
+			return Color(1.0, 0.45, 0.1) if vd < 24.0 else Color(0.24, 0.2, 0.2)
+		B.PLAINS: return Color(0.78, 0.74, 0.36)
+	return Color(0.3, 0.55, 0.26)
+
+
+func _refresh_points() -> void:
 	if not is_inside_tree():
 		return
+	_zones.clear()
 	for node in get_tree().get_nodes_in_group(&"territory_zones"):
-		var zone := node as TerritoryZone
-		if zone != null:
-			_zones.append(zone)
+		if node is TerritoryZone:
+			_zones.append(node)
+	_camps = get_tree().get_nodes_in_group(&"abandoned_camps")
+	if _ruins.is_empty():
+		_ruins = get_tree().root.find_children("*", "AncestralRuin", true, false)
+	_base_points.clear()
+	for node in get_tree().root.find_children("*", "BuildingPiece", true, false):
+		var piece := node as BuildingPiece
+		if piece.piece_id == &"" or String(piece.piece_id).begins_with("camp_"):
+			continue
+		if piece is SurvivalBed or piece is StorageChest or piece is Furnace or (piece.definition != null and piece.definition.id == &"building_campfire_primitive"):
+			_base_points.append(piece.global_position)
 
 
-func _draw_grid(area: Rect2) -> void:
-	var meters_per_pixel := (view_radius * 2.0) / maxf(area.size.y, 1.0)
-	var horizontal_radius := area.size.x * meters_per_pixel * 0.5
-	var center := _center_world()
-	var first_x := floorf((center.x - horizontal_radius) / grid_step) * grid_step
-	var last_x := center.x + horizontal_radius
-	var x := first_x
-	while x <= last_x:
-		var px := world_to_map(Vector3(x, 0.0, center.y)).x
-		draw_line(Vector2(px, area.position.y), Vector2(px, area.end.y), COLOR_GRID, 1.0)
-		x += grid_step
-	var first_z := floorf((center.y - view_radius) / grid_step) * grid_step
-	var last_z := center.y + view_radius
-	var z := first_z
-	while z <= last_z:
-		var py := world_to_map(Vector3(center.x, 0.0, z)).y
-		draw_line(Vector2(area.position.x, py), Vector2(area.end.x, py), COLOR_GRID, 1.0)
-		z += grid_step
-
-
-func _draw_zones(area: Rect2) -> void:
-	var meters_per_pixel := (view_radius * 2.0) / maxf(area.size.y, 1.0)
+func _draw_overlay() -> void:
+	var area := get_map_rect()
+	var center := area.get_center()
+	var radius := area.size.x * 0.5
+	var mpp := (view_radius * 2.0) / area.size.x
+	var font := ThemeDB.fallback_font
+	# Zonas (seguras e de perigo), recortadas pelo círculo.
 	for zone in _zones:
 		if not is_instance_valid(zone):
 			continue
-		var center := world_to_map(zone.global_position)
-		var radius_pixels := zone.radius / meters_per_pixel
-		if center.x + radius_pixels < area.position.x or center.x - radius_pixels > area.end.x:
+		var p := world_to_map(zone.global_position)
+		var rp := zone.radius / mpp
+		if p.distance_to(center) - rp > radius:
 			continue
-		if center.y + radius_pixels < area.position.y or center.y - radius_pixels > area.end.y:
-			continue
-		var fill := COLOR_SAFE if zone.level == TerritoryZone.Level.SAFE else COLOR_DANGER
-		var edge := COLOR_SAFE_EDGE if zone.level == TerritoryZone.Level.SAFE else COLOR_DANGER_EDGE
-		draw_circle(center, radius_pixels, fill)
-		draw_arc(center, radius_pixels, 0.0, TAU, 40, edge, 1.25, true)
+		var safe := zone.level == TerritoryZone.Level.SAFE
+		_overlay.draw_circle(p, rp, COLOR_SAFE if safe else COLOR_DANGER)
+		_overlay.draw_arc(p, rp, 0.0, TAU, 32, COLOR_SAFE_EDGE if safe else COLOR_DANGER_EDGE, 1.2, true)
+		if not safe and rp < 9.0:
+			_draw_paw(p)
+	# Acampamentos (tenda), ruína (losango) e base (casinha).
+	for camp in _camps:
+		if is_instance_valid(camp):
+			_draw_icon(camp.global_position, "camp", bool(camp.get("is_discovered")))
+	for ruin in _ruins:
+		if is_instance_valid(ruin):
+			_draw_icon(ruin.global_position, "ruin", ruin.is_completed())
+	var drawn_base := false
+	for p in _base_points:
+		if not drawn_base or p.distance_to(_base_points[0]) > 30.0:
+			_draw_icon(p, "base", true)
+			drawn_base = true
+	# Moldura dourada com sombra e marcas dos pontos cardeais.
+	_overlay.draw_arc(center, radius + 3.0, 0.0, TAU, 64, COLOR_FRAME_DARK, 6.0, true)
+	_overlay.draw_arc(center, radius + 1.5, 0.0, TAU, 64, COLOR_FRAME, 2.5, true)
+	for i in 4:
+		var a := -PI * 0.5 + i * PI * 0.5
+		var dir := Vector2(cos(a), sin(a))
+		_overlay.draw_line(center + dir * (radius - 5.0), center + dir * (radius + 3.0), COLOR_FRAME, 2.0, true)
+	var n_pos := center + Vector2(0, -radius - 2.0)
+	_overlay.draw_circle(n_pos, 9.0, COLOR_FRAME_DARK)
+	_overlay.draw_circle(n_pos, 8.0, COLOR_FRAME)
+	_overlay.draw_string(font, n_pos + Vector2(-4.5, 5.0), "N", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, COLOR_FRAME_DARK)
+	_draw_player(center)
+	# Região e coordenadas embaixo.
+	var region := "Floresta"
+	if _terrain != null and player != null:
+		region = _terrain.biome_name_at(player.global_position.x, player.global_position.z)
+	var c := _center_world()
+	var label_y := area.end.y + 16.0
+	var pill := StyleBoxFlat.new()
+	pill.bg_color = Color(0.03, 0.05, 0.04, 0.82)
+	pill.border_color = COLOR_FRAME.darkened(0.3)
+	pill.set_border_width_all(1)
+	pill.set_corner_radius_all(9)
+	var pill_w := maxf(font.get_string_size(region, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 26.0, 120.0)
+	pill.draw(_overlay.get_canvas_item(), Rect2((size.x - pill_w) * 0.5, label_y - 14.0, pill_w, 33.0))
+	_overlay.draw_string(font, Vector2(0, label_y), region, HORIZONTAL_ALIGNMENT_CENTER, size.x, 14, COLOR_TEXT)
+	_overlay.draw_string(font, Vector2(0, label_y + 15.0), "X %d · Z %d" % [roundi(c.x), roundi(c.y)], HORIZONTAL_ALIGNMENT_CENTER, size.x, 11, COLOR_TEXT.darkened(0.25))
 
 
-func _draw_player(area: Rect2) -> void:
-	var center := area.get_center()
+func _draw_icon(world: Vector3, kind: String, active: bool) -> void:
+	var area := get_map_rect()
+	var p := world_to_map(world)
+	var radius := area.size.x * 0.5 - 8.0
+	var off := p - area.get_center()
+	var outside := off.length() > radius
+	if outside:
+		if kind == "camp" and not active:
+			return  # acampamentos não descobertos não aparecem fora do alcance
+		p = area.get_center() + off.normalized() * radius  # preso na borda, apontando a direção
+	var dark := Color(0.08, 0.06, 0.04, 0.95)
+	match kind:
+		"camp":
+			var col := Color(1.0, 0.82, 0.4) if active else Color(0.85, 0.85, 0.85, 0.75)
+			var tri := PackedVector2Array([p + Vector2(0, -7), p + Vector2(7, 5), p + Vector2(-7, 5)])
+			_overlay.draw_colored_polygon(tri, dark)
+			_overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -5), p + Vector2(5, 4), p + Vector2(-5, 4)]), col)
+		"ruin":
+			var col := Color(1.0, 0.55, 0.15) if not active else Color(1.0, 0.85, 0.4)
+			var dia := PackedVector2Array([p + Vector2(0, -8), p + Vector2(7, 0), p + Vector2(0, 8), p + Vector2(-7, 0)])
+			_overlay.draw_colored_polygon(dia, dark)
+			_overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -6), p + Vector2(5, 0), p + Vector2(0, 6), p + Vector2(-5, 0)]), col)
+		"base":
+			var col := Color(0.45, 0.85, 1.0)
+			_overlay.draw_rect(Rect2(p + Vector2(-6, -2), Vector2(12, 9)), dark)
+			_overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -9), p + Vector2(8, -1), p + Vector2(-8, -1)]), dark)
+			_overlay.draw_rect(Rect2(p + Vector2(-4.5, -1), Vector2(9, 6.5)), col)
+			_overlay.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -7), p + Vector2(6, -1.5), p + Vector2(-6, -1.5)]), col)
+
+
+func _draw_paw(p: Vector2) -> void:
+	var col := Color(1.0, 0.4, 0.3, 0.9)
+	_overlay.draw_circle(p + Vector2(0, 1.5), 2.6, col)
+	for o in [Vector2(-3, -2.5), Vector2(0, -3.8), Vector2(3, -2.5)]:
+		_overlay.draw_circle(p + o, 1.3, col)
+
+
+func _draw_player(center: Vector2) -> void:
 	var yaw := 0.0
 	if player != null and is_instance_valid(player):
 		var visual := player.get_node_or_null("Visual") as Node3D
@@ -145,11 +293,11 @@ func _draw_player(area: Rect2) -> void:
 	var forward := Vector2(-sin(yaw), -cos(yaw))
 	var right := Vector2(-forward.y, forward.x)
 	var points := PackedVector2Array([
-		center + forward * 9.0,
-		center - forward * 6.0 + right * 5.0,
-		center - forward * 3.0,
-		center - forward * 6.0 - right * 5.0,
+		center + forward * 10.0,
+		center - forward * 6.0 + right * 6.0,
+		center - forward * 2.5,
+		center - forward * 6.0 - right * 6.0,
 	])
-	draw_colored_polygon(points, COLOR_PLAYER)
-	draw_polyline(PackedVector2Array([points[0], points[1], points[2], points[3], points[0]]),
-		Color(0.12, 0.1, 0.04, 1.0), 1.5, true)
+	_overlay.draw_circle(center, 13.0, Color(0, 0, 0, 0.25))
+	_overlay.draw_colored_polygon(points, COLOR_PLAYER)
+	_overlay.draw_polyline(PackedVector2Array([points[0], points[1], points[2], points[3], points[0]]), Color(0.15, 0.1, 0.03, 1.0), 1.6, true)
