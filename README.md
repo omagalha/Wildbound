@@ -70,6 +70,12 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Forja perto da fornalha** (nível 5): **machado de ferro** (derruba árvore em 1 golpe, +6), **picareta de ferro** (força 3, +6) e **espada de ferro** (30 de dano, golpe largo).
 - Peças podem guardar dados próprios no save (`get_piece_data` / `apply_piece_data`).
 
+## Baú (2026-11-20)
+
+- **Peça 8 da construção** (tecla 8, nível 2; 10 madeiras + 4 fibras), com 20 espaços (`scripts/building/storage_chest.gd`).
+- **[E] abre o painel** (`scripts/ui/chest_menu.gd`): mochila de um lado, baú do outro, a tampa abre. **Clique** move o monte inteiro, **botão direito** move 1. **"Guardar materiais"** manda tudo que não está na hotbar; **"Pegar tudo"** traz o que couber.
+- Conteúdo salvo; baú cheio não pode ser removido; fecha com [E], [Esc] ou ao se afastar.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

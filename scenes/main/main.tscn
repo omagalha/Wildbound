@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=3]
+[gd_scene load_steps=65 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="1_world"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -47,6 +47,7 @@
 [ext_resource type="Resource" path="res://resources/crafting/recipe_iron_pickaxe.tres" id="79_r_iron_pick"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_iron_sword.tres" id="80_r_iron_sword"]
 [ext_resource type="Script" path="res://scripts/ui/interaction_marker.gd" id="60_marker"]
+[ext_resource type="Script" path="res://scripts/ui/chest_menu.gd" id="61_chestmenu"]
 [ext_resource type="Script" path="res://scripts/enemies/night_hunt.gd" id="46_night"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/shadow_wolf.tscn" id="47_wolf"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_stone_axe.tres" id="50_recipe_stone_axe"]
@@ -305,3 +306,11 @@ hud = NodePath("../SurvivalHUD")
 [node name="InteractionMarker" type="Node3D" parent="." node_paths=PackedStringArray("detector")]
 script = ExtResource("60_marker")
 detector = NodePath("../Player/InteractionDetector")
+
+[node name="ChestMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("inventory", "interaction", "equipment", "player", "hud")]
+script = ExtResource("61_chestmenu")
+inventory = NodePath("../Player/Inventory")
+interaction = NodePath("../Player/InteractionDetector")
+equipment = NodePath("../PlayerEquipment")
+player = NodePath("../Player")
+hud = NodePath("../SurvivalHUD")
