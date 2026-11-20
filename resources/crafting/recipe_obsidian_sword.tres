@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_obsidian_sword"
+display_name = "Espada de obsidiana"
+description = "Arma: 42 de dano, a melhor da ilha"
+inputs = {&"obsidian": 4, &"iron_ingot": 2, &"wood": 1}
+outputs = {&"obsidian_sword": 1}
+station = &"furnace"
+required_knowledge = &"knowledge_iron_tools"

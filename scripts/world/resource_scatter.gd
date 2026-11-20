@@ -24,6 +24,11 @@ extends Node3D
 @export var iron_scene: PackedScene
 @export var iron_count: int = 10
 @export var iron_min_distance: float = 95.0
+## Recursos das regiões da ilha: [cena, região (IslandTerrain.Biome), grupos].
+## Gerados numa passada própria (semente + 3), sem mexer nos anteriores.
+@export var region_scenes: Array[PackedScene] = []
+@export var region_biomes: PackedInt32Array = PackedInt32Array()
+@export var region_clusters: PackedInt32Array = PackedInt32Array()
 ## Peso relativo de cada tipo nos grupos: frutas, fibra, pedra, madeira.
 @export var weights: Vector4 = Vector4(0.3, 0.25, 0.22, 0.23)
 
@@ -75,6 +80,7 @@ func spawn_all() -> void:
 			spawned.append(node)
 	_spawn_flint(root, centers)
 	_spawn_iron(root, centers)
+	_spawn_regions(root)
 
 
 func _spawn_flint(root: Node3D, avoid: Array[Vector2]) -> void:
@@ -144,3 +150,47 @@ func _spawn_iron(root: Node3D, avoid: Array[Vector2]) -> void:
 		node.position = Vector3(p.x, 0, p.y)
 		node.rotation.y = rng.randf() * TAU
 		spawned.append(node)
+
+
+func _spawn_regions(root: Node3D) -> void:
+	var terrain := IslandTerrain.find(get_tree())
+	if terrain == null or region_scenes.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = world_seed + 3
+	var index := 0
+	for k in region_scenes.size():
+		var scene := region_scenes[k]
+		var biome: int = region_biomes[k] if k < region_biomes.size() else -1
+		var clusters: int = region_clusters[k] if k < region_clusters.size() else 6
+		for c in clusters:
+			var center := _region_point(terrain, rng, biome)
+			if center == Vector2.INF:
+				continue
+			for i in rng.randi_range(2, 4):
+				var offset := Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(1.5, 5.0)
+				var p := center + offset
+				if terrain.biome_at(p.x, p.y) == IslandTerrain.Biome.WATER:
+					continue
+				var node := scene.instantiate() as ResourceNode
+				node.name = "B%03d_region" % index
+				index += 1
+				root.add_child(node)
+				node.position = Vector3(p.x, terrain.height_at(p.x, p.y), p.y)
+				node.rotation.y = rng.randf() * TAU
+				spawned.append(node)
+
+
+## Ponto da região pedida, fora do centro e sem encosta forte (INF se não achou).
+func _region_point(terrain: IslandTerrain, rng: RandomNumberGenerator, biome: int) -> Vector2:
+	for attempt in 80:
+		var a := rng.randf() * TAU
+		var r := rng.randf_range(terrain.flat_radius + 30.0, terrain.coast_radius + 40.0)
+		var p := Vector2(cos(a), sin(a)) * r
+		if terrain.biome_at(p.x, p.y) != biome:
+			continue
+		var slope := absf(terrain.height_at(p.x + 2.0, p.y) - terrain.height_at(p.x - 2.0, p.y)) + absf(terrain.height_at(p.x, p.y + 2.0) - terrain.height_at(p.x, p.y - 2.0))
+		if slope > 3.0:
+			continue
+		return p
+	return Vector2.INF

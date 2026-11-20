@@ -51,6 +51,15 @@ func _draw() -> void:
 		&"iron_sword": _sword()
 		&"iron_ore": _ore()
 		&"iron_ingot": _ingot()
+		&"ice_crystal": _shards(Color("8fe6ff"))
+		&"obsidian": _shards(Color("2a1e3a"))
+		&"sulfur": _lumps(Color("f2d33a"))
+		&"clay": _lumps(Color("b8683f"))
+		&"golden_berries": _gold_berries()
+		&"coconut": _coconut()
+		&"golden_stew": _stew()
+		&"frost_elixir": _bottle(Color("6fd8ff"))
+		&"obsidian_sword": _sword_colored(Color("4a3466"))
 		&"stone_spear": _spear()
 		&"improvised_club": _club()
 		&"torch": _torch()
@@ -181,3 +190,46 @@ func _ingot() -> void:
 	_poly([Vector2(8, 42), Vector2(46, 42), Vector2(46, 50), Vector2(8, 50)], IRON.darkened(0.35))
 	_poly([Vector2(46, 42), Vector2(56, 28), Vector2(56, 36), Vector2(46, 50)], IRON.darkened(0.45))
 	draw_line(Vector2(20, 32), Vector2(40, 32), _tint(Color(1, 1, 1, 0.6)), 2.0, true)
+
+
+func _shards(c: Color) -> void:
+	_poly([Vector2(14, 52), Vector2(22, 14), Vector2(30, 52)], c)
+	_poly([Vector2(26, 54), Vector2(36, 8), Vector2(46, 54)], c.lightened(0.15))
+	_poly([Vector2(40, 54), Vector2(48, 24), Vector2(56, 54)], c.darkened(0.1))
+
+
+func _lumps(c: Color) -> void:
+	_circle(Vector2(24, 40), 12.0, c)
+	_circle(Vector2(40, 36), 14.0, c.lightened(0.1))
+	_circle(Vector2(32, 24), 9.0, c.darkened(0.1))
+
+
+func _gold_berries() -> void:
+	_stick(Vector2(32, 10), Vector2(32, 22), 3.0, LEAF)
+	for p in [Vector2(22, 34), Vector2(42, 34), Vector2(32, 46), Vector2(32, 26)]:
+		_circle(p, 9.0, Color("ffc928"))
+		draw_circle(p + Vector2(-3, -3), 2.5, _tint(Color(1, 1, 1, 0.7)))
+
+
+func _coconut() -> void:
+	_circle(Vector2(32, 34), 20.0, Color("6b4a2b"))
+	for p in [Vector2(26, 28), Vector2(36, 26), Vector2(31, 36)]:
+		draw_circle(p, 2.5, _tint(Color(0.15, 0.1, 0.05)))
+
+
+func _stew() -> void:
+	_poly([Vector2(10, 30), Vector2(54, 30), Vector2(48, 52), Vector2(16, 52)], Color("7a5a3a"))
+	_poly([Vector2(12, 30), Vector2(52, 30), Vector2(48, 24), Vector2(16, 24)], Color("e09a3a"))
+	draw_circle(Vector2(26, 27), 3.0, _tint(Color("ffd25a")))
+	draw_circle(Vector2(38, 26), 3.0, _tint(Color("b8743e")))
+
+
+func _bottle(c: Color) -> void:
+	_poly([Vector2(26, 8), Vector2(38, 8), Vector2(38, 20), Vector2(50, 34), Vector2(46, 56), Vector2(18, 56), Vector2(14, 34), Vector2(26, 20)], Color(0.85, 0.9, 0.95))
+	_poly([Vector2(17, 38), Vector2(47, 38), Vector2(44, 53), Vector2(20, 53)], c)
+
+
+func _sword_colored(c: Color) -> void:
+	_poly([Vector2(36, 8), Vector2(42, 6), Vector2(44, 12), Vector2(22, 40), Vector2(18, 36)], c)
+	_stick(Vector2(14, 30), Vector2(28, 44), 4.0, Color("8a6a40"))
+	_stick(Vector2(20, 42), Vector2(10, 54), 4.0, WOOD_DARK)

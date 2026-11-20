@@ -135,7 +135,7 @@ func _setup() -> void:
 	# Os testes de construção partem do nível máximo do MVP (todas as peças liberadas).
 	(main.get_node("Progression/Experience") as ExperienceComponent).restore({"total_xp": 700})
 	await _wait_physics(3)
-	_check(controller.catalog.pieces.size() == 8, "Catálogo com 8 peças: fundação, parede, entrada, telhado, fogueira, leito, fornalha, baú")
+	_check(controller.catalog.pieces.size() == 9, "Catálogo com 9 peças (inclui fornalha, baú e braseiro)")
 	var order := main.get_children().map(func(n): return n.name)
 	_check(order.find(&"PlacementController") > order.find(&"Player"), "Controle de construção depois do Player: recebe o Esc antes da câmera [R-BL-03]")
 

@@ -158,11 +158,12 @@ func _test_scatter() -> void:
 		categories[node.category] = true
 		if _flat(node.global_position).length() < scatter.inner_radius - 5.0:
 			too_close += 1
-		if absf(node.global_position.x) > 148.0 or absf(node.global_position.z) > 148.0:
+		var isl := world.get_node("TestWorld/Island") as IslandTerrain
+		if isl.is_water(node.global_position.x, node.global_position.z) and isl.height_at(node.global_position.x, node.global_position.z) < isl.sea_level - 0.5:
 			outside += 1
 	_check(categories.size() == 4, "Os quatro tipos aparecem (madeira, pedra, fibra, frutas)", str(categories.keys()))
 	_check(too_close == 0, "Nada novo na área inicial")
-	_check(outside == 0, "Tudo dentro das bordas")
+	_check(outside == 0, "Nenhum recurso dentro d'água", str(outside))
 	var first_name := String(scatter.spawned[0].name)
 	var first_pos := scatter.spawned[0].global_position
 	_check(world.get_node_or_null("ResourceField/Wilds/" + first_name) == scatter.spawned[0], "Caminho estável para o save", first_name)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_frost_elixir"
+display_name = "Elixir de gelo"
+description = "Cura 60 de vida (use pela barra)"
+inputs = {&"ice_crystal": 2, &"golden_berries": 1}
+outputs = {&"frost_elixir": 1}
+station = &"campfire"
+required_knowledge = &""

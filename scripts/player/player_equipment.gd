@@ -28,7 +28,8 @@ const TORCH := &"torch"
 const BANDAGE := &"bandage"
 const SLOT_COUNT := 9
 ## Itens (além das ferramentas) que ganham espaço na hotbar, na ordem de prioridade.
-const USABLE_ITEMS := [TORCH, BANDAGE, &"cooked_meat", &"wild_berries"]
+const ELIXIR := &"frost_elixir"
+const USABLE_ITEMS := [TORCH, BANDAGE, ELIXIR, &"golden_stew", &"cooked_meat", &"golden_berries", &"coconut", &"wild_berries"]
 const NAMES := {CLUB: "Clava improvisada"}
 
 @export var inventory: Inventory
@@ -149,6 +150,8 @@ func select_slot(index: int) -> bool:
 			return toggle_torch()
 		BANDAGE:
 			return use_bandage()
+		ELIXIR:
+			return use_elixir()
 	if food != null:
 		return food.try_eat_item(id) == FoodConsumer.REASON_OK
 	return false
@@ -250,6 +253,19 @@ func use_bandage() -> bool:
 	var healed := health.heal(bandage_heal)
 	_bandage_left = bandage_cooldown
 	message.emit("Atadura: +%d de vida" % roundi(healed))
+	return true
+
+
+## Elixir de gelo: cura 60 (sem intervalo próprio além do da atadura).
+func use_elixir() -> bool:
+	if health == null or inventory == null or health.is_dead() or not inventory.has_item(ELIXIR):
+		return false
+	if health.current_health >= health.max_health:
+		message.emit("Vida cheia")
+		return false
+	inventory.remove_item(ELIXIR, 1)
+	var healed := health.heal(60.0)
+	message.emit("Elixir de gelo: +%d de vida" % roundi(healed))
 	return true
 
 

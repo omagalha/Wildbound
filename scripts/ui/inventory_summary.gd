@@ -23,6 +23,15 @@ const ITEM_VISUALS := {
 	&"iron_axe": {"code": "MCF", "color": Color("c3c8d0")},
 	&"iron_pickaxe": {"code": "PCF", "color": Color("c3c8d0")},
 	&"iron_sword": {"code": "ESP", "color": Color("c3c8d0")},
+	&"ice_crystal": {"code": "CRI", "color": Color("8fe6ff")},
+	&"clay": {"code": "ARG", "color": Color("b8683f")},
+	&"obsidian": {"code": "OBS", "color": Color("6a4a8a")},
+	&"sulfur": {"code": "ENX", "color": Color("f2d33a")},
+	&"golden_berries": {"code": "DOU", "color": Color("ffc928")},
+	&"coconut": {"code": "COC", "color": Color("8a6a40")},
+	&"golden_stew": {"code": "ENS", "color": Color("e09a3a")},
+	&"frost_elixir": {"code": "ELX", "color": Color("6fd8ff")},
+	&"obsidian_sword": {"code": "ESO", "color": Color("6a4a8a")},
 }
 
 @export var inventory: Inventory

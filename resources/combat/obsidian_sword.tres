@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_definition.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"obsidian_sword"
+display_name = "Espada de obsidiana"
+damage = 42.0
+reach = 2.4
+arc_degrees = 110.0
+interval = 0.5
+windup = 0.14
+active_time = 0.1
+assist_distance = 2.8
+assist_cone_degrees = 60.0
+knockback = 4.5
+visual_kind = &"sword"
+handle_length = 1.0
+head_color = Color(0.16, 0.1, 0.24, 1)
+handle_color = Color(0.22, 0.14, 0.1, 1)

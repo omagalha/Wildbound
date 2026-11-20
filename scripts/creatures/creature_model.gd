@@ -18,6 +18,10 @@ extends Node
 @export var color_overrides: Dictionary = {}
 ## Nome do material -> cor de brilho (olhos que brilham no escuro).
 @export var glow_overrides: Dictionary = {}
+## Multiplica a cor de todos os materiais (para modelos com nomes genéricos).
+@export var tint: Color = Color.WHITE
+## Brilho somado a todos os materiais (preto = nenhum).
+@export var emission_tint: Color = Color.BLACK
 ## Estado da criatura -> nome da animação no modelo.
 @export var clips: Dictionary = {
 	"idle": "Idle", "walk": "Walk", "run": "Gallop", "alert": "Idle_2_HeadLow",
@@ -142,9 +146,15 @@ func _apply_colors() -> void:
 			if base == null:
 				continue
 			var key := base.resource_name
-			if not color_overrides.has(key) and not glow_overrides.has(key):
+			var global := tint != Color.WHITE or emission_tint != Color.BLACK
+			if not color_overrides.has(key) and not glow_overrides.has(key) and not global:
 				continue
 			var mat := base.duplicate() as StandardMaterial3D
+			mat.albedo_color = mat.albedo_color * tint
+			if emission_tint != Color.BLACK:
+				mat.emission_enabled = true
+				mat.emission = emission_tint
+				mat.emission_energy_multiplier = 0.22
 			if color_overrides.has(key):
 				mat.albedo_color = color_overrides[key]
 			if glow_overrides.has(key):

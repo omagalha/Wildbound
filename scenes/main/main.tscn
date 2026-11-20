@@ -1,4 +1,4 @@
-[gd_scene load_steps=72 format=3]
+[gd_scene load_steps=77 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="1_world"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -46,6 +46,10 @@
 [ext_resource type="Resource" path="res://resources/crafting/recipe_iron_axe.tres" id="78_r_iron_axe"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_iron_pickaxe.tres" id="79_r_iron_pick"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_iron_sword.tres" id="80_r_iron_sword"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_golden_stew.tres" id="81_r_stew"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_frost_elixir.tres" id="82_r_elixir"]
+[ext_resource type="Resource" path="res://resources/crafting/recipe_obsidian_sword.tres" id="83_r_obsidian"]
+[ext_resource type="Resource" path="res://resources/combat/obsidian_sword.tres" id="84_obsidian"]
 [ext_resource type="Script" path="res://scripts/ui/interaction_marker.gd" id="60_marker"]
 [ext_resource type="Script" path="res://scripts/ui/chest_menu.gd" id="61_chestmenu"]
 [ext_resource type="Script" path="res://scripts/abilities/ability_controller.gd" id="62_abil"]
@@ -55,6 +59,7 @@
 [ext_resource type="Resource" path="res://resources/abilities/ancestral_spark.tres" id="66_spark"]
 [ext_resource type="Script" path="res://scripts/world/ancestral_ruin.gd" id="67_ruin"]
 [ext_resource type="Script" path="res://scripts/world/abandoned_camp.gd" id="68_camp"]
+[ext_resource type="Script" path="res://scripts/enemies/region_creatures.gd" id="69_regions"]
 [ext_resource type="Script" path="res://scripts/enemies/night_hunt.gd" id="46_night"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/shadow_wolf.tscn" id="47_wolf"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_stone_axe.tres" id="50_recipe_stone_axe"]
@@ -271,7 +276,7 @@ manager = NodePath("../DifficultyManager")
 
 [node name="CraftingManager" type="Node" parent="." node_paths=PackedStringArray("inventory", "knowledge", "building_manager", "player", "health", "experience")]
 script = ExtResource("40_craft")
-recipes = Array[ExtResource("41_recipe")]([ExtResource("50_recipe_stone_axe"), ExtResource("51_recipe_stone_pickaxe"), ExtResource("52_recipe_torch"), ExtResource("53_recipe_bandage"), ExtResource("54_recipe_stone_spear"), ExtResource("55_recipe_cooked_meat"), ExtResource("73_r_flint_axe"), ExtResource("74_r_flint_pick"), ExtResource("78_r_iron_axe"), ExtResource("79_r_iron_pick"), ExtResource("80_r_iron_sword")])
+recipes = Array[ExtResource("41_recipe")]([ExtResource("50_recipe_stone_axe"), ExtResource("51_recipe_stone_pickaxe"), ExtResource("52_recipe_torch"), ExtResource("53_recipe_bandage"), ExtResource("54_recipe_stone_spear"), ExtResource("55_recipe_cooked_meat"), ExtResource("73_r_flint_axe"), ExtResource("74_r_flint_pick"), ExtResource("78_r_iron_axe"), ExtResource("79_r_iron_pick"), ExtResource("80_r_iron_sword"), ExtResource("81_r_stew"), ExtResource("82_r_elixir"), ExtResource("83_r_obsidian")])
 inventory = NodePath("../Player/Inventory")
 knowledge = NodePath("../Progression/Knowledge")
 building_manager = NodePath("../BuildingManager")
@@ -289,7 +294,7 @@ club_definition = ExtResource("44_club")
 spear_definition = ExtResource("45_spear")
 axe_definition = ExtResource("48_axe")
 pickaxe_definition = ExtResource("49_pick")
-extra_definitions = Array[ExtResource("72_wdef")]([ExtResource("70_flint_axe"), ExtResource("71_flint_pick"), ExtResource("75_iron_axe"), ExtResource("76_iron_pick"), ExtResource("77_iron_sword")])
+extra_definitions = Array[ExtResource("72_wdef")]([ExtResource("70_flint_axe"), ExtResource("71_flint_pick"), ExtResource("75_iron_axe"), ExtResource("76_iron_pick"), ExtResource("77_iron_sword"), ExtResource("84_obsidian")])
 food = NodePath("../Player/FoodConsumer")
 interaction = NodePath("../Player/InteractionDetector")
 placement = NodePath("../PlacementController")
@@ -394,3 +399,8 @@ camp_name = "Bivaque do Norte"
 player = NodePath("../../Player")
 experience = NodePath("../../Progression/Experience")
 hud = NodePath("../../SurvivalHUD")
+
+[node name="RegionCreatures" type="Node3D" parent="." node_paths=PackedStringArray("player", "difficulty")]
+script = ExtResource("69_regions")
+player = NodePath("../Player")
+difficulty = NodePath("../DifficultyManager")
