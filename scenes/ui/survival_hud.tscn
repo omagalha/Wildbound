@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/survival_hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/minimap.tscn" id="2_minimap"]
-[ext_resource type="PackedScene" path="res://scenes/ui/shortcut_bar.tscn" id="3_shortcuts"]
+[ext_resource type="Script" path="res://scripts/ui/hotbar_ui.gd" id="3_shortcuts"]
 [ext_resource type="PackedScene" path="res://scenes/ui/inventory_summary.tscn" id="4_inventory"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud_toast_feed.tscn" id="5_toasts"]
 
@@ -194,6 +194,7 @@ layout_mode = 2
 
 [node name="InventorySummary" parent="Root/TopRow/RightStack" instance=ExtResource("4_inventory")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="BottomStack" type="VBoxContainer" parent="Root"]
@@ -248,9 +249,11 @@ theme_override_colors/font_color = Color(0.94, 0.96, 0.86, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 1
 
-[node name="ShortcutBar" parent="Root/BottomStack" instance=ExtResource("3_shortcuts")]
+[node name="Hotbar" type="VBoxContainer" parent="Root/BottomStack"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("3_shortcuts")
 
 [node name="CompatibilityData" type="Control" parent="Root"]
 visible = false

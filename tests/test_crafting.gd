@@ -26,6 +26,8 @@ func _run() -> void:
 	await _test_equipment()
 	await _test_boar_loot()
 	await _test_menu()
+	await _test_hotbar()
+	await _test_marker()
 	await _test_save()
 	_wipe_dir()
 	print("== Resultado: %d passaram, %d falharam ==" % [_passed, _failed])
@@ -193,10 +195,17 @@ func _test_tools() -> void:
 	_check(r["ok"] and inv.count(&"wood") == tree.amount_per_harvest, "Sem machado: coleta normal")
 	inv.add_item(&"stone_axe", 1)
 	inv.add_item(&"stone_pickaxe", 1)
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	var before_wood := inv.count(&"wood")
+	tree.interact(detector)
+	_check(inv.count(&"wood") == before_wood + tree.amount_per_harvest, "Machado só no inventário (não na mão): sem bônus")
+	inv.remove_item(&"wood", tree.amount_per_harvest)
+	_check(equipment.select_slot(equipment.slot_of(&"stone_axe")) and equipment.held_item == &"stone_axe", "Seleciona o machado na hotbar")
 	r = tree.interact(detector)
 	_check(inv.count(&"wood") == tree.amount_per_harvest * 2 + 2, "Com machado: +2 madeira", str(inv.count(&"wood")))
 	_check(String(r["message"]).contains("Machado"), "Aviso cita o machado", r["message"])
 	var before := inv.count(&"stone")
+	equipment.select_slot(equipment.slot_of(&"stone_pickaxe"))
 	stone.interact(detector)
 	_check(inv.count(&"stone") == before + stone.amount_per_harvest + 2, "Com picareta: +2 pedra")
 	before = inv.count(&"wild_berries")
@@ -221,6 +230,10 @@ func _test_forest_tree() -> void:
 	var r := detector.try_interact()
 	_check(not r["ok"] and String(r["message"]).contains("Machado") and inv.count(&"wood") == 0, "Sem machado: recusa e explica")
 	inv.add_item(&"stone_axe", 1)
+	r = detector.try_interact()
+	_check(not r["ok"] and String(r["message"]).contains("Segure"), "Machado guardado: pede para segurar", r["message"])
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	equipment.select_slot(equipment.slot_of(&"stone_axe"))
 	var experience := world.get_node("Progression/Experience") as ExperienceComponent
 	var xp := experience.total_xp
 	r = detector.try_interact()
@@ -241,7 +254,10 @@ func _test_equipment() -> void:
 	var weapon := world.get_node("Player/Visual/Weapon") as WeaponController
 	_check(weapon.definition.id == &"improvised_club", "Começa com a clava")
 	inv.add_item(&"stone_spear", 1)
-	_check(weapon.definition.id == &"stone_spear" and weapon.definition.damage > 12.0 and weapon.definition.reach > 1.8, "Lança no inventário: equipada, mais dano e alcance")
+	_check(weapon.definition.id == &"improvised_club", "Lança nova vai para a hotbar, sem trocar a arma sozinha")
+	_check(equipment.slot_of(&"stone_spear") > 0, "Lança ganha um espaço na hotbar")
+	equipment.select_slot(equipment.slot_of(&"stone_spear"))
+	_check(weapon.definition.id == &"stone_spear" and weapon.definition.damage > 12.0 and weapon.definition.reach > 1.8, "Lança selecionada: na mão, mais dano e alcance")
 	var spear_visual := weapon.get_node_or_null("Club/Spear") as Node3D
 	_check(spear_visual != null and spear_visual.visible and not (weapon.get_node("Club/Head") as Node3D).visible, "Visual troca para a lança")
 	inv.remove_item(&"stone_spear", 1)
@@ -323,6 +339,9 @@ func _test_save() -> void:
 	var world := await _new_world()
 	var inv := _inv(world)
 	inv.add_all({&"stone_axe": 1, &"stone_spear": 1, &"bandage": 3, &"cooked_meat": 2})
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	equipment.select_slot(equipment.slot_of(&"stone_spear"))
+	var slots_before := equipment.slots.duplicate()
 	var save := world.get_node("SaveManager") as SaveManager
 	_check(save.save_game(), "Salvar com ferramentas")
 	await _free_world(world)
@@ -333,6 +352,85 @@ func _test_save() -> void:
 	var inv2 := _inv(again)
 	_check(inv2.has_item(&"stone_axe") and inv2.count(&"bandage") == 3 and inv2.count(&"cooked_meat") == 2, "Ferramentas e itens restaurados")
 	var weapon := again.get_node("Player/Visual/Weapon") as WeaponController
-	_check(weapon.definition.id == &"stone_spear", "Lança volta equipada")
+	_check(weapon.definition.id == &"stone_spear", "Lança volta na mão")
+	var equipment2 := again.get_node("PlayerEquipment") as PlayerEquipment
+	_check(equipment2.slots == slots_before, "Hotbar restaurada na mesma ordem", str(equipment2.slots))
 	await _free_world(again)
 	_wipe_dir()
+
+
+# ---------- hotbar ----------
+
+func _test_hotbar() -> void:
+	print("-- Hotbar --")
+	var world := await _new_world()
+	var inv := _inv(world)
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	var detector := world.get_node("Player/InteractionDetector") as InteractionDetector
+	_check(equipment.slots.size() == 9 and equipment.slots[0] == &"improvised_club", "9 espaços; o 1 é a clava")
+	_check(equipment.held_item == &"improvised_club" and detector.held_item == &"improvised_club", "Começa com a clava na mão")
+	inv.add_all({&"stone_pickaxe": 1, &"torch": 1, &"bandage": 2, &"cooked_meat": 1, &"wood": 5})
+	_check(equipment.slot_of(&"stone_pickaxe") > 0 and equipment.slot_of(&"torch") > 0 and equipment.slot_of(&"bandage") > 0 and equipment.slot_of(&"cooked_meat") > 0, "Itens úteis entram sozinhos na hotbar")
+	_check(equipment.slot_of(&"wood") < 0, "Materiais não ocupam a hotbar")
+	equipment.select_slot(equipment.slot_of(&"stone_pickaxe"))
+	_check(equipment.held_item == &"stone_pickaxe" and detector.held_item == &"stone_pickaxe", "Número escolhe o item na mão")
+	var torch_slot := equipment.slot_of(&"torch")
+	equipment.select_slot(torch_slot)
+	_check(equipment.torch_lit and equipment.held_item == &"stone_pickaxe", "Tocha acende sem largar a ferramenta")
+	var health := world.get_node("Player/Health") as HealthComponent
+	health.apply_damage(DamageInfo.create(40.0, &"enemy:test"))
+	equipment.select_slot(equipment.slot_of(&"bandage"))
+	_check(inv.count(&"bandage") == 1 and health.current_health > 60.0, "Espaço da atadura cura")
+	var hunger := world.get_node("Player/Hunger") as HungerComponent
+	hunger.set_hunger(30.0)
+	var meat_slot := equipment.slot_of(&"cooked_meat")
+	equipment.select_slot(meat_slot)
+	_check(not inv.has_item(&"cooked_meat") and hunger.current_hunger > 60.0, "Espaço da comida come")
+	_check(equipment.slots[meat_slot] == &"", "Item que acabou libera o espaço")
+	equipment.cycle_held(1)
+	_check(equipment.held_item == &"improvised_club", "Roda do mouse passa para o próximo item de mão")
+	equipment.select_slot(equipment.slot_of(&"stone_pickaxe"))
+	inv.remove_item(&"stone_pickaxe", 1)
+	_check(equipment.held_item == &"improvised_club", "Perder o item na mão volta para a clava")
+	var placement := world.get_node("PlacementController") as PlacementController
+	placement.enter()
+	_check(not equipment._hotbar_input_allowed(), "No modo de construção, os números escolhem peças")
+	placement.exit()
+
+	var hud := world.get_node("SurvivalHUD") as SurvivalHUD
+	var bar := hud.get_hotbar()
+	await _wait(2)
+	_check(bar != null and bar.get_slot_count() == 9, "Hotbar visual com 9 espaços")
+	_check(bar.get_slot_item(0) == &"improvised_club" and bar.get_slot_item(torch_slot) == &"torch", "Ícones seguem a hotbar")
+	_check(not hud.is_inventory_open(), "Inventário começa fechado")
+	hud.toggle_inventory()
+	_check(hud.is_inventory_open(), "[I] abre o inventário")
+	hud.toggle_inventory()
+	_check(not hud.is_inventory_open(), "[I] fecha o inventário")
+	await _free_world(world)
+
+
+func _test_marker() -> void:
+	print("-- Indicador de interação --")
+	var world := await _new_world()
+	var marker := world.get_node("InteractionMarker") as InteractionMarker
+	var detector := world.get_node("Player/InteractionDetector") as InteractionDetector
+	var player := world.get_node("Player") as CharacterBody3D
+	var bush := world.get_node("ResourceField/BerryBushs/BerryBush01") as Node3D
+	_check(not marker.is_showing(), "Sem nada perto: indicador escondido")
+	player.global_position = bush.global_position + Vector3(0, 0.1, 1.6)
+	await _wait(3)
+	detector.refresh_focus()
+	await _wait(10)
+	_check(marker.is_showing() and marker.target == bush, "Perto do arbusto: indicador aparece nele")
+	var gem := marker.get_node("Gem") as Node3D
+	_check(gem.global_position.y > bush.global_position.y + 0.6, "Losango fica acima do objeto")
+	var y1 := gem.global_position.y
+	await _wait(12)
+	_check(not is_equal_approx(gem.global_position.y, y1), "Losango se mexe (animação)")
+	player.global_position = Vector3(30, 0.1, 30)  # campo aberto, nada interativo perto
+	await _wait(3)
+	detector.refresh_focus()
+	await _wait(20)
+	_check(detector.get_focused() == null and not marker.is_showing(), "Longe de tudo: indicador some", str(detector.get_focused()))
+	await _free_world(world)

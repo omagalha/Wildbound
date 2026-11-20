@@ -81,7 +81,7 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 	if inventory == null:
 		return {"ok": false, "message": "Sem inventário"}
 	var amount := roll_amount()
-	var used_tool := tool_for(inventory)
+	var used_tool := tool_for(interactor)
 	if used_tool != &"":
 		amount += tool_bonus
 	if not inventory.add_item(item.id, amount):
@@ -99,12 +99,14 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 	return {"ok": true, "message": message, "item_id": item.id, "amount": amount, "tool": used_tool}
 
 
-## A ferramenta do inventário que melhora esta fonte, ou &"" se nenhuma.
-func tool_for(inventory: Inventory) -> StringName:
+## A ferramenta na mão que melhora esta fonte, ou &"" se nenhuma.
+func tool_for(interactor: InteractionDetector) -> StringName:
 	var tool: StringName = TOOLS.get(category, &"")
-	if tool != &"" and inventory != null and inventory.has_item(tool):
-		return tool
-	return &""
+	if tool == &"" or interactor == null or interactor.held_item != tool:
+		return &""
+	if interactor.inventory == null or not interactor.inventory.has_item(tool):
+		return &""
+	return tool
 
 
 ## Quantidade de uma coleta com o multiplicador do preset (SURVIVAL_DIFFICULTY.md 2.3):

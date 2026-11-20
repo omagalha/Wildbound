@@ -34,6 +34,8 @@ func interact(interactor: InteractionDetector) -> Dictionary:
 		return {"ok": false, "message": "Sem inventário"}
 	if not inventory.has_item(AXE):
 		return {"ok": false, "message": "Precisa de um Machado de pedra (fabrique com [C])"}
+	if interactor.held_item != AXE:
+		return {"ok": false, "message": "Segure o Machado de pedra (tecla do espaço na barra)"}
 	if not is_ready():
 		return {"ok": false, "message": "Esta árvore já foi cortada; volte mais tarde"}
 	if not inventory.add_item(WOOD, wood_per_chop):

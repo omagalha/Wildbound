@@ -33,7 +33,7 @@ const EAT_MESSAGES := {
 @onready var _prompt_panel: PanelContainer = %PromptLabel.get_parent()
 @onready var _capacity_label: Label = %CapacityLabel
 @onready var _minimap: WildboundMinimap = %Minimap
-@onready var _shortcut_bar: ShortcutBar = %ShortcutBar
+@onready var _hotbar: HotbarUI = %Hotbar
 @onready var _inventory_summary: InventorySummary = %InventorySummary
 @onready var _toast_feed: HudToastFeed = %ToastFeed
 @onready var _damage_vignette: ColorRect = %DamageVignette
@@ -112,8 +112,44 @@ func get_inventory_text() -> String:
 	return _inventory_label.text
 
 
-func get_shortcut_count() -> int:
-	return _shortcut_bar.get_shortcut_count() if _shortcut_bar != null else 0
+const ACTION_INVENTORY := &"inventory"
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(ACTION_INVENTORY):
+		toggle_inventory()
+		get_viewport().set_input_as_handled()
+
+
+## [I] mostra/esconde o inventário completo.
+func toggle_inventory() -> void:
+	set_inventory_open(not is_inventory_open())
+
+
+func set_inventory_open(open: bool) -> void:
+	if _inventory_summary == null or _inventory_summary.visible == open:
+		return
+	_inventory_summary.visible = open
+	if open:
+		_inventory_summary.modulate.a = 0.0
+		_inventory_summary.scale = Vector2(0.92, 0.92)
+		var tween := create_tween().set_parallel(true)
+		tween.tween_property(_inventory_summary, "modulate:a", 1.0, 0.14)
+		tween.tween_property(_inventory_summary, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func is_inventory_open() -> bool:
+	return _inventory_summary != null and _inventory_summary.visible
+
+
+## Liga a hotbar ao equipamento do jogador (chamado pelo PlayerEquipment).
+func bind_equipment(equipment: PlayerEquipment) -> void:
+	if _hotbar != null:
+		_hotbar.bind_equipment(equipment)
+
+
+func get_hotbar() -> HotbarUI:
+	return _hotbar
 
 
 func get_inventory_card_count() -> int:

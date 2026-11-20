@@ -71,7 +71,7 @@ func _build_cards() -> void:
 
 func _add_card(item: ItemDefinition, visual: Dictionary) -> void:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(53.0, 39.0)
+	panel.custom_minimum_size = Vector2(53.0, 40.0)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.tooltip_text = item.display_name
 	var style := StyleBoxFlat.new()
@@ -92,13 +92,19 @@ func _add_card(item: ItemDefinition, visual: Dictionary) -> void:
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(row)
+	var icon := ItemIcon.new()
+	icon.item_id = item.id
+	icon.custom_minimum_size = Vector2(26, 26)
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
 	var code := Label.new()
 	code.text = visual["code"]
-	code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	code.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	code.add_theme_font_size_override("font_size", 10)
-	code.add_theme_color_override("font_color", visual["color"])
+	code.visible = false  # o ícone substitui a sigla; fica para consulta
 	row.add_child(code)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(spacer)
 	var amount := Label.new()
 	amount.text = "—"
 	amount.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -106,7 +112,7 @@ func _add_card(item: ItemDefinition, visual: Dictionary) -> void:
 	amount.add_theme_font_size_override("font_size", 14)
 	amount.add_theme_color_override("font_color", Color(0.9, 0.93, 0.86))
 	row.add_child(amount)
-	_cards[item.id] = {"panel": panel, "code": code, "amount": amount, "style": style}
+	_cards[item.id] = {"panel": panel, "code": code, "amount": amount, "style": style, "icon": icon}
 
 
 func _refresh(animate_changes: bool = true) -> void:
@@ -120,6 +126,8 @@ func _refresh(animate_changes: bool = true) -> void:
 		var card: Dictionary = _cards[id]
 		(card["amount"] as Label).text = str(quantity) if quantity > 0 else "—"
 		(card["panel"] as PanelContainer).modulate = Color.WHITE if quantity > 0 else Color(1, 1, 1, 0.34)
+		if card.has("icon"):
+			(card["icon"] as ItemIcon).dimmed = quantity <= 0
 		if animate_changes and quantity != old_quantity:
 			var target := Color.WHITE if quantity > 0 else Color(1, 1, 1, 0.34)
 			_pulse_card(card["panel"] as PanelContainer, target)

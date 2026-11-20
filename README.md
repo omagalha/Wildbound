@@ -41,6 +41,13 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Feedback contextual** (`scripts/ui/hud_toast_feed.gd`): até três mensagens com prioridade, deduplicação, prompt animado, vinheta de dano e indicador direcional da mochila de recuperação.
 - Primeira entrega feita para teclado e mouse; a adaptação final para proporções diferentes, área segura do iPhone e controles touch continua em etapa posterior.
 
+## HUD: hotbar, inventário no [I] e indicador (2026-11-20)
+
+- **Hotbar de 9 espaços** (`scripts/player/player_equipment.gd`, `scripts/ui/hotbar_ui.gd`): espaço 1 é a clava; ferramentas, armas, tocha, ataduras e comida entram sozinhas. Teclas **1–9** ou a roda do mouse: clava, lança, machado e picareta vão **para a mão** (a lança não equipa mais sozinha). Tocha acende, atadura cura e comida é comida. A hotbar e o item na mão vão para o save.
+- **Ferramentas só funcionam na mão:** o bônus do machado e da picareta e cortar árvores exigem o item selecionado.
+- **Inventário só com [I]**, com ícones desenhados (`scripts/ui/item_icon.gd`) no lugar das siglas.
+- **Indicador animado** (`scripts/ui/interaction_marker.gd`): losango brilhando e quicando, tecla **E** e anel pulsando no chão sobre o objeto interativo em foco.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).
@@ -84,6 +91,8 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 | Remover a peça mirada | X | `build_remove` |
 | Sair da construção | Clique direito ou Esc | `build_cancel` / `ui_cancel` |
 | Menu de fabricação | C | `crafting_menu` |
+| Escolher item da hotbar | 1 a 9 / roda do mouse | `hotbar_1` … `hotbar_9` |
+| Abrir/fechar inventário | I | `inventory` |
 | Acender/apagar tocha | T | `toggle_torch` |
 | Usar atadura | H | `use_bandage` |
 

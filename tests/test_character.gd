@@ -143,6 +143,8 @@ func _test_actions() -> void:
 	_check(animator.current_clip() == "idle", "Golpe termina e volta ao idle", animator.current_clip())
 
 	world.get_node("Player/Inventory").add_item(&"stone_spear", 1)
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	equipment.select_slot(equipment.slot_of(&"stone_spear"))
 	await _wait(1)
 	weapon.try_attack()
 	await _wait(1)

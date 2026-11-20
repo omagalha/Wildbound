@@ -29,6 +29,8 @@ const ACTION_INTERACT := &"interact"
 @export var inventory: Inventory
 ## Se false, não procura nem aciona nada (ex.: jogador morto).
 @export var enabled: bool = true
+## Item na mão do jogador (ferramentas só ajudam na coleta quando estão na mão).
+var held_item: StringName = &""
 
 var _focused: Node = null
 var _scan_timer: float = 0.0

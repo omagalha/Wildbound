@@ -45,6 +45,8 @@ const STATUS_CORRUPTED := &"corrupted"
 @export var creatures_root: Node
 ## Relógio do mundo (dia e hora); opcional.
 @export var day_night: DayNightCycle
+## Hotbar e item na mão; opcional.
+@export var equipment: PlayerEquipment
 
 var _autosave_left := 0.0
 var _loading := false
@@ -182,6 +184,8 @@ func collect_state() -> Dictionary:
 		state["resources"] = nodes
 	if day_night != null:
 		state["world_time"] = day_night.get_save_data()
+	if equipment != null:
+		state["hotbar"] = equipment.get_save_data()
 	return state
 
 
@@ -262,6 +266,8 @@ func apply_state(state: Dictionary) -> void:
 	# Inventário depois da progressão: a capacidade pode depender de conhecimentos.
 	if inventory != null and state.has("inventory"):
 		inventory.load_counts(state["inventory"])
+	if equipment != null and typeof(state.get("hotbar")) == TYPE_DICTIONARY:
+		equipment.apply_save_data(state["hotbar"])
 
 	if respawn != null and state.has("bags"):
 		respawn.restore_bags(state["bags"])

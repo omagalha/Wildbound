@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_definition.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"stone_axe"
+display_name = "Machado de pedra"
+damage = 14.0
+reach = 1.9
+arc_degrees = 80.0
+interval = 0.7
+windup = 0.18
+active_time = 0.1
+assist_distance = 2.5
+assist_cone_degrees = 60.0
+knockback = 3.0

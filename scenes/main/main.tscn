@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3]
+[gd_scene load_steps=53 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="1_world"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
@@ -33,6 +33,9 @@
 [ext_resource type="Script" path="res://scripts/player/player_equipment.gd" id="43_equip"]
 [ext_resource type="Resource" path="res://resources/combat/improvised_club.tres" id="44_club"]
 [ext_resource type="Resource" path="res://resources/combat/stone_spear.tres" id="45_spear"]
+[ext_resource type="Resource" path="res://resources/combat/stone_axe.tres" id="48_axe"]
+[ext_resource type="Resource" path="res://resources/combat/stone_pickaxe.tres" id="49_pick"]
+[ext_resource type="Script" path="res://scripts/ui/interaction_marker.gd" id="60_marker"]
 [ext_resource type="Script" path="res://scripts/enemies/night_hunt.gd" id="46_night"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/shadow_wolf.tscn" id="47_wolf"]
 [ext_resource type="Resource" path="res://resources/crafting/recipe_stone_axe.tres" id="50_recipe_stone_axe"]
@@ -193,7 +196,7 @@ spawn_point = NodePath("../SpawnPoint")
 building_manager = NodePath("../BuildingManager")
 bag_root = NodePath("../Bags")
 
-[node name="SaveManager" type="Node" parent="." node_paths=PackedStringArray("player", "health", "hunger", "inventory", "building_manager", "respawn", "resources_root", "spawn_point", "difficulty", "experience", "level_manager", "knowledge", "creatures_root", "day_night")]
+[node name="SaveManager" type="Node" parent="." node_paths=PackedStringArray("player", "health", "hunger", "inventory", "building_manager", "respawn", "resources_root", "spawn_point", "difficulty", "experience", "level_manager", "knowledge", "creatures_root", "day_night", "equipment")]
 script = ExtResource("10_save")
 player = NodePath("../Player")
 health = NodePath("../Player/Health")
@@ -209,6 +212,7 @@ level_manager = NodePath("../Progression/LevelManager")
 knowledge = NodePath("../Progression/Knowledge")
 creatures_root = NodePath("../Creatures")
 day_night = NodePath("../TestWorld/DayNight")
+equipment = NodePath("../PlayerEquipment")
 
 [node name="DifficultyManager" type="Node" parent="." node_paths=PackedStringArray("hunger", "respawn", "resources_root", "save_manager", "enemies_root")]
 script = ExtResource("11_diff")
@@ -256,7 +260,7 @@ player = NodePath("../Player")
 health = NodePath("../Player/Health")
 experience = NodePath("../Progression/Experience")
 
-[node name="PlayerEquipment" type="Node" parent="." node_paths=PackedStringArray("inventory", "health", "weapon", "visual", "hud")]
+[node name="PlayerEquipment" type="Node" parent="." node_paths=PackedStringArray("inventory", "health", "weapon", "visual", "food", "interaction", "placement", "crafting_menu", "hud")]
 script = ExtResource("43_equip")
 inventory = NodePath("../Player/Inventory")
 health = NodePath("../Player/Health")
@@ -264,6 +268,12 @@ weapon = NodePath("../Player/Visual/Weapon")
 visual = NodePath("../Player/Visual")
 club_definition = ExtResource("44_club")
 spear_definition = ExtResource("45_spear")
+axe_definition = ExtResource("48_axe")
+pickaxe_definition = ExtResource("49_pick")
+food = NodePath("../Player/FoodConsumer")
+interaction = NodePath("../Player/InteractionDetector")
+placement = NodePath("../PlacementController")
+crafting_menu = NodePath("../CraftingMenu")
 hud = NodePath("../SurvivalHUD")
 
 [node name="CraftingMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("manager", "placement", "hud")]
@@ -279,3 +289,7 @@ player = NodePath("../Player")
 difficulty = NodePath("../DifficultyManager")
 wolf_scene = ExtResource("47_wolf")
 hud = NodePath("../SurvivalHUD")
+
+[node name="InteractionMarker" type="Node3D" parent="." node_paths=PackedStringArray("detector")]
+script = ExtResource("60_marker")
+detector = NodePath("../Player/InteractionDetector")

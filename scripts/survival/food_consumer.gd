@@ -36,8 +36,20 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Tenta comer o primeiro alimento disponível. Devolve o motivo.
 func try_eat() -> StringName:
+	return try_eat_item(&"")
+
+
+## Come um alimento específico ([param id] vazio = o primeiro disponível).
+func try_eat_item(id: StringName) -> StringName:
 	var reason := _validate()
-	var item: ItemDefinition = inventory.first_food() if inventory != null else null
+	var item: ItemDefinition = null
+	if inventory != null:
+		if id == &"":
+			item = inventory.first_food()
+		elif inventory.has_item(id) and inventory.catalog != null:
+			item = inventory.catalog.get_item(id)
+			if item != null and not item.is_food():
+				item = null
 	if reason == REASON_OK and item == null:
 		reason = REASON_NO_ITEM
 	if reason != REASON_OK:

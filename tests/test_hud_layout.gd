@@ -47,7 +47,7 @@ func _run() -> void:
 
 func _test_main_hud(hud: SurvivalHUD, player: Node3D) -> void:
 	var minimap := hud.get_node_or_null("%Minimap") as WildboundMinimap
-	var shortcuts := hud.get_node_or_null("%ShortcutBar") as ShortcutBar
+	var hotbar := hud.get_node_or_null("%Hotbar") as HotbarUI
 	var inventory_summary := hud.get_node_or_null("%InventorySummary") as InventorySummary
 	var toast_feed := hud.get_node_or_null("%ToastFeed") as HudToastFeed
 	_check(minimap != null and minimap.visible, "Minimapa visível")
@@ -60,14 +60,14 @@ func _test_main_hud(hud: SurvivalHUD, player: Node3D) -> void:
 		_check(marker.distance_to(center) < 0.01, "Jogador fica no centro do minimapa", str(marker))
 		var east := minimap.world_to_map(player.global_position + Vector3(10.0, 0.0, 0.0))
 		_check(east.x > marker.x, "Conversão X/Z do minimapa")
-	_check(shortcuts != null, "Barra retangular de atalhos existe")
-	_check(hud.get_shortcut_count() == 7, "Barra mostra os 7 atalhos atuais")
-	if shortcuts != null:
-		_check(shortcuts.get_shortcut_text(0) == "M1 ATACAR", "Primeiro atalho é o ataque")
-		_check(shortcuts.get_shortcut_text(6) == "H ATADURA", "Último atalho é a atadura")
-		_check(shortcuts.mouse_filter == Control.MOUSE_FILTER_IGNORE,
-			"Barra de atalhos não bloqueia o gameplay")
+	_check(hotbar != null, "Hotbar de itens substitui a barra de atalhos")
+	if hotbar != null:
+		_check(hotbar.get_slot_count() == 9, "Hotbar tem 9 espaços (teclas 1–9)")
+		_check(hotbar.get_slot_item(0) == &"improvised_club", "Espaço 1 é a clava")
+		_check(hotbar.mouse_filter == Control.MOUSE_FILTER_IGNORE,
+			"Hotbar não bloqueia o gameplay")
 	_check(inventory_summary != null, "Inventário compacto existe")
+	_check(inventory_summary != null and not inventory_summary.visible, "Inventário fica escondido até apertar [I]")
 	if inventory_summary != null:
 		_check(inventory_summary.get_item_card_count() == 11,
 			"Inventário compacto tem os 11 itens em posições fixas")
