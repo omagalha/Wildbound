@@ -350,27 +350,47 @@ hud = NodePath("../SurvivalHUD")
 
 [node name="Camps" type="Node3D" parent="."]
 
-[node name="Camp1" type="Node3D" parent="Camps"]
+[node name="Camp1" type="Node3D" parent="Camps" node_paths=PackedStringArray("player", "experience", "hud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62, 0, -48)
 script = ExtResource("68_camp")
 camp_seed = 11
+camp_name = "Clareira do Lenhador"
+player = NodePath("../../Player")
+experience = NodePath("../../Progression/Experience")
+hud = NodePath("../../SurvivalHUD")
 
-[node name="Camp2" type="Node3D" parent="Camps"]
+[node name="Camp2" type="Node3D" parent="Camps" node_paths=PackedStringArray("player", "experience", "hud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58, 0, -72)
 script = ExtResource("68_camp")
 camp_seed = 12
+camp_name = "Acampamento dos Caçadores"
+player = NodePath("../../Player")
+experience = NodePath("../../Progression/Experience")
+hud = NodePath("../../SurvivalHUD")
 
-[node name="Camp3" type="Node3D" parent="Camps"]
+[node name="Camp3" type="Node3D" parent="Camps" node_paths=PackedStringArray("player", "experience", "hud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, 0, 10)
 script = ExtResource("68_camp")
 camp_seed = 13
+camp_name = "Pouso do Ferreiro"
+player = NodePath("../../Player")
+experience = NodePath("../../Progression/Experience")
+hud = NodePath("../../SurvivalHUD")
 
-[node name="Camp4" type="Node3D" parent="Camps"]
+[node name="Camp4" type="Node3D" parent="Camps" node_paths=PackedStringArray("player", "experience", "hud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110, 0, -20)
 script = ExtResource("68_camp")
 camp_seed = 14
+camp_name = "Refúgio Esquecido"
+player = NodePath("../../Player")
+experience = NodePath("../../Progression/Experience")
+hud = NodePath("../../SurvivalHUD")
 
-[node name="Camp5" type="Node3D" parent="Camps"]
+[node name="Camp5" type="Node3D" parent="Camps" node_paths=PackedStringArray("player", "experience", "hud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 112)
 script = ExtResource("68_camp")
 camp_seed = 15
+camp_name = "Bivaque do Norte"
+player = NodePath("../../Player")
+experience = NodePath("../../Progression/Experience")
+hud = NodePath("../../SurvivalHUD")

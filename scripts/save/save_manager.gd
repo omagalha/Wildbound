@@ -187,6 +187,12 @@ func collect_state() -> Dictionary:
 		state["resources"] = nodes
 	if day_night != null:
 		state["world_time"] = day_night.get_save_data()
+	var camps := {}
+	for node in get_tree().get_nodes_in_group(&"abandoned_camps"):
+		if node.has_method("get_save_data"):
+			camps[String(node.name)] = node.get_save_data()
+	if not camps.is_empty():
+		state["camps"] = camps
 	if equipment != null:
 		state["hotbar"] = equipment.get_save_data()
 	return state
@@ -250,6 +256,12 @@ func apply_state(state: Dictionary) -> void:
 		health.accepts_damage = false
 	if hunger != null:
 		hunger.active = false
+
+	if typeof(state.get("camps")) == TYPE_DICTIONARY:
+		for node in get_tree().get_nodes_in_group(&"abandoned_camps"):
+			var saved = state["camps"].get(String(node.name))
+			if typeof(saved) == TYPE_DICTIONARY:
+				node.apply_save_data(saved)
 
 	if day_night != null and typeof(state.get("world_time")) == TYPE_DICTIONARY:
 		day_night.apply_save_data(state["world_time"])

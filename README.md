@@ -85,6 +85,12 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **Ruína do Primeiro Fogo** (`scripts/world/ancestral_ruin.gd`, em (-75, 55)): chegar a 15 m registra a descoberta (+50 XP). As **3 marcas ancestrais**, em qualquer ordem, acendem e soltam um feixe de luz; com as três, o **altar desperta**. Tocar o altar concede a Centelha uma única vez (+150 XP). Depois disso, o altar queima para sempre e espanta lobos à noite.
 - O progresso fica no `KnowledgeManager`, então vai para o save e nunca volta atrás. *Desvio do GDD:* a Centelha vai direto para o [R], sem o botão "Equipar" (só existem 2 habilidades e 2 espaços).
 
+## Acampamentos abandonados (2026-11-20)
+
+- 5 acampamentos com nome (`scripts/world/abandoned_camp.gd`), cheios de objetos do Fantasy Props: Clareira do Lenhador (62, -48), Acampamento dos Caçadores (-58, -72), Pouso do Ferreiro (105, 10), Refúgio Esquecido (-110, -20) e Bivaque do Norte (20, 112).
+- Chegar perto avisa e dá **+50 XP** de descoberta. Cada um tem um **baú com saque** sorteado (madeira, pedra, sílex, comida, ataduras, tocha, minério e, raramente, lingotes de ferro).
+- O conteúdo do baú e a descoberta vão para o save, então o saque não renasce. O baú do acampamento não pode ser desmontado.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).
