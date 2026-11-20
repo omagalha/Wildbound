@@ -19,6 +19,12 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - **[T] Tocha** com luz tremeluzente; **[H] Atadura** cura 30.
 - **Javalis abatidos deixam 2 carnes cruas** no chão ([E] pega); carne crua só serve assada (+40 de fome).
 
+## Perigo à noite (2026-11-20)
+
+- **Lobos Sombrios** (`scripts/enemies/night_hunt.gd`, `scenes/enemies/shadow_wolf.tscn`): cerca de 20 s depois do anoitecer, uma matilha surge na mata a 30–42 m do jogador; novas matilhas a cada 75 s, no máximo 4 lobos vivos. Matilha de 1 / 2 / 3 / 3 lobos (Fácil / Intermediário / Difícil / Hardcore), com os multiplicadores do preset.
+- **Medo do fogo** (`scripts/world/fire_light.gd`): tocha acesa (7 m) ou fogueira (9 m) e os lobos não atacam e recuam. A prévia do modo de construção não conta.
+- Zonas seguras continuam seguras. Ao amanhecer, os lobos somem. Lobo abatido deixa 1 carne crua e não renasce. Nada disso é salvo: ao carregar à noite, a caçada recomeça.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).
@@ -97,6 +103,7 @@ As suítes nunca usam o save do jogo (desligam o carregamento ou gravam numa pas
 - `test_taming.gd` (58 verificações): regras de confiança e medo (T01–T20), Lumaru no mundo, vínculo, Seguir/Ficar, recuperação, respawn, Instinto Selvagem e save do companheiro.
 - `test_combat.gd` (31 verificações): clava (alcance, arco, intervalo, assistência, clique de recaptura), Javali (aviso, investida, mordida, muro, desistência), zonas segura/atenção, guarda, carência no carregamento, dificuldade e reaparecimento.
 - `test_progression.gd` (71 verificações): curva de níveis, teto de XP de coleta, marcos únicos, conhecimentos, presets e seus efeitos, tela de escolha, mochila (perda por preset, posição segura, união, recuperação parcial), respawn por preset, subida de nível com avisos, peças bloqueadas por nível e save de tudo isso.
+- `test_night.gd` (27 verificações): matilhas (quando, onde, quantos por preset, limite), caçada, medo da tocha e da fogueira (a prévia não conta), carne, corpo que não renasce e amanhecer.
 - `test_crafting.gd` (62 verificações): receitas (insumos, recusas, nível, itens únicos, espaço), fogueira, carne, bônus de ferramentas, árvores da floresta, lança, tocha, atadura, carne de javali, menu e save.
 - `test_world.gd` (34 verificações): floresta procedural (determinística, sem árvores na área inicial, em zonas seguras ou sobre recursos), recursos espalhados (tipos, caminhos estáveis, multiplicador do preset, save), ciclo de dia e noite (sol, lua, avisos, relógio) e save do dia e hora.
 - `test_survival_core.gd` (67 verificações): InputMap novo, catálogo de itens, inventário (pilhas, capacidade, operações atômicas), vida (dano com causa, morte única, cura), fome (por preset, independente de quadros), comer (todas as recusas), inanição (intervalos, morte), fontes de recurso (coleta, esgotar, regenerar, inventário cheio), interação pela física, HUD e respawn simples.

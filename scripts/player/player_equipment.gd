@@ -27,6 +27,8 @@ const BANDAGE := &"bandage"
 @export var spear_definition: WeaponDefinition
 @export var bandage_heal: float = 30.0
 @export var bandage_cooldown: float = 2.0
+## Raio em que a tocha acesa espanta criaturas que temem o fogo.
+@export var torch_fear_radius: float = 7.0
 ## Opcional: avisos vão direto para o HUD.
 @export var hud: SurvivalHUD
 
@@ -185,7 +187,9 @@ func _build_spear() -> Node3D:
 func _build_torch() -> void:
 	if visual == null:
 		return
-	_torch_node = Node3D.new()
+	var fear := FireLight.new()
+	fear.radius = torch_fear_radius
+	_torch_node = fear
 	_torch_node.name = "Torch"
 	_torch_node.position = Vector3(-0.45, 0.95, -0.25)
 	_torch_node.visible = false

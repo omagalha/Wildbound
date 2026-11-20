@@ -133,7 +133,16 @@ func player_huntable() -> bool:
 		return false
 	if TerritoryZone.is_safe(get_tree(), player.global_position):
 		return false
+	if definition.fears_light and is_scared_by_light():
+		return false
 	return _flat(player.global_position - home).length() <= definition.leash_radius
+
+
+## O jogador ou a própria criatura estão perto de fogo? (só importa se teme a luz)
+func is_scared_by_light() -> bool:
+	if player != null and FireLight.is_point_lit(get_tree(), player.global_position):
+		return true
+	return FireLight.is_point_lit(get_tree(), global_position)
 
 
 func can_see_player() -> bool:
@@ -321,6 +330,9 @@ func _do_dead(delta: float) -> void:
 	visual.rotation.z = lerpf(visual.rotation.z, PI * 0.5, 0.15)
 	if _state_time > 3.0:
 		visual.visible = false
+		if not definition.respawns:
+			queue_free()
+			return
 	_respawn_left -= delta
 	if _respawn_left <= 0.0:
 		respawn_now()

@@ -30,3 +30,7 @@ extends Resource
 @export var respawn_time: float = 90.0
 ## Itens deixados no chão ao morrer: id -> quantidade.
 @export var loot: Dictionary = {}
+## Foge do fogo: não caça quem está perto de uma tocha acesa ou fogueira.
+@export var fears_light: bool = false
+## Volta a nascer no ninho depois de morto. Falso: o corpo some (criaturas da noite).
+@export var respawns: bool = true
