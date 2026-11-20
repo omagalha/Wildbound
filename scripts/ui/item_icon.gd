@@ -27,6 +27,7 @@ const MEAT_COOKED := Color("b8743e")
 const BONE := Color("efe6d4")
 const CLOTH := Color("ece2cc")
 const BERRY := Color("c8445f")
+const FLINT := Color("33405a")
 const OUTLINE := Color(0.05, 0.05, 0.05, 0.9)
 
 
@@ -39,8 +40,11 @@ func _draw() -> void:
 		&"stone": _stone()
 		&"fiber": _fiber()
 		&"wild_berries": _berries()
-		&"stone_axe": _axe()
-		&"stone_pickaxe": _pickaxe()
+		&"stone_axe": _axe(STONE)
+		&"stone_pickaxe": _pickaxe(STONE)
+		&"flint_axe": _axe(FLINT)
+		&"flint_pickaxe": _pickaxe(FLINT)
+		&"flint": _flint()
 		&"stone_spear": _spear()
 		&"improvised_club": _club()
 		&"torch": _torch()
@@ -102,15 +106,15 @@ func _berries() -> void:
 		draw_circle(c + Vector2(-3, -3), 2.5, _tint(Color(1, 1, 1, 0.6)))
 
 
-func _axe() -> void:
+func _axe(head: Color) -> void:
 	_stick(Vector2(18, 56), Vector2(42, 10), 5.0, WOOD)
-	_poly([Vector2(34, 10), Vector2(56, 8), Vector2(58, 30), Vector2(40, 24)], STONE)
+	_poly([Vector2(34, 10), Vector2(56, 8), Vector2(58, 30), Vector2(40, 24)], head)
 	_stick(Vector2(36, 18), Vector2(44, 20), 3.0, Color("c9b07b"))
 
 
-func _pickaxe() -> void:
+func _pickaxe(head: Color) -> void:
 	_stick(Vector2(16, 56), Vector2(40, 16), 5.0, WOOD)
-	_poly([Vector2(10, 22), Vector2(34, 8), Vector2(58, 18), Vector2(56, 24), Vector2(36, 16), Vector2(14, 28)], STONE)
+	_poly([Vector2(10, 22), Vector2(34, 8), Vector2(58, 18), Vector2(56, 24), Vector2(36, 16), Vector2(14, 28)], head)
 	_stick(Vector2(34, 14), Vector2(40, 20), 3.0, Color("c9b07b"))
 
 
@@ -145,3 +149,10 @@ func _meat(color: Color) -> void:
 	_circle(Vector2(11, 54), 4.0, BONE)
 	_poly([Vector2(22, 34), Vector2(30, 14), Vector2(50, 10), Vector2(58, 28), Vector2(48, 46), Vector2(30, 46)], color)
 	draw_circle(Vector2(44, 22), 4.0, _tint(color.lightened(0.3)))
+
+
+func _flint() -> void:
+	_poly([Vector2(14, 44), Vector2(26, 10), Vector2(36, 22), Vector2(30, 52)], FLINT)
+	_poly([Vector2(32, 50), Vector2(42, 14), Vector2(54, 40), Vector2(44, 56)], FLINT.lightened(0.15))
+	draw_line(Vector2(26, 16), Vector2(24, 40), _tint(Color(0.6, 0.75, 1.0, 0.7)), 2.0, true)
+	draw_line(Vector2(42, 20), Vector2(46, 44), _tint(Color(0.6, 0.75, 1.0, 0.7)), 2.0, true)

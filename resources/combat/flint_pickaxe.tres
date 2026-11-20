@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_definition.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"flint_pickaxe"
+display_name = "Picareta de sílex"
+damage = 13.0
+reach = 2.0
+arc_degrees = 80.0
+interval = 0.66
+windup = 0.16
+active_time = 0.1
+assist_distance = 2.5
+assist_cone_degrees = 60.0
+knockback = 3.0
+visual_kind = &"pickaxe"
+mine_power = 2
+harvest_bonus = 4
+handle_length = 0.76
+head_color = Color(0.2, 0.24, 0.32, 1)
+handle_color = Color(0.42, 0.29, 0.17, 1)

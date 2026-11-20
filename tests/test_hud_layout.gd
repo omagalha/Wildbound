@@ -69,8 +69,9 @@ func _test_main_hud(hud: SurvivalHUD, player: Node3D) -> void:
 	_check(inventory_summary != null, "Inventário compacto existe")
 	_check(inventory_summary != null and not inventory_summary.visible, "Inventário fica escondido até apertar [I]")
 	if inventory_summary != null:
-		_check(inventory_summary.get_item_card_count() == 11,
-			"Inventário compacto tem os 11 itens em posições fixas")
+		var catalog_size := (player.get_node("Inventory") as Inventory).catalog.items.size()
+		_check(inventory_summary.get_item_card_count() == catalog_size,
+			"Inventário tem um cartão fixo para cada item do catálogo")
 		_check(inventory_summary.mouse_filter == Control.MOUSE_FILTER_IGNORE,
 			"Inventário compacto não bloqueia o mouse")
 		_check(inventory_summary.get_card_text(&"wood") == "MAD —", "Item ausente aparece esmaecido")

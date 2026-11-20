@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="Resource" path="res://resources/items/flint.tres" id="9_flint"]
 [ext_resource type="Script" path="res://scripts/world/resource_node.gd" id="1_node"]
 [ext_resource type="Resource" path="res://resources/items/stone.tres" id="2_item"]
 
@@ -35,6 +36,8 @@ regrow_time = 180.0
 category = &"stone"
 action_verb = "Quebrar"
 hand_verb = "Pegar pedrinhas"
+bonus_item = ExtResource("9_flint")
+bonus_chance = 0.3
 visual = NodePath("Visual")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

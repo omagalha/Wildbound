@@ -32,6 +32,12 @@ signal regrown
 @export var hand_amount: int = 1
 ## Verbo da coleta à mão ("Juntar galhos", "Pegar pedrinhas").
 @export var hand_verb: String = ""
+## Força mínima da ferramenta (minérios melhores pedem picaretas melhores).
+@export var min_tool_power: int = 1
+## Item extra que às vezes sai nos golpes de ferramenta (sílex nas pedras).
+@export var bonus_item: ItemDefinition
+## Chance do item extra por golpe, somada a 10% por ponto de força acima de 1.
+@export_range(0.0, 1.0) var bonus_chance: float = 0.0
 const DEFAULT_TOOLS := {&"wood": &"axe", &"stone": &"pickaxe"}
 const TOOL_VERBS := {&"axe": "Cortar", &"pickaxe": "Quebrar"}
 const TOOL_NAMES := {&"axe": "um machado", &"pickaxe": "uma picareta"}
@@ -95,8 +101,8 @@ func accepts_tool(tool: WeaponDefinition) -> bool:
 	if tool == null or is_depleted():
 		return false
 	match required_tool():
-		&"axe": return tool.chop_power > 0
-		&"pickaxe": return tool.mine_power > 0
+		&"axe": return tool.chop_power >= min_tool_power
+		&"pickaxe": return tool.mine_power >= min_tool_power
 	return false
 
 
@@ -127,7 +133,13 @@ func tool_strike(interactor: InteractionDetector, tool: WeaponDefinition) -> Dic
 	var inventory: Inventory = interactor.inventory if interactor != null else null
 	if inventory == null:
 		return {"ok": false, "message": "Sem inventário"}
-	return _harvest(inventory, roll_amount() + tool.harvest_bonus, tool.display_name)
+	var result := _harvest(inventory, roll_amount() + tool.harvest_bonus, tool.display_name)
+	if result["ok"] and bonus_item != null:
+		var power := maxi(tool.mine_power, tool.chop_power)
+		if rng.randf() < bonus_chance + 0.1 * (power - 1) and inventory.add_item(bonus_item.id, 1):
+			result["message"] += "  ·  +1 %s!" % bonus_item.display_name
+			result["bonus_item"] = bonus_item.id
+	return result
 
 
 func _harvest(inventory: Inventory, amount: int, tool_name: String) -> Dictionary:

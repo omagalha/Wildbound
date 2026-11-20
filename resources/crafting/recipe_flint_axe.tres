@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/crafting/crafting_recipe.gd" id="1_recipe"]
+
+[resource]
+script = ExtResource("1_recipe")
+id = &"recipe_flint_axe"
+display_name = "Machado de sílex"
+description = "Derruba árvores em 2 golpes e rende +4 madeira"
+inputs = {&"wood": 3, &"flint": 3, &"fiber": 3}
+outputs = {&"flint_axe": 1}
+station = &""
+required_knowledge = &"knowledge_flint_tools"

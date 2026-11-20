@@ -28,6 +28,7 @@ func _run() -> void:
 	await _test_menu()
 	await _test_hotbar()
 	await _test_marker()
+	await _test_flint()
 	await _test_save()
 	_wipe_dir()
 	print("== Resultado: %d passaram, %d falharam ==" % [_passed, _failed])
@@ -108,7 +109,7 @@ func _test_recipes() -> void:
 	var crafting := _crafting(world)
 	var inv := _inv(world)
 	var experience := world.get_node("Progression/Experience") as ExperienceComponent
-	_check(crafting.recipes.size() == 6, "Seis receitas no menu", str(crafting.recipes.size()))
+	_check(crafting.recipes.size() == 8, "Oito receitas no menu", str(crafting.recipes.size()))
 
 	var axe := crafting.get_recipe(&"recipe_stone_axe")
 	_check(crafting.status(axe) == CraftingManager.MISSING, "Sem materiais: 'missing'")
@@ -301,7 +302,7 @@ func _test_equipment() -> void:
 	_check(equipment.slot_of(&"stone_spear") > 0, "Lança ganha um espaço na hotbar")
 	equipment.select_slot(equipment.slot_of(&"stone_spear"))
 	_check(weapon.definition.id == &"stone_spear" and weapon.definition.damage > 12.0 and weapon.definition.reach > 1.8, "Lança selecionada: na mão, mais dano e alcance")
-	var spear_visual := weapon.get_node_or_null("Club/Spear") as Node3D
+	var spear_visual := weapon.get_node_or_null("Club/StoneSpear") as Node3D
 	_check(spear_visual != null and spear_visual.visible and not (weapon.get_node("Club/Head") as Node3D).visible, "Visual troca para a lança")
 	inv.remove_item(&"stone_spear", 1)
 	_check(weapon.definition.id == &"improvised_club" and (weapon.get_node("Club/Head") as Node3D).visible, "Sem a lança: volta à clava")
@@ -476,4 +477,62 @@ func _test_marker() -> void:
 	detector.refresh_focus()
 	await _wait(20)
 	_check(detector.get_focused() == null and not marker.is_showing(), "Longe de tudo: indicador some", str(detector.get_focused()))
+	await _free_world(world)
+
+
+# ---------- sílex ----------
+
+func _test_flint() -> void:
+	print("-- Sílex --")
+	var world := await _new_world()
+	var inv := _inv(world)
+	var crafting := _crafting(world)
+	var player := world.get_node("Player") as CharacterBody3D
+	var detector := player.get_node("InteractionDetector") as InteractionDetector
+	var weapon := player.get_node("Visual/Weapon") as WeaponController
+	var equipment := world.get_node("PlayerEquipment") as PlayerEquipment
+	var scatter := world.get_node("ResourceField") as ResourceScatter
+	var outcrops := []
+	for node in scatter.spawned:
+		if String(node.name).ends_with("_flint"):
+			outcrops.append(node)
+	_check(inv.catalog.has_item(&"flint") and outcrops.size() >= 10, "Afloramentos de sílex espalhados pelo mapa", str(outcrops.size()))
+	var outcrop := outcrops[0] as ResourceNode
+	outcrop.yield_multiplier = 1.0
+	_check(outcrop.required_tool() == &"pickaxe" and outcrop.get_interaction_prompt_for(detector) == "Pegar lascas de sílex", "Sílex pede picareta; à mão, só lascas")
+	outcrop.interact(detector)
+	_check(inv.count(&"flint") == 1, "À mão: 1 sílex")
+	inv.add_item(&"stone_pickaxe", 1)
+	equipment.select_slot(equipment.slot_of(&"stone_pickaxe"))
+	player.global_position = outcrop.global_position + Vector3(0, 0.1, 1.4)
+	_face(player, outcrop.global_position)
+	await _wait(3)
+	weapon.tool_strike()
+	_check(inv.count(&"flint") == 1 + outcrop.amount_per_harvest + 2, "Picareta no afloramento: +4 sílex", str(inv.count(&"flint")))
+
+	var stone := world.get_node("ResourceField/StonePiles/StonePile01") as ResourceNode
+	stone.bonus_chance = 1.0
+	player.global_position = stone.global_position + Vector3(0, 0.1, 1.4)
+	_face(player, stone.global_position)
+	await _wait(3)
+	var before := inv.count(&"flint")
+	var r := weapon.tool_strike()
+	_check(inv.count(&"flint") == before + 1 and String(r.get("message", "")).contains("Sílex"), "Quebrar pedra pode soltar sílex", r.get("message", ""))
+
+	inv.add_all({&"wood": 6, &"flint": 10, &"fiber": 6})
+	var axe := crafting.get_recipe(&"recipe_flint_axe")
+	_check(crafting.status(axe) == CraftingManager.LOCKED, "Ferramentas de sílex bloqueadas antes do nível 3")
+	(world.get_node("Progression/LevelManager") as LevelManager).sync_to_xp(250)
+	_check(crafting.status(axe) == CraftingManager.READY, "Nível 3 libera o machado de sílex")
+	_check(crafting.craft(axe)["ok"] and crafting.craft(crafting.get_recipe(&"recipe_flint_pickaxe"))["ok"], "Fabrica machado e picareta de sílex")
+	_check(equipment.slot_of(&"flint_axe") > 0 and equipment.slot_of(&"flint_pickaxe") > 0, "Ferramentas novas entram na hotbar")
+	equipment.select_slot(equipment.slot_of(&"flint_axe"))
+	_check(weapon.definition.id == &"flint_axe" and weapon.definition.chop_power == 2, "Machado de sílex na mão (força 2)")
+	var visual := weapon.get_node_or_null("Club/FlintAxe") as Node3D
+	_check(visual != null and visual.visible and not (weapon.get_node("Club/Head") as Node3D).visible, "Visual montado a partir dos dados")
+	var tree := (world.get_node("TestWorld/Forest") as ForestGenerator).tree_bodies[2] as ForestTree
+	var wood := inv.count(&"wood")
+	tree.tool_strike(detector, weapon.definition)
+	r = tree.tool_strike(detector, weapon.definition)
+	_check(r.get("felled", false) and inv.count(&"wood") == wood + 7, "Machado de sílex: 2 golpes e +7 madeira (3 + 4)", str(inv.count(&"wood") - wood))
 	await _free_world(world)

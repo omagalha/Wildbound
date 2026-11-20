@@ -27,10 +27,8 @@ const PICKAXE := &"stone_pickaxe"
 const TORCH := &"torch"
 const BANDAGE := &"bandage"
 const SLOT_COUNT := 9
-## Itens que vão para a mão.
-const HOLDABLE := [CLUB, SPEAR, AXE, PICKAXE]
-## Itens que ganham espaço na hotbar, na ordem de prioridade.
-const HOTBAR_ITEMS := [SPEAR, AXE, PICKAXE, TORCH, BANDAGE, &"cooked_meat", &"wild_berries"]
+## Itens (além das ferramentas) que ganham espaço na hotbar, na ordem de prioridade.
+const USABLE_ITEMS := [TORCH, BANDAGE, &"cooked_meat", &"wild_berries"]
 const NAMES := {CLUB: "Clava improvisada"}
 
 @export var inventory: Inventory
@@ -42,6 +40,9 @@ const NAMES := {CLUB: "Clava improvisada"}
 @export var spear_definition: WeaponDefinition
 @export var axe_definition: WeaponDefinition
 @export var pickaxe_definition: WeaponDefinition
+## Outras armas e ferramentas de segurar (machados e picaretas melhores...).
+## O id da definição é o id do item no inventário.
+@export var extra_definitions: Array[WeaponDefinition] = []
 @export var food: FoodConsumer
 ## Recebe o item na mão (as fontes de recurso consultam).
 @export var interaction: InteractionDetector
@@ -62,8 +63,7 @@ var held_item: StringName = CLUB
 var _bandage_left := 0.0
 var _torch_node: Node3D
 var _torch_light: OmniLight3D
-var _spear_visual: Node3D
-var _tool_visuals := {}
+var _held_visuals := {}  # id -> Node3D montado na mão
 var _flicker := 0.0
 
 
@@ -119,7 +119,7 @@ func refresh() -> void:
 		if slots[i] != &"" and not _owns(slots[i]):
 			slots[i] = &""
 			changed = true
-	for id in HOTBAR_ITEMS:
+	for id in hotbar_items():
 		if _owns(id) and not slots.has(id):
 			var free := slots.find(&"")
 			if free >= 0:
@@ -141,7 +141,7 @@ func select_slot(index: int) -> bool:
 	var id := slots[index]
 	if id == &"":
 		return false
-	if id in HOLDABLE:
+	if is_holdable(id):
 		_hold(id, true)
 		return true
 	match id:
@@ -158,9 +158,43 @@ func select_slot(index: int) -> bool:
 func cycle_held(direction: int) -> void:
 	for step in range(1, SLOT_COUNT + 1):
 		var i := posmod(selected + step * direction, SLOT_COUNT)
-		if slots[i] in HOLDABLE:
+		if is_holdable(slots[i]):
 			_hold(slots[i], true)
 			return
+
+
+## Armas e ferramentas de segurar: clava + todas as definições conhecidas.
+func held_definitions() -> Array[WeaponDefinition]:
+	var out: Array[WeaponDefinition] = []
+	for def in [spear_definition, axe_definition, pickaxe_definition]:
+		if def != null:
+			out.append(def)
+	for def in extra_definitions:
+		if def != null and not out.has(def):
+			out.append(def)
+	return out
+
+
+func is_holdable(id: StringName) -> bool:
+	return id == CLUB or definition_for(id) != null
+
+
+## Itens que ganham espaço na hotbar: ferramentas e armas, depois os de usar.
+func hotbar_items() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for def in held_definitions():
+		out.append(def.id)
+	for id in USABLE_ITEMS:
+		out.append(id)
+	return out
+
+
+## Definição de segurar de um item (null se não for arma/ferramenta).
+func definition_for(id: StringName) -> WeaponDefinition:
+	for def in held_definitions():
+		if def.id == id:
+			return def
+	return null
 
 
 func slot_of(id: StringName) -> int:
@@ -253,7 +287,7 @@ func _hotbar_input_allowed() -> bool:
 
 
 func _hold(id: StringName, announce: bool) -> void:
-	if not (id in HOLDABLE) or not _owns(id):
+	if not is_holdable(id) or not _owns(id):
 		id = CLUB
 	var index := slots.find(id)
 	selected = index if index >= 0 else 0
@@ -268,14 +302,8 @@ func _hold(id: StringName, announce: bool) -> void:
 
 
 func _definition_for(id: StringName) -> WeaponDefinition:
-	match id:
-		SPEAR:
-			return spear_definition if spear_definition != null else club_definition
-		AXE:
-			return axe_definition if axe_definition != null else club_definition
-		PICKAXE:
-			return pickaxe_definition if pickaxe_definition != null else club_definition
-	return club_definition
+	var def := definition_for(id)
+	return def if def != null else club_definition
 
 
 func _apply_held() -> void:
@@ -295,101 +323,95 @@ func _update_weapon_visual() -> void:
 	var club := weapon.get_node_or_null("Club") as Node3D
 	if club == null:
 		return
-	if held_item == SPEAR and _spear_visual == null:
-		_spear_visual = _build_spear()
-		club.add_child(_spear_visual)
-	for id in [AXE, PICKAXE]:
-		if held_item == id and not _tool_visuals.has(id):
-			var tool := _build_tool(id)
-			club.add_child(tool)
-			_tool_visuals[id] = tool
+	if held_item != CLUB and not _held_visuals.has(held_item):
+		var def := definition_for(held_item)
+		if def != null:
+			var built := build_held_visual(def)
+			club.add_child(built)
+			_held_visuals[held_item] = built
 	for child in club.get_children():
 		var node := child as Node3D
-		if node == _spear_visual:
-			node.visible = held_item == SPEAR
-		elif _tool_visuals.values().has(node):
-			node.visible = _tool_visuals.get(held_item) == node
+		if node == null:
+			continue
+		if _held_visuals.values().has(node):
+			node.visible = _held_visuals.get(held_item) == node
 		else:
-			node.visible = held_item == CLUB
+			node.visible = held_item == CLUB  # a clava são os filhos originais do Club
 
 
-func _build_tool(id: StringName) -> Node3D:
+## Monta o visual de uma arma/ferramenta a partir dos dados, com a pegada na
+## origem: o cabo sai do punho para +Y e a frente (lâmina, ponta) aponta para -X.
+static func build_held_visual(def: WeaponDefinition) -> Node3D:
 	var root := Node3D.new()
-	root.name = "Axe" if id == AXE else "Pickaxe"
+	root.name = String(def.id).to_pascal_case()
 	var wood := StandardMaterial3D.new()
-	wood.albedo_color = Color(0.5, 0.36, 0.22)
-	var handle := CylinderMesh.new()
-	handle.top_radius = 0.03
-	handle.bottom_radius = 0.035
-	handle.height = 0.7
-	handle.radial_segments = 6
-	handle.rings = 0
-	handle.material = wood
-	var handle_mi := MeshInstance3D.new()
-	handle_mi.mesh = handle
-	handle_mi.position = Vector3(0, 0.2, 0)
-	handle_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	root.add_child(handle_mi)
+	wood.albedo_color = def.handle_color
+	wood.roughness = 0.9
 	var stone := StandardMaterial3D.new()
-	stone.albedo_color = Color(0.58, 0.6, 0.63)
-	var head_mi := MeshInstance3D.new()
-	head_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	if id == AXE:
-		var blade := PrismMesh.new()
-		blade.size = Vector3(0.26, 0.2, 0.05)
-		blade.material = stone
-		head_mi.mesh = blade
-		head_mi.rotation.z = -PI * 0.5
-		head_mi.position = Vector3(0.1, 0.5, 0)
-	else:
-		var pick := CylinderMesh.new()
-		pick.top_radius = 0.0
-		pick.bottom_radius = 0.045
-		pick.height = 0.5
-		pick.radial_segments = 4
-		pick.rings = 0
-		pick.material = stone
-		head_mi.mesh = pick
-		head_mi.rotation.z = PI * 0.5
-		head_mi.position = Vector3(0.0, 0.52, 0)
-	root.add_child(head_mi)
+	stone.albedo_color = def.head_color
+	stone.roughness = 0.55
+	var length := def.handle_length
+	var grip := 0.12 if def.visual_kind != &"spear" else length * 0.38  # cabo abaixo do punho
+	var top := length - grip
+	_add_mesh(root, _cylinder(0.026, 0.032, length, wood), Vector3(0, top - length * 0.5, 0), Vector3.ZERO)
+	match def.visual_kind:
+		&"axe":
+			# Lâmina em cunha para a frente (-X) e um contrapeso atrás.
+			var blade := PrismMesh.new()
+			blade.size = Vector3(0.2, 0.24, 0.045)
+			blade.left_to_right = 0.5
+			blade.material = stone
+			_add_mesh(root, blade, Vector3(-0.1, top - 0.1, 0), Vector3(0, 0, PI * 0.5))
+			_add_mesh(root, _box(Vector3(0.07, 0.09, 0.06), stone), Vector3(0.04, top - 0.1, 0), Vector3.ZERO)
+			_add_mesh(root, _box(Vector3(0.05, 0.06, 0.07), wood.duplicate()), Vector3(0, top - 0.1, 0), Vector3.ZERO)
+		&"pickaxe":
+			# Cabeça curva com duas pontas, centrada no topo.
+			for side in [-1.0, 1.0]:
+				var spike := _cylinder(0.0, 0.035, 0.28, stone)
+				spike.radial_segments = 4
+				_add_mesh(root, spike, Vector3(0.14 * side, top - 0.04, 0), Vector3(0, 0, -side * (PI * 0.5 - 0.35)))
+			_add_mesh(root, _box(Vector3(0.08, 0.07, 0.06), stone), Vector3(0, top - 0.03, 0), Vector3.ZERO)
+		&"spear":
+			var tip := _cylinder(0.0, 0.055, 0.26, stone)
+			tip.radial_segments = 4
+			_add_mesh(root, tip, Vector3(0, top + 0.13, 0), Vector3.ZERO)
+			_add_mesh(root, _cylinder(0.04, 0.04, 0.06, wood.duplicate()), Vector3(0, top - 0.02, 0), Vector3.ZERO)
+		_:
+			var head := SphereMesh.new()
+			head.radius = 0.12
+			head.height = 0.26
+			head.radial_segments = 7
+			head.rings = 4
+			head.material = wood
+			_add_mesh(root, head, Vector3(0, top - 0.04, 0), Vector3.ZERO)
 	return root
 
 
-func _build_spear() -> Node3D:
-	var root := Node3D.new()
-	root.name = "Spear"
-	var wood := StandardMaterial3D.new()
-	wood.albedo_color = Color(0.5, 0.36, 0.22)
-	var shaft := CylinderMesh.new()
-	shaft.top_radius = 0.03
-	shaft.bottom_radius = 0.035
-	shaft.height = 1.7
-	shaft.radial_segments = 6
-	shaft.rings = 0
-	shaft.material = wood
-	var shaft_mi := MeshInstance3D.new()
-	shaft_mi.mesh = shaft
-	shaft_mi.rotation.x = -PI * 0.5 + 0.25
-	shaft_mi.position = Vector3(0, 0.1, -0.45)
-	shaft_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	root.add_child(shaft_mi)
-	var stone := StandardMaterial3D.new()
-	stone.albedo_color = Color(0.55, 0.57, 0.6)
-	var tip := CylinderMesh.new()
-	tip.top_radius = 0.0
-	tip.bottom_radius = 0.07
-	tip.height = 0.25
-	tip.radial_segments = 4
-	tip.rings = 0
-	tip.material = stone
-	var tip_mi := MeshInstance3D.new()
-	tip_mi.mesh = tip
-	tip_mi.rotation.x = -PI * 0.5 + 0.25
-	tip_mi.position = Vector3(0, 0.33, -1.33)
-	tip_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	root.add_child(tip_mi)
-	return root
+static func _cylinder(top_r: float, bottom_r: float, height: float, mat: Material) -> CylinderMesh:
+	var m := CylinderMesh.new()
+	m.top_radius = top_r
+	m.bottom_radius = bottom_r
+	m.height = height
+	m.radial_segments = 6
+	m.rings = 0
+	m.material = mat
+	return m
+
+
+static func _box(size: Vector3, mat: Material) -> BoxMesh:
+	var m := BoxMesh.new()
+	m.size = size
+	m.material = mat
+	return m
+
+
+static func _add_mesh(root: Node3D, mesh: Mesh, pos: Vector3, rot: Vector3) -> void:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.position = pos
+	mi.rotation = rot
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(mi)
 
 
 func _build_torch() -> void:

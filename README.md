@@ -55,6 +55,14 @@ Estado atual: **protótipo técnico WLD-001** + **núcleo de sobrevivência** + 
 - À mão, com [E], só dá para **juntar galhos** e **pegar pedrinhas** (1 por vez), o bastante para fabricar as primeiras ferramentas. Com a ferramenta na mão, o aviso e o indicador pedem **Clique**.
 - **Pronto para vários machados e picaretas:** a força e o bônus são dados da ferramenta (`chop_power`, `mine_power` e `harvest_bonus` em `WeaponDefinition`). Uma ferramenta nova é só um item, uma ficha de dados e uma receita: um machado com força 3 derruba a árvore em 1 golpe.
 
+## Ferramentas de sílex e pegada na mão (2026-11-20)
+
+- **Pegada de verdade:** o cabo atravessa o punho e a lâmina fica virada para o lado dos dedos (`CharacterAnimator.RIGHT_GRIP`). Com algo além da clava na mão, o personagem fica na pose de prontidão (*Sword_Idle*).
+- **Visual montado a partir dos dados:** cada `WeaponDefinition` diz `visual_kind` (clava, machado, picareta, lança), `handle_length` e as cores, e `PlayerEquipment.build_held_visual` monta o modelo. Ferramentas novas já nascem encaixadas.
+- **Sílex:** material novo. Sai de **afloramentos** (12 pelo mapa, pedem picareta; à mão, só lascas) e às vezes ao **quebrar pedra** com picareta (30% de chance, mais com picaretas melhores).
+- **Machado de sílex** (força de corte 2: derruba árvores em 2 golpes, +4 de bônus) e **picareta de sílex** (força 2, +4), liberados no **nível 3**.
+- Novas ferramentas: `extra_definitions` no `PlayerEquipment`, mais item, receita e conhecimento. A hotbar, o golpe e o visual se ajustam sozinhos.
+
 ## Requisitos
 
 - Godot **4.5.x estável** (validado em 4.5.1 em ambiente Linux headless; ainda não verificado na instalação local do Windows).

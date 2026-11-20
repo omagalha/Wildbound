@@ -81,6 +81,9 @@ func _test_model() -> void:
 	var club := weapon.get_node("Club") as Node3D
 	_check(club.global_position.distance_to(hand.origin) < 0.2, "Clava presa na mão direita", "%.2f m" % club.global_position.distance_to(hand.origin))
 	_check(weapon.get_node_or_null("Club/Head") != null, "Arma continua no mesmo lugar da árvore")
+	var head := weapon.get_node("Club/Head") as Node3D
+	var up := (head.global_position - club.global_position)
+	_check(up.length() > 0.4 and up.length() < 0.8, "Cabeça da clava fica na ponta do cabo, longe do punho", "%.2f" % up.length())
 
 	world.get_node("Player/Inventory").add_item(&"torch", 1)
 	(world.get_node("PlayerEquipment") as PlayerEquipment).set_torch(true)

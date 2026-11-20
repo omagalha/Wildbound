@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/world/resources/berry_bush.tscn" id="1_berry_bush"]
 [ext_resource type="PackedScene" path="res://scenes/world/resources/fiber_plant.tscn" id="2_fiber_plant"]
 [ext_resource type="PackedScene" path="res://scenes/world/resources/stone_pile.tscn" id="3_stone_pile"]
 [ext_resource type="PackedScene" path="res://scenes/world/resources/dead_tree.tscn" id="4_dead_tree"]
 [ext_resource type="Script" path="res://scripts/world/resource_scatter.gd" id="5_scatter"]
+[ext_resource type="PackedScene" path="res://scenes/world/resources/flint_outcrop.tscn" id="6_flint"]
 
 [node name="ResourceField" type="Node3D"]
 script = ExtResource("5_scatter")
@@ -12,6 +13,7 @@ berry_scene = ExtResource("1_berry_bush")
 fiber_scene = ExtResource("2_fiber_plant")
 stone_scene = ExtResource("3_stone_pile")
 wood_scene = ExtResource("4_dead_tree")
+flint_scene = ExtResource("6_flint")
 
 [node name="BerryBushs" type="Node3D" parent="."]
 

@@ -11,11 +11,12 @@ level_names = PackedStringArray("Sobrevivente", "Coletor", "Construtor", "Explor
 unlocks = {
 1: [&"knowledge_campfire", &"knowledge_initial_bond", &"knowledge_basic_tools"],
 2: [&"knowledge_primitive_shelter", &"knowledge_stone_spear"],
-3: [&"knowledge_flat_roof", &"knowledge_survival_bed"],
+3: [&"knowledge_flat_roof", &"knowledge_survival_bed", &"knowledge_flint_tools"],
 4: [&"knowledge_gathering_capacity"],
 5: [&"knowledge_pioneer"]
 }
 knowledge_names = {
+&"knowledge_flint_tools": "Ferramentas de sílex",
 &"knowledge_basic_tools": "Ferramentas básicas (machado, picareta, tocha, atadura)",
 &"knowledge_stone_spear": "Lança de pedra",
 &"knowledge_campfire": "Fogueira",

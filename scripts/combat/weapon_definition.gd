@@ -24,3 +24,11 @@ extends Resource
 @export var mine_power: int = 0
 ## Unidades extras por coleta feita com esta ferramenta.
 @export var harvest_bonus: int = 0
+
+# ---------- visual na mão ----------
+## Forma montada na mão: &"club", &"axe", &"pickaxe" ou &"spear".
+@export var visual_kind: StringName = &"club"
+## Comprimento do cabo (m). A pegada fica perto da base.
+@export var handle_length: float = 0.7
+@export var handle_color: Color = Color(0.5, 0.36, 0.22)
+@export var head_color: Color = Color(0.58, 0.6, 0.63)

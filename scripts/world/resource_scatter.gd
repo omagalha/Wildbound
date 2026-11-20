@@ -16,6 +16,10 @@ extends Node3D
 @export var fiber_scene: PackedScene
 @export var stone_scene: PackedScene
 @export var wood_scene: PackedScene
+## Afloramentos de sílex (pedem picareta). Gerados numa segunda passada com
+## semente própria, para não mudar a posição dos grupos já existentes nos saves.
+@export var flint_scene: PackedScene
+@export var flint_count: int = 12
 ## Peso relativo de cada tipo nos grupos: frutas, fibra, pedra, madeira.
 @export var weights: Vector4 = Vector4(0.3, 0.25, 0.22, 0.23)
 
@@ -65,6 +69,35 @@ func spawn_all() -> void:
 			node.position = Vector3(center.x + offset.x, 0, center.y + offset.y)
 			node.rotation.y = rng.randf() * TAU
 			spawned.append(node)
+	_spawn_flint(root, centers)
+
+
+func _spawn_flint(root: Node3D, avoid: Array[Vector2]) -> void:
+	if flint_scene == null:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = world_seed + 1
+	var placed: Array[Vector2] = []
+	for i in flint_count:
+		var p := Vector2.ZERO
+		for attempt in 30:
+			p = Vector2(rng.randf_range(-half_size, half_size), rng.randf_range(-half_size, half_size))
+			if p.length() < inner_radius + 10.0:
+				continue
+			var ok := true
+			for other in avoid + placed:
+				if other.distance_to(p) < 9.0:
+					ok = false
+					break
+			if ok:
+				break
+		placed.append(p)
+		var node := flint_scene.instantiate() as ResourceNode
+		node.name = "F%03d_flint" % i
+		root.add_child(node)
+		node.position = Vector3(p.x, 0, p.y)
+		node.rotation.y = rng.randf() * TAU
+		spawned.append(node)
 
 
 func _pick(rng: RandomNumberGenerator) -> int:

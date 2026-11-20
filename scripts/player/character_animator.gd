@@ -28,12 +28,18 @@ extends Node
 
 ## Nome no jogo -> nome na biblioteca.
 const CLIPS := {
-	"idle": "Idle", "idle_torch": "Idle_Torch", "jog": "Jog_Fwd", "sprint": "Sprint",
+	"idle": "Idle", "idle_armed": "Sword_Idle", "idle_torch": "Idle_Torch", "jog": "Jog_Fwd", "sprint": "Sprint",
 	"air": "Jump", "attack": "Sword_Regular_A", "attack_heavy": "Sword_Attack",
 	"hit": "Hit_Chest", "death": "Death01", "eat": "Consume", "harvest": "Farm_Harvest",
 	"chop": "TreeChopping", "pickup": "PickUp_Table", "interact": "Interact",
 }
 const ONE_SHOT_PRIORITY := {"death": 10, "attack": 5, "attack_heavy": 5, "chop": 5, "hit": 3, "eat": 2, "harvest": 2, "pickup": 2, "interact": 2}
+
+## Pegada da mão direita. Ferramentas são montadas com o cabo em +Y e a
+## frente (lâmina, ponta) em -X; no osso da mão, +Y aponta para os dedos e -X
+## para o lado do polegar. Então: cabo atravessa o punho saindo pelo polegar,
+## e a lâmina fica virada para o lado dos dedos, como numa pegada de verdade.
+const RIGHT_GRIP := Transform3D(Basis(Vector3(0, 0, 1), PI * 0.5) * Basis(Vector3(0, 1, 0), PI), Vector3(0.0, 0.08, 0.0))
 
 static var _clip_cache := {}  # caminho da biblioteca -> {nome: Animation}
 
@@ -111,7 +117,12 @@ func _update_locomotion() -> void:
 		return
 	var speed := _flat_speed()
 	if speed < 0.4:
-		_play("idle_torch" if _torch_lit() else "idle")
+		if _torch_lit():
+			_play("idle_torch")
+		elif _holding_tool():
+			_play("idle_armed")
+		else:
+			_play("idle")
 	elif player.is_sprinting() and speed > player.walk_speed + 0.5:
 		_play("sprint", clampf(speed / sprint_reference_speed, 0.8, 1.4))
 	else:
@@ -192,6 +203,11 @@ func _flat_speed() -> float:
 	return Vector2(player.velocity.x, player.velocity.z).length()
 
 
+## Segurando algo além da clava (machado, picareta, lança...): pose de prontidão.
+func _holding_tool() -> bool:
+	return weapon != null and weapon.definition != null and weapon.definition.id != &"improvised_club"
+
+
 func _torch_lit() -> bool:
 	var torch := _visual.get_node_or_null("Torch") as Node3D
 	return torch != null and torch.visible
@@ -237,8 +253,7 @@ static func _clips_from(source: PackedScene) -> Dictionary:
 func _attach_hands() -> void:
 	var club := weapon.get_node_or_null("Club") as Node3D if weapon != null else null
 	if club != null:
-		_right_hand = _hand_remote("hand_r", club,
-			Transform3D(Basis.from_euler(Vector3(deg_to_rad(-90), 0, deg_to_rad(-90))), Vector3(0.0, 0.08, 0.02)))
+		_right_hand = _hand_remote("hand_r", club, RIGHT_GRIP)
 
 
 func _attach_torch() -> void:

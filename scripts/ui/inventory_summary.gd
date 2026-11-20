@@ -15,6 +15,9 @@ const ITEM_VISUALS := {
 	&"bandage": {"code": "ATA", "color": Color("e8dcc5")},
 	&"raw_meat": {"code": "CRU", "color": Color("b85b55")},
 	&"cooked_meat": {"code": "ASS", "color": Color("c67a42")},
+	&"flint": {"code": "SIL", "color": Color("6f86b8")},
+	&"flint_axe": {"code": "MCS", "color": Color("6f86b8")},
+	&"flint_pickaxe": {"code": "PCS", "color": Color("6f86b8")},
 }
 
 @export var inventory: Inventory

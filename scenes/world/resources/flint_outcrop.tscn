@@ -1,0 +1,70 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/resource_node.gd" id="1_node"]
+[ext_resource type="Resource" path="res://resources/items/flint.tres" id="2_item"]
+
+[sub_resource type="BoxShape3D" id="Shape_main"]
+size = Vector3(1.2, 0.9, 1.1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_base"]
+albedo_color = Color(0.36, 0.37, 0.4, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_flint"]
+albedo_color = Color(0.16, 0.2, 0.3, 1)
+metallic = 0.2
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.12, 0.2, 0.4, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="SphereMesh" id="Mesh_base"]
+material = SubResource("Mat_base")
+radius = 0.5
+height = 0.55
+radial_segments = 6
+rings = 2
+
+[sub_resource type="CylinderMesh" id="Mesh_shard"]
+material = SubResource("Mat_flint")
+top_radius = 0.0
+bottom_radius = 0.13
+height = 0.6
+radial_segments = 4
+rings = 0
+
+[node name="FlintOutcrop" type="StaticBody3D" node_paths=PackedStringArray("visual")]
+collision_layer = 5
+collision_mask = 0
+script = ExtResource("1_node")
+item = ExtResource("2_item")
+amount_per_harvest = 2
+max_harvests = 3
+regrow_time = 240.0
+category = &"stone"
+action_verb = "Quebrar"
+tool_kind = &"pickaxe"
+hand_verb = "Pegar lascas de sílex"
+visual = NodePath("Visual")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("Shape_main")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Base" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1.2, 0, 0, 0, 1, 0, 0, 0, 1.1, 0, 0.2, 0)
+mesh = SubResource("Mesh_base")
+
+[node name="Shard1" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(0.96, -0.26, 0, 0.26, 0.96, 0, 0, 0, 1, -0.15, 0.6, 0.05)
+mesh = SubResource("Mesh_shard")
+
+[node name="Shard2" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(0.7, 0.3, 0, -0.3, 0.7, 0.3, 0.1, -0.2, 0.75, 0.22, 0.5, -0.12)
+mesh = SubResource("Mesh_shard")
+
+[node name="Shard3" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(0.6, 0, -0.25, 0, 0.6, 0, 0.25, 0, 0.6, 0.05, 0.45, 0.3)
+mesh = SubResource("Mesh_shard")

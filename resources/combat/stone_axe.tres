@@ -17,3 +17,6 @@ assist_cone_degrees = 60.0
 knockback = 3.0
 chop_power = 1
 harvest_bonus = 2
+visual_kind = &"axe"
+handle_length = 0.7
+head_color = Color(0.6, 0.62, 0.64, 1)

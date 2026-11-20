@@ -15,3 +15,5 @@ active_time = 0.1
 assist_distance = 3.2
 assist_cone_degrees = 50.0
 knockback = 4.5
+visual_kind = &"spear"
+handle_length = 1.7
